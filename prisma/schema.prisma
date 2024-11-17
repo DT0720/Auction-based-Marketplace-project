@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model auction {
+  id            Int      @id @default(autoincrement()) @db.UnsignedInt
+  product_id    Int      @db.UnsignedInt
+  seller_id     Int      @db.UnsignedInt
+  current_price Decimal  @db.Decimal(8, 2)
+  desired_price Decimal  @db.Decimal(8, 2)
+  status        Boolean
+  created_at    DateTime @db.DateTime(0)
+  product       product  @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "auction_product_id_foreign")
+  seller        seller   @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "auction_seller_id_foreign")
+  bid           bid[]
+
+  @@index([product_id], map: "auction_product_id_foreign")
+  @@index([seller_id], map: "auction_seller_id_foreign")
+}
+
+model bid {
+  id         Int      @id @default(autoincrement()) @db.UnsignedInt
+  auction_id Int      @db.UnsignedInt
+  price      Decimal  @db.Decimal(8, 2)
+  buyer_id   Int      @db.UnsignedInt
+  created_at DateTime @db.DateTime(0)
+  auction    auction  @relation(fields: [auction_id], references: [id], onUpdate: Restrict, map: "bid_auction_id_foreign")
+  buyer      buyer    @relation(fields: [buyer_id], references: [id], onUpdate: Restrict, map: "bid_buyer_id_foreign")
+
+  @@index([auction_id], map: "bid_auction_id_foreign")
+  @@index([buyer_id], map: "bid_buyer_id_foreign")
+}
+
+model buyer {
+  id      Int      @id @default(autoincrement()) @db.UnsignedInt
+  user_id Int      @db.UnsignedInt
+  bid     bid[]
+  user    user     @relation(fields: [user_id], references: [user_id], onUpdate: Restrict, map: "buyer_user_id_foreign")
+  orders  orders[]
+
+  @@index([user_id], map: "buyer_user_id_foreign")
+}
+
+model notifications {
+  id                                   Int      @id @default(autoincrement()) @db.UnsignedInt
+  reciever_id                          Int      @db.UnsignedInt
+  recieved_at                          DateTime @db.DateTime(0)
+  content                              String   @db.VarChar(255)
+  sender_id                            Int      @db.UnsignedInt
+  user_notifications_reciever_idTouser user     @relation("notifications_reciever_idTouser", fields: [reciever_id], references: [user_id], onUpdate: Restrict, map: "notifications_reciever_id_foreign")
+  user_notifications_sender_idTouser   user     @relation("notifications_sender_idTouser", fields: [sender_id], references: [user_id], onUpdate: Restrict, map: "notifications_sender_id_foreign")
+
+  @@index([reciever_id], map: "notifications_reciever_id_foreign")
+  @@index([sender_id], map: "notifications_sender_id_foreign")
+}
+
+model offers {
+  id              Int      @id @default(autoincrement()) @db.UnsignedInt
+  type            String   @db.VarChar(255)
+  discount_amount Decimal  @db.Decimal(8, 2)
+  orders          orders[]
+}
+
+model order_details {
+  id         Int     @id @default(autoincrement()) @db.UnsignedInt
+  order_id   Int     @db.UnsignedInt
+  product_id Int     @db.UnsignedInt
+  quantity   Int
+  orders     orders  @relation(fields: [order_id], references: [id], onUpdate: Restrict, map: "order_details_order_id_foreign")
+  product    product @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "order_details_product_id_foreign")
+
+  @@index([order_id], map: "order_details_order_id_foreign")
+  @@index([product_id], map: "order_details_product_id_foreign")
+}
+
+model orders {
+  id            Int             @id @default(autoincrement()) @db.UnsignedInt
+  buyer_id      Int             @db.UnsignedInt
+  offer_id      Int?            @db.UnsignedInt
+  status        String          @db.Char(255)
+  seller_id     Int             @db.UnsignedInt
+  order_details order_details[]
+  buyer         buyer           @relation(fields: [buyer_id], references: [id], onUpdate: Restrict, map: "orders_buyer_id_foreign")
+  offers        offers?         @relation(fields: [offer_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "orders_offer_id_foreign")
+  seller        seller          @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "orders_seller_id_foreign")
+
+  @@index([buyer_id], map: "orders_buyer_id_foreign")
+  @@index([offer_id], map: "orders_offer_id_foreign")
+  @@index([seller_id], map: "orders_seller_id_foreign")
+}
+
+model product {
+  id               Int                @id @default(autoincrement()) @db.UnsignedInt
+  product_name     String             @db.VarChar(255)
+  stock            Int
+  price_per_unit   Decimal            @db.Decimal(8, 2)
+  photo            Bytes?             @db.Blob
+  auction          auction[]
+  order_details    order_details[]
+  seller_inventory seller_inventory[]
+}
+
+model seller {
+  id               Int                @id @default(autoincrement()) @db.UnsignedInt
+  user_id          Int                @db.UnsignedInt
+  auction          auction[]
+  orders           orders[]
+  user             user               @relation(fields: [user_id], references: [user_id], onUpdate: Restrict, map: "seller_user_id_foreign")
+  seller_inventory seller_inventory[]
+
+  @@index([user_id], map: "seller_user_id_foreign")
+}
+
+model seller_inventory {
+  id         Int     @id @default(autoincrement()) @db.UnsignedInt
+  seller_id  Int     @db.UnsignedInt
+  product_id Int     @db.UnsignedInt
+  product    product @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "seller_inventory_product_id_foreign")
+  seller     seller  @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "seller_inventory_seller_id_foreign")
+
+  @@index([product_id], map: "seller_inventory_product_id_foreign")
+  @@index([seller_id], map: "seller_inventory_seller_id_foreign")
+}
+
+model user {
+  user_id                                       Int             @id @default(autoincrement()) @db.UnsignedInt
+  name                                          String          @db.VarChar(255)
+  email                                         String          @unique(map: "user_email_unique") @db.VarChar(255)
+  password                                      String          @db.VarChar(255)
+  age                                           Int
+  gender                                        Int
+  secondary_email                               String?         @unique(map: "user_secondary_email_unique") @db.VarChar(255)
+  type                                          String          @db.Char(255)
+  phone                                         String          @db.VarChar(255)
+  photo                                         Bytes?          @db.Blob
+  buyer                                         buyer[]
+  notifications_notifications_reciever_idTouser notifications[] @relation("notifications_reciever_idTouser")
+  notifications_notifications_sender_idTouser   notifications[] @relation("notifications_sender_idTouser")
+  seller                                        seller[]
+}
+
+model wallet {
+  id              Int       @id @default(autoincrement()) @db.UnsignedInt
+  user_id         Int       @db.UnsignedInt
+  payment_type    String?   @db.VarChar(255)
+  card_number     String?   @db.VarChar(255)
+  expiry_date     DateTime? @db.Date
+  cvv             Int?
+  email           String?   @db.VarChar(255)
+  password        String?   @db.VarChar(255)
+  current_balance Decimal   @default(0.00) @db.Decimal(8, 2)
+}
