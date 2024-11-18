@@ -84,8 +84,9 @@ export default function SignupPage() {
           const response = await NetworkUtils.postRequest(endpoint, body);
     
           if (response) {
+            if(error) setError(null);
             setSuccessMessage("Signup successful! Please login.");
-            // setTimeout(() => (window.location.href = ROUTES.LOGIN), 2000);
+            setTimeout(() => (window.location.href = ROUTES.LOGIN), 1000);
           }
         } catch (error) {
           setError("Signup failed. Please try again.");

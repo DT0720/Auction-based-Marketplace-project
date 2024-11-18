@@ -8,8 +8,26 @@ const hashingService = new HashingService();
 const userUseCases = new UserUseCases(userRepository,hashingService);
 
 export async function POST(req: Request) {
-  return NextResponse.json(
-    { message: 'GET method is not allowed for this endpoint.' },
-    { status: 200 }
-  );
+  try {
+    const body = await req.json(); // Parse JSON request body
+
+    if (!body) {
+      return new Response('No body received', { status: 400 });
+    }
+
+    const user = await userUseCases.login(body); // Login the user using the use case
+
+    return NextResponse.json(
+      { message: user ? 'Login Success' : 'Login Failed' },
+      { status: user ? 201 : 400 },
+      { data : user }
+    );
+
+  } catch (error: any) {
+      return NextResponse.json(
+        { message: error.message || 'Failed to Login' },
+        { status: 400 }
+      );
+  }
 }
+

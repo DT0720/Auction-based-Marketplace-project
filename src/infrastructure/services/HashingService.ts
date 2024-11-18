@@ -7,6 +7,11 @@ export class HashingService implements IHashingService {
     }
   
     async compare(value: string, hash: string): Promise<boolean> {
-      return await argon2.verify(value, hash);
+      try{
+        return await argon2.verify(hash, value);
+      }catch(e){
+        console.log(e);
+        return false;  
+      }
     }
 }

@@ -1,6 +1,7 @@
 import { IUserRepository } from '@/application/repositories/IUserRepository';
 import { IHashingService } from '@/application/services/IHashingService';
 import { User } from '@/domain/entities/User';
+import { UserAuthException } from '@/domain/errors/UserAuthException';
 
 export class UserUseCases {
   private userRepository: IUserRepository;
@@ -20,21 +21,21 @@ export class UserUseCases {
     const existingUser = await this.userRepository.findByEmail(user.email);
     
     if (existingUser) {
-      throw new Error('User already exists');
+      throw new UserAuthException('User already exists');
     }
 
     return this.userRepository.create(user);
   }
 
-  async login(email: string, password: string): Promise<User | null> {
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) {
-      throw new Error('Invalid email or password');
-    }
+  async login(data : any): Promise<User | null> {
 
-    const isPasswordValid = await this.hashingService.compare(password, user.password);
+    const user = await this.userRepository.findByEmail(data.email);
+    if (!user) {
+      throw new UserAuthException('Invalid email or password');
+    }
+    const isPasswordValid = await this.hashingService.compare(data.password, user.password);
     if (!isPasswordValid) {
-      throw new Error('Invalid email or password');
+      throw new UserAuthException('Invalid email or password');
     }
 
     return user;
