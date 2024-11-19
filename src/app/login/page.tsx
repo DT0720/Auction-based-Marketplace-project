@@ -4,7 +4,8 @@ import { ROUTES } from "@/application/routing/routes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import NetworkUtils from "@/lib/networkUtils";
+import { User } from "@/domain/entities/User";
+import NetworkUtils, { ApiResponse } from "@/lib/networkUtils";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -50,12 +51,14 @@ export default function LoginPage(){
         };
 
         try {
-          const response = await NetworkUtils.postRequest(endpoint, body);
+          const response = await NetworkUtils.postRequest<ApiResponse<User>>(endpoint, body);
     
           if (response) {
             if(error) setError(null);
+            console.log("Message is: " + response.message);
+            console.log("Response is: " + response.data);
             setSuccessMessage("Login successful! Please login.");
-            setTimeout(() => (window.location.href = ROUTES.LOGIN), 1000);
+            // setTimeout(() => (window.location.href = ROUTES.BUYER_DASHBOARD), 1000);
           }
         } catch (error) {
           setError("Login failed" + error);

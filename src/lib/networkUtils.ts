@@ -24,6 +24,7 @@ interface RequestOptions {
   
         if (!response.ok) {
           const error = await response.json();
+          console.log("Error is: " + error);
           throw new Error(error?.message || 'Network request failed');
         }
   
@@ -34,6 +35,7 @@ interface RequestOptions {
   
         // Parse JSON if the response is not empty
         const data: T = await response.json();
+
         return data;
       } catch (error) {
         console.error('Network request failed', error);
@@ -56,5 +58,12 @@ interface RequestOptions {
     static deleteRequest<T>(endpoint: string, headers?: Record<string, string>): Promise<T | null> {
       return this.request<T>({ method: 'DELETE', endpoint, headers });
     }
+    
 }
+
+export interface ApiResponse<T> {
+  message: string;
+  data: T; // This will vary depending on what your API sends
+}
+
   

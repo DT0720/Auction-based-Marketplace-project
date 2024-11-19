@@ -18,9 +18,8 @@ export async function POST(req: Request) {
     const user = await userUseCases.login(body); // Login the user using the use case
 
     return NextResponse.json(
-      { message: user ? 'Login Success' : 'Login Failed' },
-      { status: user ? 201 : 400 },
-      { data : user }
+      { message: user ? 'Login Success' : 'Login Failed', data: user ? user : null },
+      { status: user ? 201 : 400 }
     );
 
   } catch (error: any) {
