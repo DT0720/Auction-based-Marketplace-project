@@ -7,16 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ToggleGroup,ToggleGroupItem } from "@/components/ui/toggle-group";
 import NetworkUtils from "@/lib/networkUtils";
 import { ROUTES } from "@/application/routing/routes";
 import Link from "next/link";
+import { FileStorageService } from "@/infrastructure/services/FileStorageService";
+import { useToast } from "@/hooks/use-toast";
+import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
+import ImageHolder from "@/components/ui/custom/ImageHolder";
+import { useLoader } from "@/hooks/use-loader";
 
 
 export default function SignupPage() {
 
-    const initialFormData = {
+    const fileStorageService = new FileStorageService();
+
+      const initialFormData = {
         name: "",
         email: "",
         gender: "0", // Default value
@@ -24,25 +30,26 @@ export default function SignupPage() {
         password: "",
         confirmPassword: "",
         phone: "",
-        image: null as File | null,
         type: "B", // Default type
       };
+
+      const { toast } = useToast();
+
+      const { showLoader, hideLoader } = useLoader();
     
-    const [formData, setFormData] = useState(initialFormData);
-    
-      const [error, setError] = useState<string | null>(null);
-      const [successMessage, setSuccessMessage] = useState<string | null>(null);
+      const [formData, setFormData] = useState(initialFormData);
+      const [userRegistrationTypeText, setUserRegistrationTypeText] = useState("Buyer Registration");
+      const [image, setImage] = useState<File | null>(null);
     
       const clearForm = () => { 
         setFormData(initialFormData); 
-        setError(null);
-        setSuccessMessage(null);
-    };
+      };
 
-    const handleToggleChange = (value : string) => {
-        clearForm();
-        setFormData((prev) => ({ ...prev, type: value }));
-    }
+      const handleToggleChange = (value : string) => {
+          clearForm();
+          setUserRegistrationTypeText(value === "B" ? "Buyer Registration" : "Seller Registration");
+          setFormData((prev) => ({ ...prev, type: value }));
+      }
       // Handle input changes
       const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -50,10 +57,10 @@ export default function SignupPage() {
       };
     
       // Handle file input change
-      const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const handleImageUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
         if(file){
-            setFormData((prev) => ({ ...prev, image: file }));
+            setImage(file);
         }
       };
     
@@ -62,100 +69,95 @@ export default function SignupPage() {
         event.preventDefault();
     
         if (formData.password !== formData.confirmPassword) {
-          setError("Passwords do not match!");
+          errorMessage(toast,"Signup failed.", "Passwords do not match!", "Try again");
           return;
         }
-    
-        const endpoint = "/api/users/signup";
-
-        const body = {
-          name: formData.name,
-          email: formData.email,
-          gender: parseInt(formData.gender ?? "0"),
-          age: parseInt(formData.age ?? "0"),
-          secondaryEmail: null,
-          password: formData.password,
-          phone: formData.phone,
-          photo: formData.image,
-          type: formData.type,
-        };
 
         try {
+
+          const endpoint = "/api/users/signup";
+
+          const body = {
+            name: formData.name,
+            email: formData.email,
+            gender: parseInt(formData.gender ?? "0"),
+            age: parseInt(formData.age ?? "0"),
+            secondaryEmail: null,
+            password: formData.password,
+            phone: formData.phone,
+            type: formData.type,
+          };
+
+          showLoader();
+
           const response = await NetworkUtils.postRequest(endpoint, body);
     
           if (response) {
-            if(error) setError(null);
-            setSuccessMessage("Signup successful! Please login.");
-            setTimeout(() => (window.location.href = ROUTES.LOGIN), 1000);
+            await handleImageUpload();
+
+            successMessage(toast, "Redirecting to login page...","Signup Successful!");
+
+            setTimeout(() => (window.location.href = ROUTES.LOGIN), 3000);
           }
-        } catch (error) {
-          setError("Signup failed. Please try again.");
+        } catch (exception : any) {
+          errorMessage(toast, "Signup failed.", exception.message, "Try again");
+        }finally{
+          hideLoader();
         }
       };
 
-    
+      const handleImageUpload = async () => {
+
+        if (image) {
+          const fileName = image?.name ?? "default.jpg";
+          const path = `uploads/${fileName}`;
+          const photoUrl = await fileStorageService.uploadFile(image != null ? image : undefined, path);
+  
+          // Update the user profile with the image URL
+          await NetworkUtils.postRequest('/api/users/update-profile', {
+            email: formData.email,
+            photo: photoUrl,
+          });
+        }
+      }
+
       return (
         <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50">
           {/* Toggle Options */}
- 
-          {/* Form Section */}
-          <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-           
-            <form onSubmit={handleSignup}>
-              {/* Avatar with File Upload */}
+          <div className="w-full max-w-md">
             <ToggleGroup
-                type="single"
-                variant="outline"
-                value={formData.type}
-                onValueChange={(value) => {
-                    if (value) {
-                        handleToggleChange(value);
-                    }
-                }}
-                className="w-full mb-6 mt-2"
+                  type="single"
+                  variant="outline"
+                  value={formData.type}
+                  onValueChange={(value) => {
+                      if (value) {
+                          handleToggleChange(value);
+                      }
+                  }}
+                  className="w-full mb-4 mt-2"
                 >
                 <ToggleGroupItem
-                    value="B"
-                    className="flex-1 py-5 text-lg font-medium">
-                    Buyer Registration
+                      value="B"
+                      className="flex-1 py-5 text-lg font-medium">
+                      Buyer Registration
                 </ToggleGroupItem>
                 <ToggleGroupItem
-                    value="S"
-                    className="flex-1 py-5 text-lg font-medium">
-                    Seller Registration
+                      value="S"
+                      className="flex-1 py-5 text-lg font-medium">
+                      Seller Registration
                 </ToggleGroupItem>
             </ToggleGroup>
+          </div>
 
-              <div className="flex justify-center relative">
-                <label htmlFor="image-upload" className="cursor-pointer">
-                <Avatar className="h-24 w-24">
-                    {formData.image ? (
-                    <AvatarImage
-                        src={URL.createObjectURL(formData.image)}
-                        alt="User Avatar"
-                    />
-                    ) : (
-                    <AvatarImage
-                        alt="User Avatar"
-                    />
-                    )}
-                    <AvatarFallback>U</AvatarFallback>
-                </Avatar>
-                  <Input
-                    id="image-upload"
-                    name="image"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                  />
-                </label>
+          <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
+            <div>
+              <h1 className="text-2xl font-semibold text-center mb-4">{userRegistrationTypeText}</h1>
+            </div>
+              <div className="flex justify-center relative mb-4">
+                <ImageHolder image={image} handleImageUpdate={handleImageUpdate} />
               </div>
-
-               {/* Error or Success Messages */}
-                {!error && !successMessage && <div className="text-white mb-4">H</div>}
-                {error && <div className="text-red-500 mb-4">{error}</div>}
-                {successMessage && <div className="text-green-500 mb-4">{successMessage}</div>}
+          {/* Form Section */}
+            <form onSubmit={handleSignup}>
     
               {/* Form Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

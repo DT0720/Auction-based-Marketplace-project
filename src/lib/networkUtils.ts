@@ -10,13 +10,15 @@ interface RequestOptions {
   export default class NetworkUtils {
     static async request<T>({ method, endpoint, headers = {}, body }: RequestOptions): Promise<T | null> {
 
+      const isFormData = body instanceof FormData;
+
       const options: RequestInit = {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          ...(isFormData ? {} : { 'Content-Type': 'application/json' }), // Exclude Content-Type for FormData
           ...headers, // Allow custom headers to be passed
         },
-        body: body ? JSON.stringify(body) : undefined,
+        body: isFormData ? body : body ? JSON.stringify(body) : undefined,
       };
   
       try {
@@ -24,7 +26,7 @@ interface RequestOptions {
   
         if (!response.ok) {
           const error = await response.json();
-          console.log("Error is: " + error);
+          console.log("Error is: " + JSON.stringify(error));
           throw new Error(error?.message || 'Network request failed');
         }
   
@@ -63,7 +65,7 @@ interface RequestOptions {
 
 export interface ApiResponse<T> {
   message: string;
-  data: T; // This will vary depending on what your API sends
+  data: T;
 }
 
   

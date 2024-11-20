@@ -8,24 +8,18 @@ describe('UserRepository', () => {
     userRepository = new UserRepository(); // Uses the global prisma mock
   });
 
-  it('should create a user and then fetch the user by ID', async () => {
+  it('should update a user and then fetch the user by ID', async () => {
     // Arrange
     const mockUser = {
-      name: 'Hello, it is me',
-      email: 'john.doe@exam.com',
-      password: 'password',
-      age: 12,
-      gender: 1,
-      type: 'B',
-      phone: '1234567890',
-      photo: null,
+      photo: 'uploads/Screenshot 2024-06-30 123855.png',
+      email: 'tawsif.kadir18@gmail.com',
     };
     // Act
-    const success = await userRepository.create(User.fromJson(mockUser));
+    const success = await userRepository.update(User.fromJson(mockUser));
 
-    if(success){
-      const user = await userRepository.findById(2);
-      console.log(user);
-    }
+    // if(success){
+    //   const user = await userRepository.findById(2);
+    //   console.log(user);
+    // }
   });
 });

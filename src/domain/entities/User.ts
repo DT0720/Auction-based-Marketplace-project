@@ -9,18 +9,9 @@ export class User {
       public secondaryEmail: string | null,
       public type: string,
       public phone: string,
-      public photo: Buffer | null, // Nullable blob to hold binary data
+      public photo: string, // Nullable blob to hold binary data
     ) {}
   
-    // Domain methods related to User
-    updateEmail(newEmail: string) {
-      this.email = newEmail;
-    }
-  
-    updatePhoto(photoData: Buffer | null) {
-      this.photo = photoData;
-    }
-
     static fromJson(data : any) : User{
       return new User(
         data.user_id,
