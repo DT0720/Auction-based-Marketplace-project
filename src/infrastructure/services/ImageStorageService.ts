@@ -1,7 +1,7 @@
 import { IFileStorageService } from "@/application/services/IFileStorageService";
 import { supabase } from "../database/supabaseClient";
 
-export class FileStorageService implements IFileStorageService{
+export class ImageStorageService implements IFileStorageService{
     private bucketName: string;
 
     constructor(bucketName?: string) {

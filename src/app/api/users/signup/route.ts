@@ -1,22 +1,29 @@
 import { NextResponse } from 'next/server';
 import { UserRepository } from '@/infrastructure/repositories/UserRepository';
 import { HashingService } from '@/infrastructure/services/HashingService';
-import { UserUseCases } from '@/application/usecases/userAuth/userAuth';
+import { User } from '@/domain/entities/User';
 
 const userRepository = new UserRepository();
 const hashingService = new HashingService();
-const userUseCases = new UserUseCases(userRepository, hashingService);
 
-// Handle POST requests for signup
+// Handle POST requests for signupa
 export async function POST(req: Request) {
   try {
     const body = await req.json(); // Parse JSON request body
 
     if (!body) {
-      return new Response('No body received', { status: 400 });
+      throw new Error('No body received');  // Throw an error if no body is received
     }
 
-    const success = await userUseCases.signUp(body); // Sign up the user using the use case
+    const found = await userRepository.findByEmail(body.email); // Sign up the user using the use case
+
+    if (found) {
+      throw new Error('User already exists'); // Throw an error if the user already exists
+    }
+
+    body.password = await hashingService.hash(body.password); // Hash the user password
+
+    const success = await userRepository.create(User.fromJson(body)); // Sign up the user using the use case
 
     return NextResponse.json(
       { message: success ? 'User created successfully' : 'Failed to create user' },

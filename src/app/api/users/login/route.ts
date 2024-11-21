@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
 import { UserRepository } from '@/infrastructure/repositories/UserRepository';
-import { UserUseCases } from '@/application/usecases/userAuth/userAuth';
-import { HashingService } from '@/infrastructure/services/HashingService';
 
 const userRepository = new UserRepository();
-const hashingService = new HashingService();
-const userUseCases = new UserUseCases(userRepository,hashingService);
 
 export async function POST(req: Request) {
   try {
@@ -15,7 +11,7 @@ export async function POST(req: Request) {
       return new Response('No body received', { status: 400 });
     }
 
-    const user = await userUseCases.login(body); // Login the user using the use case
+    const user = await userRepository.findByEmail(body.email); 
 
     return NextResponse.json(
       { message: user ? 'Login Success' : 'Login Failed', data: user ? user : null },

@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify, JWTPayload } from 'jose';
 import { serialize,parse } from 'cookie';
 
-const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key');
+const SECRET_KEY = new TextEncoder().encode('your-secret-key');
 const COOKIE_NAME = 'session';
 const COOKIE_OPTIONS = {
   httpOnly: true,

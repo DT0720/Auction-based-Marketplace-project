@@ -8,19 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
 import { ToggleGroup,ToggleGroupItem } from "@/components/ui/toggle-group";
-import NetworkUtils from "@/lib/networkUtils";
 import { ROUTES } from "@/application/routing/routes";
 import Link from "next/link";
-import { FileStorageService } from "@/infrastructure/services/FileStorageService";
 import { useToast } from "@/hooks/use-toast";
 import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
 import ImageHolder from "@/components/ui/custom/ImageHolder";
 import { useLoader } from "@/hooks/use-loader";
+import useSignup from "@/application/usecases/userAuth/useSignup";
 
 
 export default function SignupPage() {
-
-    const fileStorageService = new FileStorageService();
 
       const initialFormData = {
         name: "",
@@ -67,15 +64,8 @@ export default function SignupPage() {
       // Handle form submission
       const handleSignup = async (event: React.FormEvent) => {
         event.preventDefault();
-    
-        if (formData.password !== formData.confirmPassword) {
-          errorMessage(toast,"Signup failed.", "Passwords do not match!", "Try again");
-          return;
-        }
 
         try {
-
-          const endpoint = "/api/users/signup";
 
           const body = {
             name: formData.name,
@@ -83,6 +73,7 @@ export default function SignupPage() {
             gender: parseInt(formData.gender ?? "0"),
             age: parseInt(formData.age ?? "0"),
             secondaryEmail: null,
+            confirmPassword: formData.confirmPassword,
             password: formData.password,
             phone: formData.phone,
             type: formData.type,
@@ -90,13 +81,10 @@ export default function SignupPage() {
 
           showLoader();
 
-          const response = await NetworkUtils.postRequest(endpoint, body);
+          const success = await useSignup(body, image);
     
-          if (response) {
-            await handleImageUpload();
-
+          if (success) {
             successMessage(toast, "Redirecting to login page...","Signup Successful!");
-
             setTimeout(() => (window.location.href = ROUTES.LOGIN), 3000);
           }
         } catch (exception : any) {
@@ -105,21 +93,6 @@ export default function SignupPage() {
           hideLoader();
         }
       };
-
-      const handleImageUpload = async () => {
-
-        if (image) {
-          const fileName = image?.name ?? "default.jpg";
-          const path = `uploads/${fileName}`;
-          const photoUrl = await fileStorageService.uploadFile(image != null ? image : undefined, path);
-  
-          // Update the user profile with the image URL
-          await NetworkUtils.postRequest('/api/users/update-profile', {
-            email: formData.email,
-            photo: photoUrl,
-          });
-        }
-      }
 
       return (
         <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50">

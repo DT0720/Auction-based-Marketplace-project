@@ -1,10 +1,14 @@
 'use client'
 
 import { ROUTES } from "@/application/routing/routes";
+import useLogin from "@/application/usecases/userAuth/useLogin";
 import { Button } from "@/components/ui/button";
+import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User } from "@/domain/entities/User";
+import { useLoader } from "@/hooks/use-loader";
+import { useToast } from "@/hooks/use-toast";
 import NetworkUtils, { ApiResponse } from "@/lib/networkUtils";
 import Link from "next/link";
 import { useState } from "react";
@@ -23,10 +27,11 @@ export default function LoginPage(){
         type: "B", // Default type
       };
     
-    const [formData, setFormData] = useState(initialFormData);
-    
-      const [error, setError] = useState<string | null>(null);
-      const [successMessage, setSuccessMessage] = useState<string | null>(null);
+      const [formData, setFormData] = useState(initialFormData);
+
+      const { toast } = useToast();
+
+      const { showLoader, hideLoader } = useLoader();
 
       // Handle input changes
       const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -37,13 +42,6 @@ export default function LoginPage(){
       // Handle form submission
       const handleLogin = async (event: React.FormEvent) => {
         event.preventDefault();
-    
-        // if (formData.password !== formData.confirmPassword) {
-        //   setError("Passwords do not match!");
-        //   return;
-        // }
-    
-        const endpoint = "/api/users/login";
 
         const body = {
           email: formData.email,
@@ -51,17 +49,17 @@ export default function LoginPage(){
         };
 
         try {
-          const response = await NetworkUtils.postRequest<ApiResponse<User>>(endpoint, body);
-    
-          if (response) {
-            if(error) setError(null);
-            console.log("Message is: " + response.message);
-            console.log("Response is: " + response.data);
-            setSuccessMessage("Login successful! Please login.");
-            // setTimeout(() => (window.location.href = ROUTES.BUYER_DASHBOARD), 1000);
+          showLoader();
+          const success = await useLogin(body);
+
+          if(success){
+            successMessage(toast, "Login successful!", "You have been logged in successfully.");
+            setTimeout(() => (window.location.href = ROUTES.BUYER_DASHBOARD), 3000);
           }
-        } catch (error) {
-          setError("Login failed" + error);
+        } catch (error: any) {
+          errorMessage(toast, "Login failed.", error.message, "Try again");
+        }finally{
+          hideLoader();
         }
       };
 
@@ -74,10 +72,6 @@ export default function LoginPage(){
             <h1 className="text-2xl font-bold text-center text-gray-800 mt-4">Login</h1>
       
             <form onSubmit={handleLogin}>
-              {/* Error or Success Messages */}
-              {!error && !successMessage && <div className="text-white">H</div>}
-              {error && <div className="text-red-500">{error}</div>}
-              {successMessage && <div className="text-green-500">{successMessage}</div>}
       
               {/* Form Fields */}
               <div className="grid gap-6">
