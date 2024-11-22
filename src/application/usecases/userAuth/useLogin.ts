@@ -1,24 +1,24 @@
-import { User } from "@/domain/entities/User";
 import { UserAuthException } from "@/domain/errors/UserAuthException";
+import { LoginResponse } from "@/domain/responses/LoginResponse";
 import NetworkUtils, { ApiResponse } from "@/lib/networkUtils";
 import ValidationUtils from "@/lib/validationUtils";
 
 const endpoint = "/api/users/login";
 
-async function useLogin(data: any): Promise<boolean> {
+async function useLogin(data: any): Promise<LoginResponse> {
 
     const message = validate(data);
     if (message != null) {
         throw new UserAuthException(message);
     }
 
-    const response = await NetworkUtils.postRequest<ApiResponse<User>>(endpoint, data);
+    const response = await NetworkUtils.postRequest<ApiResponse<LoginResponse>>(endpoint, data);
 
     if (response?.data == null) {
-        throw new Error("Login Failed. Please try again.");
+        throw new UserAuthException(response?.message || "An error occurred");
     }
 
-    return true;
+    return response.data;
 }
 
 function validate(data: any): string | null {

@@ -1,24 +1,39 @@
 import { User } from '@/domain/entities/User';
 import { IUserRepository } from '../../application/repositories/IUserRepository';
 import { prisma } from '../database/prisma';
+import { BuyerRepository } from './BuyerRepository';
+import { SellerRepository } from './SellerRepository';
+import { IBuyerRepository } from '@/application/repositories/IBuyerRepository';
+import { ISellerRepository } from '@/application/repositories/ISellerRepository';
 
 export class UserRepository implements IUserRepository {
 
+    private buyerRepository: IBuyerRepository = new BuyerRepository();
+    private sellerRepository: ISellerRepository = new SellerRepository();
+
     async create(user: User): Promise<boolean> {
         try{
-            await prisma.user.create({
-                data: {
-                    name: user.name,
-                    email: user.email,
-                    password: user.password,
-                    age: user.age,
-                    gender: user.gender ?? 0,
-                    secondary_email: user.secondaryEmail,
-                    type: user.type,
-                    phone: user.phone,
-                    photo: user.photo
+            await prisma.$transaction(async () => {
+                const createdUser = await prisma.user.create({
+                    data: {
+                        name: user.name,
+                        email: user.email,
+                        password: user.password,
+                        age: user.age,
+                        gender: user.gender ?? 0,
+                        secondary_email: user.secondaryEmail,
+                        type: user.type,
+                        phone: user.phone,
+                        photo: user.photo
+                    }
+                }); 
+    
+                if(user.type.toLocaleLowerCase() === 'b'){
+                    await this.buyerRepository.create(createdUser.user_id);
+                }else if(user.type.toLocaleLowerCase() === 's'){
+                    await this.sellerRepository.create(createdUser.user_id);
                 }
-            }); 
+            });
             return true;           
         }catch(e){
             console.log(e);
@@ -53,9 +68,6 @@ export class UserRepository implements IUserRepository {
                 return false;
             }
     
-            console.log("Where clause is: " + JSON.stringify(whereClause));
-            console.log("Data to update is: " + JSON.stringify(dataToUpdate));
-    
             await prisma.user.update({
                 where: whereClause,
                 data: dataToUpdate,
@@ -66,8 +78,7 @@ export class UserRepository implements IUserRepository {
             console.error("Error updating user:", e);
             return false;  // Indicate failure
         }
-    }
-    
+    }    
 
     async delete(_id: number): Promise<boolean> {
         return false;

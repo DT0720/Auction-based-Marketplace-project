@@ -6,10 +6,9 @@ import { Button } from "@/components/ui/button";
 import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User } from "@/domain/entities/User";
+import useAuth from "@/hooks/use-auth";
 import { useLoader } from "@/hooks/use-loader";
 import { useToast } from "@/hooks/use-toast";
-import NetworkUtils, { ApiResponse } from "@/lib/networkUtils";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -28,10 +27,9 @@ export default function LoginPage(){
       };
     
       const [formData, setFormData] = useState(initialFormData);
-
       const { toast } = useToast();
-
       const { showLoader, hideLoader } = useLoader();
+      const { login } = useAuth();
 
       // Handle input changes
       const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -50,11 +48,12 @@ export default function LoginPage(){
 
         try {
           showLoader();
-          const success = await useLogin(body);
+          const data = await useLogin(body);
 
-          if(success){
+          if(data != null){
+            login(data.token, data.user);
             successMessage(toast, "Login successful!", "You have been logged in successfully.");
-            setTimeout(() => (window.location.href = ROUTES.BUYER_DASHBOARD), 3000);
+            setTimeout(() => (window.location.href = (data.user.type.toLocaleLowerCase() == "b") ? ROUTES.BUYER_DASHBOARD : ROUTES.SELLER_DASHBOARD), 3000);
           }
         } catch (error: any) {
           errorMessage(toast, "Login failed.", error.message, "Try again");
