@@ -99,7 +99,7 @@ model product {
   product_name     String             @db.VarChar(255)
   stock            Int
   price_per_unit   Decimal            @db.Decimal(8, 2)
-  photo            Bytes?             @db.Blob
+  photo            String?            @db.VarChar(255)
   auction          auction[]
   order_details    order_details[]
   seller_inventory seller_inventory[]
@@ -137,7 +137,7 @@ model user {
   secondary_email                               String?         @unique(map: "user_secondary_email_unique") @db.VarChar(255)
   type                                          String          @db.Char(255)
   phone                                         String          @db.VarChar(255)
-  photo                                         Bytes?          @db.Blob
+  photo                                         String?         @db.VarChar(255)
   buyer                                         buyer[]
   notifications_notifications_reciever_idTouser notifications[] @relation("notifications_reciever_idTouser")
   notifications_notifications_sender_idTouser   notifications[] @relation("notifications_sender_idTouser")
