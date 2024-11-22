@@ -17,7 +17,7 @@ export const Navigation = () => {
           <Link href={ROUTES.LOGIN}>Login</Link>
         </li>
         <li>
-          <Link href={ROUTES.DASHBOARD}>Dashboard</Link>
+          <Link href={ROUTES.BUYER_DASHBOARD}>Dashboard</Link>
         </li>
       </ul>
     </nav>
