@@ -4,7 +4,7 @@ export class Product {
       public productName: string,
       public stock: number,
       public pricePerUnit: number,
-      public photo: Buffer | null, // Nullable blob to hold binary data
+      public photo: string | null
     ) {}
   
     // Domain methods related to Product
@@ -15,7 +15,7 @@ export class Product {
       this.stock -= quantity;
     }
   
-    updatePhoto(photoData: Buffer | null) {
+    updatePhoto(photoData: string) {
       this.photo = photoData;
     }
 }
