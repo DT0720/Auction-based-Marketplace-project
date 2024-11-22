@@ -5,12 +5,9 @@ const endpoint = "/api/products/getAll";
 
 async function getAllProducts(): Promise<Product[]> {
 
-   const response = NetworkUtils.getRequest<ApiResponse<Product[]>>(endpoint);
-
-   if(response?.data == null){
-    
-   }
-   return response?.data;
+   const response = await NetworkUtils.getRequest<ApiResponse<Product[]>>(endpoint);
+   
+   return response?.data ?? [];
 }
 
 export default getAllProducts;

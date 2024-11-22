@@ -8,21 +8,17 @@ export async function GET(req: Request) {
 
     const productList = await productRepository.findAllProducts(); 
 
-    if(productList.length == 0){
-      return new Error("No Products Found");
-    }
-
     return NextResponse.json(
       { 
         message: "Products found",
         data: productList
       },
-      { status: 201}
+      { status: 200 }
     );
 
   } catch (error: any) {
       return NextResponse.json(
-        { message: error.message || 'Products Not Found!!', data: [] },
+        { message: error.message, data: [] },
         { status: 400 }
       );
   }
