@@ -13,6 +13,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuItem,
   } from "@/components/ui/dropdown-menu";
+import SearchBar from "./SearchBar";
 
 
 const Navbar = () => {
@@ -35,6 +36,13 @@ const Navbar = () => {
         <Home className="mr-2 text-blue-500" />
         <span className="font-bold text-lg">MyApp</span>
       </div>
+
+      {/* Center: Search Bar for Logged-in Users */}
+      {isAuthenticated && (
+        <div className="flex-grow flex justify-center">
+          <SearchBar /> {/* Render the custom SearchBar component */}
+        </div>
+      )}
 
       {/* Right: Conditional buttons */}
       <div className="flex items-center">

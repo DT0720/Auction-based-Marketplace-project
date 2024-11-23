@@ -17,11 +17,11 @@ export const AuthContext = createContext<AuthContextProps | undefined>(undefined
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Restore user session on load
   useEffect(() => {
     const token = Cookies.get(CookieEnum.AuthToken); // Get token from cookie
-
     if (token) {
       try {
         // Decode or verify the token as needed
@@ -33,11 +33,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         Cookies.remove(CookieEnum.AuthToken); // Remove the cookie if decoding fails
       }
     }
+    setLoading(false); // Loading completed
   }, []);
 
   const login = (token: string, user: User) => {
-
-    console.log("Entered Login");
 
     if(token){
       Cookies.set(CookieEnum.AuthToken, token, { 
@@ -55,6 +54,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setIsAuthenticated(false);
   };
+
+  if (loading) {
+    return null; 
+  }
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
