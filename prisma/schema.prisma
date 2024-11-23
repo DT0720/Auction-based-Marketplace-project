@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url = "mysql://rafi:@94.250.203.197:3306/eCommerce"
+  url      = "mysql://rafi:@94.250.203.197:3306/eCommerce"
 }
 
 model auction {
