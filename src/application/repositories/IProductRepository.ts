@@ -1,3 +1,4 @@
+import { ProductTypeEnum } from "@/domain/enums/ProductTypeEnum";
 import { Product } from "../../domain/entities/Product";
 
 export interface IProductRepository {
@@ -9,4 +10,5 @@ export interface IProductRepository {
     findBySellerId(sellerId: string): Promise<Product[]>;
     findByPrice(price: number): Promise<Product[]>;
     findByProductName(productName: string): Promise<Product[]>;
+    findByCategory(product_type : ProductTypeEnum): Promise<Product[]>;
 }

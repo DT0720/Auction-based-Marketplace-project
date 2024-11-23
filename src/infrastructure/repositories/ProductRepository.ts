@@ -3,6 +3,7 @@
 import { IProductRepository } from "@/application/repositories/IProductRepository";
 import { Product } from "@/domain/entities/Product";
 import { prisma } from "../database/prisma";
+import { ProductTypeEnum } from "@/domain/enums/ProductTypeEnum";
 
 export class ProductRepository implements IProductRepository{
     create(product: Product): Promise<Product> {
@@ -24,7 +25,8 @@ export class ProductRepository implements IProductRepository{
                 product.id,
                 product.product_name,
                 product.stock,
-                parseFloat(product.price_per_unit.toString()), // Convert Decimal to number
+                parseFloat(product.price_per_unit.toString()), // Convert Decimal to number,
+                product.category ?? "No Category",
                 product.photo // Handle photo if needed
             ));
 
@@ -36,6 +38,11 @@ export class ProductRepository implements IProductRepository{
     findBySellerId(sellerId: string): Promise<Product[]> {
         throw new Error("Method not implemented.");
     }
+
+    findByCategory(product_type: ProductTypeEnum): Promise<Product[]> {
+        throw new Error("Method not implemented.");
+    }
+
     findByPrice(price: number): Promise<Product[]> {
         throw new Error("Method not implemented.");
     }

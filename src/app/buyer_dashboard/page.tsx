@@ -74,7 +74,7 @@ export default function BuyerDashboard() {
                             {/* <img src={URL.createObjectURL()} alt={product.productName} className="w-full h-auto mb-2" /> */}
                             <h3 className="font-semibold">{product.productName}</h3>
                             <p>Price: ${product.pricePerUnit.toFixed(2)}</p>
-                            <Button onClick={() => console.log(`Adding ${product.productName} to cart`)} className="mt-2 bg-blue-500 text-white rounded p-1">
+                            <Button onClick={() => console.log(`Adding ${product.productName} to cart`)} className="mt-2 text-white rounded p-1">
                                 Add to Cart
                             </Button>
                         </div>

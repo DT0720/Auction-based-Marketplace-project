@@ -1,5 +1,7 @@
 // src/utils/NetworkUtils.ts
 
+import Cookies from "js-cookie";
+
 interface RequestOptions {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE';
     endpoint: string;
@@ -12,10 +14,13 @@ interface RequestOptions {
 
       const isFormData = body instanceof FormData;
 
+      const token = Cookies.get('auth-token');
+
       const options: RequestInit = {
         method,
         headers: {
           ...(isFormData ? {} : { 'Content-Type': 'application/json' }), // Exclude Content-Type for FormData
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
           ...headers, // Allow custom headers to be passed
         },
         body: isFormData ? body : body ? JSON.stringify(body) : undefined,

@@ -49,7 +49,6 @@ export default function LoginPage(){
         try {
           showLoader();
           const data = await useLogin(body);
-
           if(data != null){
             successMessage(toast, "Login successful!", "You have been logged in successfully.");
             setTimeout(() => {
@@ -57,8 +56,7 @@ export default function LoginPage(){
               window.location.href = data.user.type.toLocaleLowerCase() === "b" 
                   ? ROUTES.BUYER_DASHBOARD 
                   : ROUTES.SELLER_DASHBOARD;
-          }, 3000);
-          
+            }, 3000);
           }
         } catch (error: any) {
           errorMessage(toast, "Login failed.", error.message, "Try again");

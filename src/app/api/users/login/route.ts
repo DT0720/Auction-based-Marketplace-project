@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { UserRepository } from '@/infrastructure/repositories/UserRepository';
-import { generateToken } from '@/lib/session/tokenUtils';
+import { generateToken } from '@/lib/tokenUtils';
 
 const userRepository = new UserRepository();
 

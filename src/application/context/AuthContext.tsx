@@ -1,8 +1,9 @@
 'use client'; // Required for App Router client-side context
 
 import React, { createContext, useState, useEffect } from 'react';
-import { saveToken, getToken, removeToken } from '@/lib/session/auth';
 import { User } from '@/domain/entities/User';
+import Cookies from 'js-cookie';
+import { CookieEnum } from '@/domain/enums/CookieEnum';
 
 interface AuthContextProps {
   user: User | null;
@@ -19,7 +20,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Restore user session on load
   useEffect(() => {
-    const token = getToken();
+    const token = Cookies.get(CookieEnum.AuthToken); // Get token from cookie
+
     if (token) {
       try {
         // Decode or verify the token as needed
@@ -27,20 +29,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(decodedUser);
         setIsAuthenticated(true);
       } catch (error) {
-        console.error('Invalid token:', error);
-        removeToken();
+        console.error('Failed to decode token:', error);
+        Cookies.remove(CookieEnum.AuthToken); // Remove the cookie if decoding fails
       }
     }
   }, []);
 
   const login = (token: string, user: User) => {
-    saveToken(token); // Save token in localStorage
-    setUser(user);
-    setIsAuthenticated(true);
+
+    console.log("Entered Login");
+
+    if(token){
+      Cookies.set(CookieEnum.AuthToken, token, { 
+        expires: 7,
+        path: '/' , 
+        secure: process.env.NODE_ENV === 'production',
+      }); // Set the cookie
+      setUser(user);
+      setIsAuthenticated(true);
+    }
   };
 
   const logout = () => {
-    removeToken(); // Clear token from localStorage
+    Cookies.remove(CookieEnum.AuthToken); // Remove the cookie
     setUser(null);
     setIsAuthenticated(false);
   };
