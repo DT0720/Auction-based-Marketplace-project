@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { CookieEnum } from './domain/enums/CookieEnum';
 
 const publicPaths = ['/', '/login', '/signup', '/forgot-password'];
-const protectedPaths = ['/buyer_dashboard', '/seller_dashboard'];
+const protectedPaths = ['/buyer_dashboard', '/seller_dashboard', '/review_dashboard'];
 
 export async function middleware(req: NextRequest) {
 
@@ -36,5 +36,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/login', '/signup', '/forgot-password', '/buyer_dashboard', '/seller_dashboard'], 
+    matcher: ['/login', '/signup', '/forgot-password', '/buyer_dashboard', '/seller_dashboard', '/review_dashboard'], 
 };
