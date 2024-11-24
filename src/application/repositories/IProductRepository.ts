@@ -5,10 +5,10 @@ export interface IProductRepository {
     create(product: Product): Promise<Product>;
     update(product: Product): Promise<Product>;
     delete(id: string): Promise<boolean>;
-    findById(id: string): Promise<Product>;
+    findById(id: number): Promise<Product | null>;
     findAllProducts(): Promise<Product[]>;
     findBySellerId(sellerId: string): Promise<Product[]>;
     findByPrice(price: number): Promise<Product[]>;
     findByProductName(productName: string): Promise<Product[]>;
-    findByCategory(product_type : ProductTypeEnum): Promise<Product[]>;
+    findByCategory(product_type : typeof ProductTypeEnum): Promise<Product[]>;
 }
