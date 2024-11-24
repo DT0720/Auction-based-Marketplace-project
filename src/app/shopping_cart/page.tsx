@@ -1,45 +1,155 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import getAllProducts from "@/application/usecases/buyerDashboard/products/getAllProducts";
-import { Product } from "@/domain/entities/Product";
+import { Card } from "@/components/ui/card";
+import { useLoader } from "@/hooks/use-loader";
+import { useRouter } from "next/navigation";
+import { CartItem } from "@/domain/entities/CartItem"; // Assuming a CartItem entity exists
 
-// Main BuyerDashboard component
-export default function BuyerDashboard() {
-    const [products, setProducts] = useState<Product[]>([]);
-    // Fetch products from API
+// Mock function to simulate fetching cart data
+const fetchCartItems = async (): Promise<CartItem[]> => {
+    // Replace with an actual API call
+    return new Promise((resolve) =>
+        setTimeout(() => {
+            resolve([
+                {
+                    id: "1",
+                    productName: "Product 1",
+                    photo: "/images/product1.jpg",
+                    pricePerUnit: 20.0,
+                    quantity: 2,
+                },
+                {
+                    id: "2",
+                    productName: "Product 2",
+                    photo: "/images/product2.jpg",
+                    pricePerUnit: 15.0,
+                    quantity: 1,
+                },
+            ]);
+        }, 1000)
+    );
+};
+
+// Main ShoppingCart component
+export default function ShoppingCart() {
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const { showLoader, hideLoader } = useLoader();
+    const router = useRouter();
+
+    // Fetch cart items on component mount
     useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchCart = async () => {
             try {
-                const fetchedProducts = await getAllProducts();
-                setProducts(fetchedProducts);
+                showLoader();
+                const items = await fetchCartItems();
+                setCartItems(items);
             } catch (error: any) {
-                console.error('Error fetching products:', error.message);
+                console.error("Error fetching cart items:", error.message);
+            } finally {
+                hideLoader();
             }
         };
-
-        fetchProducts();
+        fetchCart();
     }, []);
+
+    // Update quantity of a cart item
+    const updateQuantity = (itemId: string, newQuantity: number) => {
+        setCartItems((prevItems) =>
+            prevItems.map((item) =>
+                item.id === itemId ? { ...item, quantity: newQuantity } : item
+            )
+        );
+    };
+
+    // Remove item from cart
+    const removeItem = (itemId: string) => {
+        setCartItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
+    };
+
+    // Calculate total price
+    const calculateTotal = () => {
+        return cartItems.reduce(
+            (total, item) => total + item.pricePerUnit * item.quantity,
+            0
+        );
+    };
 
     return (
         <div className="min-h-screen bg-white">
-
-            {/* Products Display */}
-            <main className="mt-8 p-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {products.map((product) => (
-                        <div key={product.id} className="border border-gray-300 rounded-lg p-4 text-center">
-                            {/* <img src={URL.createObjectURL()} alt={product.productName} className="w-full h-auto mb-2" /> */}
-                            <h3 className="font-semibold">{product.productName}</h3>
-                            <p>Price: ${product.pricePerUnit.toFixed(2)}</p>
-                            <Button onClick={() => console.log(`Adding ${product.productName} to cart`)} className="mt-2 text-white rounded p-1">
-                                Add to Cart
+            <div className="max-w-5xl mx-auto py-8 px-4">
+                <h1 className="text-2xl font-semibold mb-6">Shopping Cart</h1>
+                {cartItems.length > 0 ? (
+                    <>
+                        <div className="grid grid-cols-1 gap-4">
+                            {cartItems.map((item) => (
+                                <Card
+                                    key={item.id}
+                                    className="border border-gray-300 rounded-lg p-4 flex justify-between items-center"
+                                >
+                                    <div className="flex items-center space-x-4">
+                                        <img
+                                            src={item.photo}
+                                            alt={item.productName}
+                                            className="w-24 h-24 object-cover"
+                                        />
+                                        <div>
+                                            <h3 className="font-semibold text-lg">{item.productName}</h3>
+                                            <p className="text-sm text-gray-500">
+                                                Price: ${item.pricePerUnit.toFixed(2)}
+                                            </p>
+                                            <p className="text-sm text-gray-500">
+                                                Quantity:{" "}
+                                                <input
+                                                    type="number"
+                                                    value={item.quantity}
+                                                    min={1}
+                                                    className="border rounded w-16 text-center"
+                                                    onChange={(e) =>
+                                                        updateQuantity(
+                                                            item.id,
+                                                            parseInt(e.target.value)
+                                                        )
+                                                    }
+                                                />
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        onClick={() => removeItem(item.id)}
+                                        className="rounded p-2"
+                                        variant="outline"
+                                    >
+                                        Remove
+                                    </Button>
+                                </Card>
+                            ))}
+                        </div>
+                        <div className="mt-6 flex justify-between items-center">
+                            <h2 className="text-xl font-semibold">
+                                Total: ${calculateTotal().toFixed(2)}
+                            </h2>
+                            <Button
+                                onClick={() => router.push("/checkout")}
+                                className="rounded p-2"
+                            >
+                                Proceed to Checkout
                             </Button>
                         </div>
-                    ))}
-                </div>
-            </main>
+                    </>
+                ) : (
+                    <p className="text-gray-500 text-center mt-20">
+                        Your cart is empty.{" "}
+                        <a
+                            href="/products"
+                            className="text-blue-500 hover:underline"
+                        >
+                            Continue Shopping
+                        </a>
+                    </p>
+                )}
+            </div>
         </div>
     );
 }
