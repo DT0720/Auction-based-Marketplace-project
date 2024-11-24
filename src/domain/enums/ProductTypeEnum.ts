@@ -12,6 +12,7 @@ export const ProductTypeEnum = {
     GROCERIES: "Groceries",
     HEALTH_AND_BEAUTY: "Health & Beauty",
     WATCHES_BAGS_JEWELLERY: "Watches, Bags & Jewellery",
+    NO_CATEGORY: "No Category",
 } as const;
 
 export type ProductTypeEnumKey = keyof typeof ProductTypeEnum;

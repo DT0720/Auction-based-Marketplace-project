@@ -63,7 +63,7 @@ const SearchBar: React.FC = () => {
       />
 
       {/* Search Button */}
-      <Button type="submit" variant="ghost" className="ml-2">
+      <Button type="submit" variant="outline" className="ml-2">
         <Search />
       </Button>
     </form>

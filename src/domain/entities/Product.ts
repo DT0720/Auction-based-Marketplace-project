@@ -1,3 +1,5 @@
+import { ProductTypeEnum } from "../enums/ProductTypeEnum";
+
 export class Product {
     constructor(
       public id: number,
@@ -18,6 +20,19 @@ export class Product {
   
     updatePhoto(photoData: string) {
       this.photo = photoData;
+    }
+
+    static fromJson(data: any): Product {
+      return new Product(
+        data.id,
+        data.product_name,
+        data.stock,
+        data.price_per_unit !== undefined && data.price_per_unit !== null
+        ? parseFloat(data.price_per_unit.toString())
+        : 0,
+        data.category ?? ProductTypeEnum.NO_CATEGORY,
+        data.photo
+      );
     }
 }
   
