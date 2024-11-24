@@ -8,14 +8,16 @@ import { Card } from "@/components/ui/card";
 import { useLoader } from "@/hooks/use-loader";
 import { useRouter } from "next/navigation";
 
-// Main BuyerDashboard component
-export default function SellerDashboard() {
+// Main sellerDashboard component
+export default function sellerDashboard()
+ {
     const [products, setProducts] = useState<Product[]>([]);
     const { showLoader, hideLoader } = useLoader();
     const router = useRouter();
     // Fetch products from API
     useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchProducts = async () => 
+            {
             try {
                 showLoader();
                 const fetchedProducts = await getAllProducts();
