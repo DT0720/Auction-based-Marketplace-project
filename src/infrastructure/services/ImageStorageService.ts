@@ -4,6 +4,8 @@ import { supabase } from "../database/supabaseClient";
 export class ImageStorageService implements IFileStorageService{
     private bucketName: string;
 
+    public static productPlaceholderImage = '/assets/product-placeholder.png';
+
     constructor(bucketName?: string) {
         this.bucketName = bucketName ? bucketName : "uploads";
     }
@@ -41,13 +43,15 @@ export class ImageStorageService implements IFileStorageService{
       return true;
     }
 
-    async getFileUrl(filePath: string): Promise<string> {
+    async getFileUrl(filePath: string): Promise<string | null> {
         const { data } = supabase.storage
         .from(this.bucketName)
         .getPublicUrl(filePath);
     
-        if (!data || !data.publicUrl) {
-            throw new Error('Failed to retrieve the public URL');
+        const imageExists = await this.fileExists(filePath); 
+
+        if (!data || !data.publicUrl || !imageExists) {
+            return null;
         }
     
       return data.publicUrl;
