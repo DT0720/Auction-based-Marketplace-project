@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { CookieEnum } from './domain/enums/CookieEnum';
+import { getPublicRoutes,getProtectedRoutes, ROUTES } from './application/routing/routes';
 
-const publicPaths = ['/', '/login', '/signup', '/forgot-password'];
-const protectedPaths = ['/buyer_dashboard', '/seller_dashboard'];
+const publicPaths = getPublicRoutes();
+const protectedPaths = getProtectedRoutes();
+const allPaths = [...publicPaths, ...protectedPaths];
 
 export async function middleware(req: NextRequest) {
 
@@ -11,7 +13,7 @@ export async function middleware(req: NextRequest) {
     const token = cookies.get(CookieEnum.AuthToken)?.value;
 
     const requestedPath = req.nextUrl.pathname;
-  
+
     // Allow users to access public paths without a token
     if (publicPaths.includes(requestedPath)) {
       if (token) {
@@ -28,6 +30,7 @@ export async function middleware(req: NextRequest) {
     }
   
     if (!token && protectedPaths.includes(requestedPath)) {
+      console.log(allPaths);
         return NextResponse.redirect(new URL('/login', req.url));
     }
   
@@ -38,3 +41,5 @@ export async function middleware(req: NextRequest) {
 export const config = {
     matcher: ['/login', '/signup', '/forgot-password', '/buyer_dashboard', '/seller_dashboard'], 
 };
+
+
