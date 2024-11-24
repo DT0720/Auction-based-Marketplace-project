@@ -52,7 +52,7 @@ export default function LoginPage(){
           if(data != null){
             successMessage(toast, "Login successful!", "You have been logged in successfully.");
             setTimeout(() => {
-              login(data.token, data.user);
+              login(data.token, data.user, data.credit);
               window.location.href = data.user.type.toLocaleLowerCase() === "b" 
                   ? ROUTES.BUYER_DASHBOARD 
                   : ROUTES.SELLER_DASHBOARD;

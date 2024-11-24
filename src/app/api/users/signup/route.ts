@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     );
 
   } catch (error: any) {
-      console.log(error.trace());
+      console.log(error.message);
       return NextResponse.json(
         { message: 'Failed to create user' },
         { status: 400 }
