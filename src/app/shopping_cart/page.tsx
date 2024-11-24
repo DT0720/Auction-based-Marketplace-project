@@ -1,4 +1,3 @@
-// pages/shopping_cart/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,44 +6,25 @@ import CartSummary from "@/components/ui/custom/CartSummary";
 
 const ShoppingCartPage: React.FC = () => {
   const [cartItems, setCartItems] = useState([]);
-  const [total, setTotal] = useState(0);
+  const taxRate = 0.1;
 
   useEffect(() => {
-    // Mock fetch function; replace with actual API call
-    const fetchCartItems = async () => {
-      const items = [
-        { id: "1", name: "Product 1", image: "/images/product1.jpg", price: 20, quantity: 2 },
-        { id: "2", name: "Product 2", image: "/images/product2.jpg", price: 15, quantity: 1 },
-      ];
-      setCartItems(items);
-      calculateTotal(items);
-    };
-
-    fetchCartItems();
+    const items = [
+      { id: "1", name: "Product 1", image: "/images/product1.jpg", price: 20, quantity: 2 },
+      { id: "2", name: "Product 2", image: "/images/product2.jpg", price: 15, quantity: 1 },
+    ];
+    setCartItems(items);
   }, []);
 
-  const calculateTotal = (items) => {
-    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    setTotal(total);
-  };
-
-  const handleRemoveItem = (id) => {
-    const updatedItems = cartItems.filter((item) => item.id !== id);
-    setCartItems(updatedItems);
-    calculateTotal(updatedItems);
-  };
-
-  const handleUpdateQuantity = (id, quantity) => {
-    const updatedItems = cartItems.map((item) =>
-      item.id === id ? { ...item, quantity } : item
+  const handleRemoveItem = (id) => setCartItems((items) => items.filter((item) => item.id !== id));
+  const handleUpdateQuantity = (id, quantity) =>
+    setCartItems((items) =>
+      items.map((item) => (item.id === id ? { ...item, quantity } : item))
     );
-    setCartItems(updatedItems);
-    calculateTotal(updatedItems);
-  };
+  const handleBuyNow = (id) => alert(`Buy It Now for item ${id}!`);
+  const handleCheckout = () => alert("Proceeding to Checkout!");
 
-  const handleCheckout = () => {
-    alert("Proceeding to checkout!");
-  };
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <div className="shopping-cart p-4">
@@ -57,10 +37,11 @@ const ShoppingCartPage: React.FC = () => {
               {...item}
               onRemove={handleRemoveItem}
               onUpdateQuantity={handleUpdateQuantity}
+              onBuyNow={handleBuyNow}
             />
           ))}
         </div>
-        <CartSummary total={total} onCheckout={handleCheckout} />
+        <CartSummary subtotal={subtotal} taxRate={taxRate} onCheckout={handleCheckout} />
       </div>
     </div>
   );

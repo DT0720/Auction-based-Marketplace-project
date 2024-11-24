@@ -1,18 +1,23 @@
-// components/ui/custom/CartSummary.tsx
 import React from "react";
-import { Card } from "../card"; // Reuse the Card component
-import { Button } from "../button"; // Reuse the Button component
+import { Card } from "../card"; // Reuse Card component
+import { Button } from "../button"; // Reuse Button component
 
 type CartSummaryProps = {
-  total: number;
+  subtotal: number;
+  taxRate: number;
   onCheckout: () => void;
 };
 
-const CartSummary: React.FC<CartSummaryProps> = ({ total, onCheckout }) => {
+const CartSummary: React.FC<CartSummaryProps> = ({ subtotal, taxRate, onCheckout }) => {
+  const tax = subtotal * taxRate;
+  const total = subtotal + tax;
+
   return (
     <Card className="p-4">
       <h2 className="text-lg font-semibold">Cart Summary</h2>
-      <p className="mt-2 text-sm text-gray-500">Total: ${total.toFixed(2)}</p>
+      <p>Subtotal: ${subtotal.toFixed(2)}</p>
+      <p>Tax: ${tax.toFixed(2)}</p>
+      <p>Total: ${total.toFixed(2)}</p>
       <Button className="mt-4 w-full" onClick={onCheckout}>
         Proceed to Checkout
       </Button>

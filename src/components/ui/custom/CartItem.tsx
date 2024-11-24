@@ -1,7 +1,6 @@
-// components/ui/custom/CartItem.tsx
 import React from "react";
-import { Card } from "../card"; // Reuse the Card component
-import { Button } from "../button"; // Reuse the Button component
+import { Card } from "../card"; // Reuse Card component
+import { Button } from "../button"; // Reuse Button component
 
 type CartItemProps = {
   id: string;
@@ -11,9 +10,10 @@ type CartItemProps = {
   quantity: number;
   onRemove: (id: string) => void;
   onUpdateQuantity: (id: string, quantity: number) => void;
+  onBuyNow: (id: string) => void;
 };
 
-const CartItem: React.FC<CartItemProps> = ({ id, name, image, price, quantity, onRemove, onUpdateQuantity }) => {
+const CartItem: React.FC<CartItemProps> = ({ id, name, image, price, quantity, onRemove, onUpdateQuantity, onBuyNow }) => {
   return (
     <Card className="flex items-center gap-4 p-4">
       <img src={image} alt={name} className="w-20 h-20 object-cover rounded" />
@@ -30,9 +30,14 @@ const CartItem: React.FC<CartItemProps> = ({ id, name, image, price, quantity, o
           </Button>
         </div>
       </div>
-      <Button variant="destructive" onClick={() => onRemove(id)}>
-        Remove
-      </Button>
+      <div className="flex flex-col gap-2">
+        <Button variant="destructive" onClick={() => onRemove(id)}>
+          Remove
+        </Button>
+        <Button variant="primary" onClick={() => onBuyNow(id)}>
+          Buy It Now
+        </Button>
+      </div>
     </Card>
   );
 };
