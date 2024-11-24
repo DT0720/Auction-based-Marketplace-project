@@ -194,8 +194,8 @@ export default function BuyerDashboard() {
                                 <div className="mb-4">
                                     <h3 className="font-semibold text-lg">{product.productName}</h3>
                                     <p className="text-sm text-gray-500">Category: {product.category}</p>
-                                    <p className="text-sm text-gray-500">Rating: {product.rating ? product.rating : 'N/A'} / 5</p>
-                                    <p className="text-sm text-gray-500">Reviews: {product.reviewsCount || 0}</p>
+                                    {/* <p className="text-sm text-gray-500">Rating: {product.rating ? product.rating : 'N/A'} / 5</p>
+                                    <p className="text-sm text-gray-500">Reviews: {product.reviewsCount || 0}</p> */}
                                     <p className="font-bold mt-2">Price: ${product.pricePerUnit.toFixed(2)}</p>
                                 </div>
                                 <div className="flex justify-end mt-auto">
