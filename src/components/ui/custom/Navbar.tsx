@@ -17,12 +17,17 @@ import SearchBar from "./SearchBar";
 
 
 const Navbar = () => {
-  const { user, isAuthenticated, logout } = useAuth(); // Hook for authentication state
+  const { user, isAuthenticated, logout, currentBalance } = useAuth(); // Hook for authentication state
   const router = useRouter(); // Next.js router
   const pathname = usePathname(); // To determine the active page
 
   const isBuyer = user?.type.toLocaleLowerCase() === "b"; 
   const isSeller = user?.type.toLocaleLowerCase() === "s";
+
+  const formattedCurrency = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(currentBalance);
 
   const logoutHandler = () => {
     logout();
@@ -74,7 +79,7 @@ const Navbar = () => {
             </Button>
             <Button variant="ghost" className="mr-4">
               <CreditCard />
-              <span className="ml-2">$XX.XX</span>
+              <span className="ml-2">{formattedCurrency}</span>
             </Button>
 
             {/* Dropdown Menu */}
@@ -120,9 +125,58 @@ const Navbar = () => {
           </>
         ) : isSeller ? (
           <>
-            {/* Placeholder for Seller View */}
-            {/* Add Seller-specific items here later */}
-            <span className="text-gray-500">Seller options coming soon...</span>
+            {/* Buyer View */}
+            <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
+              <Bell />
+            </Button>
+            <Button variant="ghost" className="mr-4" onClick={() => console.log("View Cart")}>
+              <ShoppingCart />
+            </Button>
+            <Button variant="ghost" className="mr-4">
+              <CreditCard />
+              <span className="ml-2">{formattedCurrency}</span>
+            </Button>
+
+            {/* Dropdown Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost">
+                  <Menu />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel className="font-bold">
+                  {user?.name || "User"}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => console.log("Navigate to My Profile")}>
+                <User className="mr-2 h-4 w-4" />
+                My Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => console.log("Navigate to Billing")}>
+                <CreditCard className="mr-2 h-4 w-4" />
+                Billing
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => console.log("Navigate to Settings")}>
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => console.log("Navigate to My Cart")}>
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                My Cart
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => console.log("Navigate to Ongoing Bids")}>
+                <List className="mr-2 h-4 w-4" />
+                Ongoing Bids
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logoutHandler}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </>
         ) : null}
       </div>

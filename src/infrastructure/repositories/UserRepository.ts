@@ -5,11 +5,14 @@ import { BuyerRepository } from './BuyerRepository';
 import { SellerRepository } from './SellerRepository';
 import { IBuyerRepository } from '@/application/repositories/IBuyerRepository';
 import { ISellerRepository } from '@/application/repositories/ISellerRepository';
+import { IWalletRepository } from '@/application/repositories/IWalletRepository';
+import { WalletRepository } from './WalletRepository';
 
 export class UserRepository implements IUserRepository {
 
     private buyerRepository: IBuyerRepository = new BuyerRepository();
     private sellerRepository: ISellerRepository = new SellerRepository();
+    private walletRepository: IWalletRepository = new WalletRepository();
 
     async create(user: User): Promise<boolean> {
         try{
@@ -33,9 +36,17 @@ export class UserRepository implements IUserRepository {
                 }else if(user.type.toLocaleLowerCase() === 's'){
                     await this.sellerRepository.create(createdUser.user_id);
                 }
+
+                const success = await this.walletRepository.createWallet({
+                    user_id: createdUser.user_id,
+                    current_balance: 0
+                });
+                console.log("Wallet created: " + success);
             });
+
             return true;           
         }catch(e){
+            console.log("Entering error region from UserRepository");
             console.log(e);
             return false;
         }

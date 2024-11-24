@@ -12,10 +12,18 @@ describe('UserRepository', () => {
     // Arrange
     const mockUser = {
       photo: 'uploads/Screenshot 2024-06-30 123855.png',
-      email: 'tawsif.kadir18@gmail.com',
+      email: 'tawsif.kadir1569@gail.com',
+      name: 'Tawsif Kadir',
+      password: 'password',
+      type: 'B',
+      gender: 1,
+      age: 23,
+      phone: '123456789987654321',
     };
     // Act
-    const success = await userRepository.update(User.fromJson(mockUser));
+    const success = await userRepository.create(User.fromJson(mockUser));
+
+    console.log("Test is: " + success);
 
     // if(success){
     //   const user = await userRepository.findById(2);
