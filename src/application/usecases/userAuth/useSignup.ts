@@ -1,3 +1,4 @@
+import { PhotoTypeEnum } from "@/domain/enums/PhotoTypeEnum";
 import { UserAuthException } from "@/domain/errors/UserAuthException";
 import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
 import NetworkUtils from "@/lib/networkUtils";
@@ -30,7 +31,7 @@ const handleImageUpload = async (user_email: string, image : File | null) => {
     if (image) {
       const fileName = image?.name ?? "default.jpg";
       const path = `uploads/${fileName}`;
-      const photoUrl = await fileStorageService.uploadFile(image != null ? image : undefined, path);
+      const photoUrl = await fileStorageService.uploadFile(image != null ? image : undefined, path, PhotoTypeEnum.USER);
 
       // Update the user profile with the image URL
       await NetworkUtils.postRequest('/api/users/update-profile', {

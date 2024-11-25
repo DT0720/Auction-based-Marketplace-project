@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       throw new Error('No body received');  // Throw an error if no body is received
     }
 
-    const product = await productRepository.create(Product.fromJson(body)); // Sign up the user using the use case
+    const product = await productRepository.create(Product.fromJson(body)); // Create the product using the use case
 
     if (!product) {
       throw new Error('Error during creating product'); // Throw an error if the product was not created

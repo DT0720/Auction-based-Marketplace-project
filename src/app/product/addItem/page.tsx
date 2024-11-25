@@ -7,12 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ProductTypeEnum } from "@/domain/enums/ProductTypeEnum";
-import ImageHolder from "@/components/ui/custom/ImageHolder";
 import { useLoader } from "@/hooks/use-loader";
 import { useToast } from "@/hooks/use-toast";
+import useAuth from "@/hooks/use-auth";
 import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
 import { ROUTES } from "@/application/routing/routes";
-import addProduct from "@/application/usecases/sellerDashboard/products/addProduct";
+import {addProduct, addProductToSellerInventory} from "@/application/usecases/sellerDashboard/products/addProduct";
+import ImageHolderSquare from "@/components/ui/custom/ImageHolderSquare";
 
 export default function AddProductForm() {
   const [productData, setProductData] = useState({
@@ -27,6 +28,8 @@ export default function AddProductForm() {
 
   const { showLoader, hideLoader } = useLoader();
   const { toast } = useToast();
+
+  const { buyer_seller_id } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -58,9 +61,15 @@ export default function AddProductForm() {
 
       showLoader();
 
-      const success = await addProduct(body, image);
+      const product = await addProduct(body, image);
 
-      if (success) {
+      if (!product) {
+        throw new Error("Failed to add product.");
+      }
+
+      const inventoryData = await addProductToSellerInventory(product.id, buyer_seller_id);
+
+      if (inventoryData) {
         successMessage(toast, "Redirecting to dashboard...","Product Added Successfully!");
         showLoader();
         setTimeout(() => {
@@ -76,12 +85,11 @@ export default function AddProductForm() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-8 bg-white rounded-lg shadow-md mt-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">Add New Product</h1>
-      <div className="flex justify-center mb-6">
-        <ImageHolder image={image} handleImageUpdate={handleImageUpdate} />
+    <div className="max-w-4xl mx-auto mt-24 p-10 bg-white rounded-lg shadow-md">
+      <div className="flex justify-center mb-8">
+        <ImageHolderSquare image={image} handleImageUpdate={handleImageUpdate} />
       </div>
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
         <div>
           <Label htmlFor="name">Product Name</Label>
           <Input
@@ -104,12 +112,12 @@ export default function AddProductForm() {
             value={productData.description}
             onChange={handleInputChange}
             placeholder="Enter product description"
-            className="mt-2"
+            className="mt-2 h-32"
             required
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <Label htmlFor="price">Price</Label>
             <Input
@@ -147,16 +155,17 @@ export default function AddProductForm() {
             </SelectTrigger>
             <SelectContent>
               {Object.entries(ProductTypeEnum).map(([key, value]) => (
-                <SelectItem key={key} value={value}>{ProductTypeEnum.ALL}</SelectItem>
+                <SelectItem key={key} value={key}>{value}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        <Button onClick={handleSubmit} className="w-full py-3 text-lg mt-6">
+        <Button onClick={handleSubmit} className="w-full py-3 text-lg mt-8">
           Add Product
         </Button>
       </form>
     </div>
   );
 }
+

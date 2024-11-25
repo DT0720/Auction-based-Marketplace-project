@@ -2,6 +2,7 @@
 
 import { IProductRepository } from '@/application/repositories/IProductRepository';
 import { IFileStorageService } from '@/application/services/IFileStorageService';
+import { PhotoTypeEnum } from '@/domain/enums/PhotoTypeEnum';
 import { ProductRepository } from '@/infrastructure/repositories/ProductRepository';
 import { ImageStorageService } from '@/infrastructure/services/ImageStorageService';
 import { NextRequest, NextResponse } from 'next/server';
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
         }
 
         if (product.photo) {
-            product.photo = await imageStorageService.getFileUrl(product.photo);
+            product.photo = await imageStorageService.getFileUrl(product.photo,PhotoTypeEnum.PRODUCT);
             if (!product.photo) {
               product.photo = ImageStorageService.productPlaceholderImage;
             }

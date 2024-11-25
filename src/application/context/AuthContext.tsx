@@ -9,7 +9,8 @@ interface AuthContextProps {
   user: User | null;
   currentBalance: number;
   isAuthenticated: boolean;
-  login: (token: string, user: User, credit: number) => void;
+  buyer_seller_id: number;
+  login: (token: string, user: User, credit: number, buyer_seller_id: number) => void;
   logout: () => void;
 }
 
@@ -20,6 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentBalance, setCurrentBalance] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [buyer_seller_id, setBuyerSellerId] = useState(0);
 
   // Restore user session on load
   useEffect(() => {
@@ -30,6 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const decodedUser = JSON.parse(atob(token.split('.')[1])); // Parse JWT payload (base64-decoded)
         setUser(decodedUser.user); // Set user from token
         setCurrentBalance(decodedUser.credit ?? 0); // Set credit from token
+        setBuyerSellerId(decodedUser.buyer_seller_id ?? 0); // Set buyer_seller_id from token
         setIsAuthenticated(true);
       } catch (error) {
         console.error('Failed to decode token:', error);
@@ -39,14 +42,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false); // Loading completed
   }, []);
 
-  const login = (token: string, user: User, credit: number) => {
-
+  const login = (token: string, user: User, credit: number, buyer_seller_id: number) => {
     if(token){
       Cookies.set(CookieEnum.AuthToken, token, { 
         expires: 7,
         path: '/' , 
         secure: process.env.NODE_ENV === 'production',
       }); // Set the cookie
+      setBuyerSellerId(buyer_seller_id ?? 0);
       setCurrentBalance(credit ?? 0);
       setUser(user);
       setIsAuthenticated(true);
@@ -55,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     Cookies.remove(CookieEnum.AuthToken); // Remove the cookie
+    setBuyerSellerId(0);
     setCurrentBalance(0);
     setUser(null);
     setIsAuthenticated(false);
@@ -65,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   return (
-    <AuthContext.Provider value={{ user, currentBalance ,isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, currentBalance ,isAuthenticated, buyer_seller_id ,login, logout }}>
       {children}
     </AuthContext.Provider>
   );
