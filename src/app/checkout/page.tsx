@@ -190,7 +190,7 @@ export default function CheckoutPage() {
               <Button
                 type="button"
                 onClick={applyDiscount}
-                className="w-1/4 py-3 text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-200 rounded-md"
+                className="w-1/4 py-3"
               >
                 Apply
               </Button>
@@ -222,7 +222,8 @@ export default function CheckoutPage() {
           {/* Proceed to Checkout Button */}
           <Button
             type="submit"
-            className="w-full py-3 mt-4 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 rounded-md"
+            className="w-full py-3 mt-4"
+            variant="outline"
           >
             Proceed to Checkout
           </Button>

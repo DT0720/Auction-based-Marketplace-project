@@ -156,7 +156,8 @@ export default function ShoppingCartPage() {
           {/* Checkout Button */}
           <Button
             onClick={handleProceedToCheckout}
-            className="w-full py-3 mt-8 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 rounded-md"
+            className="w-full py-3 mt-8"
+            variant= "outline"
           >
             Proceed to Checkout
           </Button>
