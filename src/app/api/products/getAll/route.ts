@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ProductRepository } from '@/infrastructure/repositories/ProductRepository';
 import { ImageStorageService } from '@/infrastructure/services/ImageStorageService';
+import { PhotoTypeEnum } from '@/domain/enums/PhotoTypeEnum';
 
 const productRepository = new ProductRepository();
 const imageStorageService = new ImageStorageService();
@@ -13,10 +14,11 @@ export async function GET(req: Request) {
     const updatedProducts = await Promise.all(
       productList.map(async (product) => {
         if (product.photo) {
-          product.photo = await imageStorageService.getFileUrl(product.photo);
-          if (!product.photo) {
-            product.photo = ImageStorageService.productPlaceholderImage;
-          }
+          console.log("Before: " + product.photo );
+          product.photo = await imageStorageService.getFileUrl(product.photo, PhotoTypeEnum.PRODUCT);
+          console.log("After: " + product.photo);
+        }else{
+          product.photo = ImageStorageService.productPlaceholderImage;
         }
         return product;
       })

@@ -42,6 +42,7 @@ model buyer {
   bid     bid[]
   user    user     @relation(fields: [user_id], references: [user_id], onUpdate: Restrict, map: "buyer_user_id_foreign")
   orders  orders[]
+  review  review[]
 
   @@index([user_id], map: "buyer_user_id_foreign")
 }
@@ -101,8 +102,10 @@ model product {
   price_per_unit   Decimal            @db.Decimal(8, 2)
   photo            String?            @db.VarChar(255)
   category         String?            @db.VarChar(100)
+  description      String?            @db.VarChar(255)
   auction          auction[]
   order_details    order_details[]
+  review           review[]
   seller_inventory seller_inventory[]
 }
 
@@ -118,11 +121,13 @@ model seller {
 }
 
 model seller_inventory {
-  id         Int     @id @default(autoincrement()) @db.UnsignedInt
-  seller_id  Int     @db.UnsignedInt
-  product_id Int     @db.UnsignedInt
-  product    product @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "seller_inventory_product_id_foreign")
-  seller     seller  @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "seller_inventory_seller_id_foreign")
+  id                Int     @id @default(autoincrement()) @db.UnsignedInt
+  seller_id         Int     @db.UnsignedInt
+  product_id        Int     @db.UnsignedInt
+  quantity          Int     @db.UnsignedInt
+  quantity_for_sale Int     @db.UnsignedInt
+  product           product @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "seller_inventory_product_id_foreign")
+  seller            seller  @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "seller_inventory_seller_id_foreign")
 
   @@index([product_id], map: "seller_inventory_product_id_foreign")
   @@index([seller_id], map: "seller_inventory_seller_id_foreign")
@@ -155,4 +160,17 @@ model wallet {
   email           String?   @db.VarChar(255)
   password        String?   @db.VarChar(255)
   current_balance Decimal   @default(0.00) @db.Decimal(8, 2)
+}
+
+model review {
+  review_id      Int     @id @default(autoincrement()) @db.UnsignedInt
+  review_content String  @db.VarChar(255)
+  user_id        Int     @db.UnsignedInt
+  product_id     Int     @db.UnsignedInt
+  rating         Decimal @db.Decimal(8, 2)
+  buyer          buyer   @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "review_buyer_id_foreign")
+  product        product @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "review_product_id_foreign")
+
+  @@index([user_id], map: "review_buyer_id_foreign")
+  @@index([product_id], map: "review_product_id_foreign")
 }

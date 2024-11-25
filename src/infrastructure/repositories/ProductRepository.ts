@@ -6,11 +6,68 @@ import { prisma } from "../database/prisma";
 import { ProductTypeEnum } from "@/domain/enums/ProductTypeEnum";
 
 export class ProductRepository implements IProductRepository{
-    create(product: Product): Promise<Product> {
-        throw new Error("Method not implemented.");
+
+    async create(product: Product): Promise<Product | null> {
+        try {
+            const newProduct = await prisma.product.create({
+                data: product.toJson(),
+            });
+            return Product.fromJson(newProduct);
+        } catch (e) {
+            console.error("Error creating product:", e);
+            return null;
+        }
+        
     }
-    update(product: Product): Promise<Product> {
-        throw new Error("Method not implemented.");
+
+    async createBySellerId(product: Product, sellerId: string): Promise<Product | null> {
+        try {
+            const newProduct = await prisma.product.create({
+                data: product.toJson(),
+            });
+            return Product.fromJson(newProduct);
+        } catch (e) {
+            console.error("Error creating product:", e);
+            return null;
+        }
+    } 
+
+    async update(_product: Product): Promise<boolean> {
+        try {
+            // Filter out undefined, null, and excluded keys
+            const dataToUpdate = Object.fromEntries(
+                Object.entries(_product).filter(([key, value]) => 
+                    value !== undefined && value !== null && key !== 'id' && value !== ''
+                )
+            );
+
+            console.log(`Data to update: ${JSON.stringify(dataToUpdate)}`);
+            // Determine where clause
+            const whereClause = _product.id ? { 
+                id: _product.id 
+            } : null;
+    
+            // Validate inputs
+            if (!whereClause) {
+                console.error("Error: Missing product id for update.");
+                return false;
+            }
+    
+            if (Object.keys(dataToUpdate).length === 0) {
+                console.error("Error: No fields to update.");
+                return false;
+            }
+    
+            await prisma.product.update({
+                where: whereClause,
+                data: dataToUpdate,
+            });
+    
+            return true;  // Indicate success
+        } catch (e) {
+            console.error("Error updating product:", e);
+            return false;  // Indicate failure
+        }
     }
     delete(id: string): Promise<boolean> {
         throw new Error("Method not implemented.");
