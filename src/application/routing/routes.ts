@@ -10,6 +10,7 @@ export const ROUTES = {
     PROFILE: "/profile",
     BUYER_DASHBOARD: "/buyer_dashboard",
     SELLER_DASHBOARD: "/seller_dashboard",
+    DISCOUNT: "/discount",
     FORGOT_PASSWORD: "/forgot-password",
     ADD_PRODUCT: "/product/addItem",
   } as const;

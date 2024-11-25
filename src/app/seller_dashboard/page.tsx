@@ -12,14 +12,16 @@ import NoProductsAvailable from "@/components/ui/custom/NoProductsAvailable";
 import { ROUTES } from "@/application/routing/routes";
 import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
 
-// Main BuyerDashboard component
-export default function SellerDashboard() {
+// Main sellerDashboard component
+export default function sellerDashboard()
+ {
     const [products, setProducts] = useState<Product[]>([]);
     const { showLoader, hideLoader } = useLoader();
     const router = useRouter();
     // Fetch products from API
     useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchProducts = async () => 
+            {
             try {
                 showLoader();
                 const fetchedProducts = await getAllProducts();
