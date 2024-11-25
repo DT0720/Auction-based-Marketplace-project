@@ -121,11 +121,13 @@ model seller {
 }
 
 model seller_inventory {
-  id         Int     @id @default(autoincrement()) @db.UnsignedInt
-  seller_id  Int     @db.UnsignedInt
-  product_id Int     @db.UnsignedInt
-  product    product @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "seller_inventory_product_id_foreign")
-  seller     seller  @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "seller_inventory_seller_id_foreign")
+  id                Int     @id @default(autoincrement()) @db.UnsignedInt
+  seller_id         Int     @db.UnsignedInt
+  product_id        Int     @db.UnsignedInt
+  quantity          Int     @db.UnsignedInt
+  quantity_for_sale Int     @db.UnsignedInt
+  product           product @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "seller_inventory_product_id_foreign")
+  seller            seller  @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "seller_inventory_seller_id_foreign")
 
   @@index([product_id], map: "seller_inventory_product_id_foreign")
   @@index([seller_id], map: "seller_inventory_seller_id_foreign")

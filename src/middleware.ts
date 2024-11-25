@@ -28,8 +28,12 @@ export async function middleware(req: NextRequest) {
       // User is not authenticated and accessing a public path, so allow
       return NextResponse.next();
     }
+
+    const isProtectedPath = protectedPaths.some((protectedRoute) => {
+      return new RegExp(`^${protectedRoute.replace(/\[.*?\]/g, '[^/]+')}$`).test(requestedPath);
+    });
   
-    if (!token && protectedPaths.includes(requestedPath)) {
+    if (!token && isProtectedPath) {
       console.log(allPaths);
         return NextResponse.redirect(new URL('/login', req.url));
     }
@@ -39,7 +43,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/login', '/signup', '/forgot-password', '/buyer_dashboard', '/seller_dashboard'], 
+    matcher: ['/login', '/signup', '/forgot-password', '/buyer_dashboard', '/seller_dashboard', '/product/:path*'], 
 };
 
 

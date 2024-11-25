@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import getAllProducts from "@/application/usecases/buyerDashboard/products/getAllProducts";
 import { Product } from "@/domain/entities/Product";
 import { Card } from "@/components/ui/card";
 import { useLoader } from "@/hooks/use-loader";
@@ -10,6 +9,8 @@ import { useRouter } from "next/navigation";
 import NoProductsAvailable from "@/components/ui/custom/NoProductsAvailable";
 import NoOngoingAuctions from "@/components/ui/custom/NoOngoingAuctions";
 import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
+import { formatCurrency } from "@/lib/stringUtils";
+import getProductsOnSale from "@/application/usecases/sellerDashboard/products/getProductsOnSale";
 
 // Main BuyerDashboard component
 export default function BuyerDashboard() {
@@ -23,7 +24,7 @@ export default function BuyerDashboard() {
         const fetchProducts = async () => {
             try {
                 showLoader();
-                const fetchedProducts = await getAllProducts();
+                const fetchedProducts = await getProductsOnSale();
                 setProducts(fetchedProducts);
 
                 // Create dummy ongoing auction products using the Product constructor parameters
@@ -67,7 +68,7 @@ export default function BuyerDashboard() {
                                         <p className="text-sm text-gray-500">Category: {product.category}</p>
                                         {/* <p className="text-sm text-gray-500">Rating: {product.rating ? product.rating : 'N/A'} / 5</p>
                                         <p className="text-sm text-gray-500">Reviews: {product.reviewsCount || 0}</p> */}
-                                        <p className="font-bold mt-2">Price: ${product.pricePerUnit}</p>
+                                        <p className="font-bold mt-2">Price: {formatCurrency(product.pricePerUnit)}</p>
                                     </div>
                                     <div className="flex justify-end mt-auto">
                                         <Button onClick={() => console.log(`Adding ${product.productName} to cart`)} className="w-full rounded p-2" variant="outline">
@@ -97,7 +98,7 @@ export default function BuyerDashboard() {
                                 </div>
                                 <div className="mb-4">
                                     <h3 className="font-semibold text-lg">{auction.productName}</h3>
-                                    <p className="font-bold mt-2">Starting Bid: ${auction.pricePerUnit}</p>
+                                    <p className="font-bold mt-2">Starting Bid: formatCurrency(auction.pricePerUnit)</p>
                                 </div>
                                 <div className="flex justify-end mt-auto">
                                     <Button onClick={() => console.log(`Bidding on ${auction.productName}`)} className="w-full rounded p-2" variant="outline">

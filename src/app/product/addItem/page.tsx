@@ -59,17 +59,17 @@ export default function AddProductForm() {
         description: productData.description,
       };
 
+      console.log(body);
+
       showLoader();
 
-      const product = await addProduct(body, image);
+      const product = await addProduct(body, image, buyer_seller_id);
 
       if (!product) {
         throw new Error("Failed to add product.");
       }
 
-      const inventoryData = await addProductToSellerInventory(product.id, buyer_seller_id);
-
-      if (inventoryData) {
+      if (product) {
         successMessage(toast, "Redirecting to dashboard...","Product Added Successfully!");
         showLoader();
         setTimeout(() => {
