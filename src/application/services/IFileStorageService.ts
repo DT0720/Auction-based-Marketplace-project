@@ -19,7 +19,7 @@ export interface IFileStorageService {
    * @param filePath - The path of the file.
    * @returns A promise that resolves with the public or private URL of the file.
    */
-  getFileUrl(filePath: string): Promise<string>;
+  getFileUrl(filePath: string): Promise<string | null>;
 
   /**
    * Checks if a file exists in the storage service.
