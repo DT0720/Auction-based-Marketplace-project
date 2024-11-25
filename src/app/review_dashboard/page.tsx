@@ -1,84 +1,42 @@
-import {
-    Avatar, 
-    AvatarImage, 
-    AvatarFallback,
-} from "@/components/ui/avatar";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-  } from "@/components/ui/pagination"
-  import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-  } from "@/components/ui/card"
-  
-  
-  const HomePage: React.FC = () => {
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', height: '100vh' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <h2>Welcome to Sundarban Marketplace</h2>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Card Title</CardTitle>
-                        <CardDescription>Card Description</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Avatar>
-                            <AvatarImage src="https://via.placeholder.com/150" alt="User Avatar" />
-                            <AvatarFallback>U</AvatarFallback>
-                        </Avatar>
-                        <p>Card Content</p>
-                    </CardContent>
-                    <CardFooter>
-                        <p>Card Footer</p>
-                    </CardFooter>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Card Title</CardTitle>
-                        <CardDescription>Card Description</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Avatar>
-                            <AvatarImage src="https://via.placeholder.com/150" alt="User Avatar" />
-                            <AvatarFallback>U</AvatarFallback>
-                        </Avatar>
-                        <p>Card Content</p>
-                    </CardContent>
-                    <CardFooter>
-                        <p>Card Footer</p>
-                    </CardFooter>
-                </Card>
-            </div>
-            <Pagination>
-                <PaginationContent>
-                    <PaginationItem>
-                        <PaginationPrevious />
-                    </PaginationItem>
-                    <PaginationItem>
-                        <PaginationLink>1</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                        <PaginationEllipsis />
-                    </PaginationItem>
-                    <PaginationItem>
-                        <PaginationNext />
-                    </PaginationItem>
-                </PaginationContent>
-            </Pagination>
-        </div>
-    );
-};
+// src/app/review_dashboard/page.tsx
 
+'use client';
+import React, { useEffect, useState } from 'react';
+import { Review } from '@/domain/entities/Review';
+import getReviewData from '@/application/usecases/reviewDashboard/getReviewData';
+
+const HomePage: React.FC = () => {
+  const [review, setReview] = useState<Review | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const reviewId = 1; // Replace with the actual review ID you want to fetch
+
+  useEffect(() => {
+    async function fetchReview() {
+      setLoading(true);
+      const fetchedReview = await getReviewData(reviewId);
+      setReview(fetchedReview);
+      setLoading(false);
+    }
+
+    fetchReview();
+  }, [reviewId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!review) {
+    return <div>No review found.</div>;
+  }
+
+  return (
+    <div>
+      <h3>Review by User {review.user_id}</h3>
+      <p>{review.review_content}</p>
+      <p>Rating: {review.rating}</p>
+      {/* Render other review details as needed */}
+    </div>
+  );
+};
 
 export default HomePage;
