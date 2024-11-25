@@ -10,7 +10,7 @@ export class ImageStorageService implements IFileStorageService{
         this.bucketName = bucketName ? bucketName : "uploads";
     }
 
-    async uploadFile(file?: File, path?: string): Promise<string> {
+    async uploadFile(file?: File, path?: string, folderPath?: string): Promise<string> {
 
         if (!file) {
             throw new Error('No file provided');
@@ -19,6 +19,11 @@ export class ImageStorageService implements IFileStorageService{
         if (!path) {
             throw new Error('No path provided');
         }
+
+        if(folderPath){
+          path = folderPath + "/" + path;
+        }
+    
 
         const { data, error } = await supabase.storage
         .from(this.bucketName)
@@ -31,7 +36,12 @@ export class ImageStorageService implements IFileStorageService{
       return data.path;
     }
 
-    async deleteFile(filePath: string): Promise<boolean> {
+    async deleteFile(filePath: string,folderPath?: string): Promise<boolean> {
+
+        if(folderPath){
+          filePath = folderPath + "/" + filePath;
+        }
+  
         const { error } = await supabase.storage
         .from(this.bucketName)
         .remove([filePath]);
@@ -43,12 +53,19 @@ export class ImageStorageService implements IFileStorageService{
       return true;
     }
 
-    async getFileUrl(filePath: string): Promise<string | null> {
+    async getFileUrl(filePath: string, folderPath?: string): Promise<string | null> {
+
+        if(folderPath){
+          filePath = folderPath + "/" + filePath;
+        }
+  
         const { data } = supabase.storage
         .from(this.bucketName)
         .getPublicUrl(filePath);
     
         const imageExists = await this.fileExists(filePath); 
+
+        console.log("Image exists: " + imageExists);
 
         if (!data || !data.publicUrl || !imageExists) {
             return null;
@@ -57,7 +74,13 @@ export class ImageStorageService implements IFileStorageService{
       return data.publicUrl;
     }
 
-    async fileExists(filePath: string): Promise<boolean> {
+    async fileExists(filePath: string, folderPath?: string): Promise<boolean> {
+      if(folderPath){
+        filePath = folderPath + "/" + filePath;
+      }
+
+      console.log("Checking file exists: " + filePath);
+
         const { data, error } = await supabase.storage
         .from(this.bucketName)
         .list('', { search: filePath });

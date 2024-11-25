@@ -19,6 +19,19 @@ export class ProductRepository implements IProductRepository{
         }
         
     }
+
+    async createBySellerId(product: Product, sellerId: string): Promise<Product | null> {
+        try {
+            const newProduct = await prisma.product.create({
+                data: product.toJson(),
+            });
+            return Product.fromJson(newProduct);
+        } catch (e) {
+            console.error("Error creating product:", e);
+            return null;
+        }
+    } 
+
     async update(_product: Product): Promise<boolean> {
         try {
             // Filter out undefined, null, and excluded keys

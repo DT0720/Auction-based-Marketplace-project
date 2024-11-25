@@ -19,11 +19,17 @@ export class BuyerRepository implements IBuyerRepository {
     async delete(id: string): Promise<boolean> {
         return true;
     }
-    async findById(id: string): Promise<Buyer> {
-        return new Buyer(1, 1);
-    }
-
-    static fromJson(data: any): Buyer {
-        return new Buyer(data.id, data.user_id);
+    async findById(id: number): Promise<Buyer | null> {
+        try{
+            const buyer = await prisma.buyer.findUnique({
+                where: {
+                    id: id
+                }
+            });
+            return Buyer.fromJson(buyer);
+        }catch(e){
+            console.log(e);
+            return null;
+        }
     }
 }

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import getAllProducts from "@/application/usecases/buyerDashboard/products/getAllProducts";
 import { Product } from "@/domain/entities/Product";
 import { Card } from "@/components/ui/card";
 import { useLoader } from "@/hooks/use-loader";
@@ -11,12 +10,16 @@ import { Plus } from "lucide-react";
 import NoProductsAvailable from "@/components/ui/custom/NoProductsAvailable";
 import { ROUTES } from "@/application/routing/routes";
 import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
+import useAuth from "@/hooks/use-auth";
+import { getProductBySellerId } from "@/application/usecases/sellerDashboard/products/getProductById";
+import { formatCurrency } from "@/lib/stringUtils";
 
 // Main sellerDashboard component
 export default function sellerDashboard()
  {
     const [products, setProducts] = useState<Product[]>([]);
     const { showLoader, hideLoader } = useLoader();
+    const { buyer_seller_id } = useAuth();
     const router = useRouter();
     // Fetch products from API
     useEffect(() => {
@@ -24,7 +27,7 @@ export default function sellerDashboard()
             {
             try {
                 showLoader();
-                const fetchedProducts = await getAllProducts();
+                const fetchedProducts = await getProductBySellerId(buyer_seller_id);
                 setProducts(fetchedProducts);
             } catch (error: any) {
                 console.error('Error fetching products:', error.message);
@@ -53,13 +56,19 @@ export default function sellerDashboard()
                         <div className="mb-4">
                         <h3 className="font-semibold text-lg">{product.productName}</h3>
                         <p className="text-sm text-gray-500">Category: {product.category}</p>
-                        <p className="font-bold mt-2">Price: ${product.pricePerUnit}</p>
+                        <p className="font-bold mt-2">Price: {formatCurrency(product.pricePerUnit)}</p>
                         </div>
                         <div className="flex justify-between mt-auto">
-                        <Button onClick={() => console.log(`Putting ${product.productName} up for auction`)} className="w-1/2 rounded p-2 mr-2">
+                        <Button onClick={(e) => {
+                            e.stopPropagation();
+                            console.log(`Putting ${product.productName} up for auction`)
+                        }} className="w-1/2 rounded p-2 mr-2">
                             Put Up for Auction
                         </Button>
-                        <Button onClick={() => console.log(`Putting ${product.productName} up for sale`)} className="w-1/2 rounded p-2" variant="outline">
+                        <Button onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(ROUTES.ADD_ITEM_ON_SALE(product.id))
+                        }} className="w-1/2 rounded p-2" variant="outline">
                             Put Up for Sale
                         </Button>
                         </div>

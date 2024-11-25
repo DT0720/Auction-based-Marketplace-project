@@ -3,6 +3,7 @@ import { Product } from "../../domain/entities/Product";
 
 export interface IProductRepository {
     create(product: Product): Promise<Product | null>;
+    createBySellerId(product: Product, sellerId: string): Promise<Product | null>;
     update(product: Product): Promise<boolean>;
     delete(id: string): Promise<boolean>;
     findById(id: number): Promise<Product | null>;
