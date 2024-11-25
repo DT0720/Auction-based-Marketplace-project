@@ -17,19 +17,19 @@ class PromotionManager
     products: { price: number; quantity: number }[]
   ): 
     number {
-    let isTotalBill = 0;
+    let totalBill = 0;
 
     // Calculate total bill
     products.forEach((product) => 
     {
-      isTotalBill += product.price * product.quantity;
+      totalBill += product.price * product.quantity;
     });
 
     // Apply discount if minimum purchase amount is exceeded
-    if (isTotalBill >= this.minimumPurchaseForDiscount)
+    if (totalBill >= this.minimumPurchaseForDiscount)
      {
-        const discount = (isTotalBill * this.discountPercentage) / 100;
-        isTotalBill -= discount;
+        const discount = (totalBill * this.discountPercentage) / 100;
+        totalBill -= discount;
         this.sendNotification(`A discount of ${this.discountPercentage}% has been applied to your total bill.`);
       }
 
@@ -38,7 +38,7 @@ class PromotionManager
        this.sendNotification(`You are not eligible for discount.`);
     }
 
-    return isTotalBill;
+    return totalBill;
   }
 
   // Method to apply a coupon code
@@ -55,7 +55,7 @@ class PromotionManager
     if (couponCode === "DURJOY")
        {
             total -= 20; // Flat $20 discount
-            this.sendNotification("Coupon code SAVE20 applied. $20 discount added.");
+            this.sendNotification("Coupon code DURJOY applied. $20 discount added.");
        } 
     else if (couponCode === "FREESHIP")
         {
