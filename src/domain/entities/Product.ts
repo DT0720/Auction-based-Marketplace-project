@@ -3,21 +3,14 @@ import { ProductTypeEnum } from "../enums/ProductTypeEnum";
 export class Product {
     constructor(
       public id: number,
-      public productName: string,
-      public stock: number,
-      public pricePerUnit: number,
-      public category: string,
+      public productName: string | null,
+      public stock: number | null,
+      public pricePerUnit: number | null,
+      public category: string | null,
+      public description: string | null = null,
       public photo: string | null
     ) {}
-  
-    // Domain methods related to Product
-    reduceStock(quantity: number) {
-      if (this.stock < quantity) {
-        throw new Error("Insufficient stock available");
-      }
-      this.stock -= quantity;
-    }
-  
+    
     updatePhoto(photoData: string) {
       this.photo = photoData;
     }
@@ -27,12 +20,24 @@ export class Product {
         data.id,
         data.product_name,
         data.stock,
-        data.price_per_unit !== undefined && data.price_per_unit !== null
-        ? parseFloat(data.price_per_unit.toString())
-        : 0,
-        data.category ?? ProductTypeEnum.NO_CATEGORY,
+        data.price_per_unit,
+        data.category,
+        data.description,
         data.photo
       );
     }
+
+    toJson(): any {
+      return {
+        id: this.id,
+        product_name: this.productName,
+        stock: this.stock,
+        price_per_unit: this.pricePerUnit,
+        category: this.category,
+        description: this.description,
+        photo: this.photo,
+      }
+    };
+    
 }
   

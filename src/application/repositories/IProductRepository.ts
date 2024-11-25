@@ -2,8 +2,8 @@ import { ProductTypeEnum } from "@/domain/enums/ProductTypeEnum";
 import { Product } from "../../domain/entities/Product";
 
 export interface IProductRepository {
-    create(product: Product): Promise<Product>;
-    update(product: Product): Promise<Product>;
+    create(product: Product): Promise<Product | null>;
+    update(product: Product): Promise<boolean>;
     delete(id: string): Promise<boolean>;
     findById(id: number): Promise<Product | null>;
     findAllProducts(): Promise<Product[]>;

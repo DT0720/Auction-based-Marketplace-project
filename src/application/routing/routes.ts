@@ -11,6 +11,7 @@ export const ROUTES = {
     BUYER_DASHBOARD: "/buyer_dashboard",
     SELLER_DASHBOARD: "/seller_dashboard",
     FORGOT_PASSWORD: "/forgot-password",
+    ADD_PRODUCT: "/product/addItem",
   } as const;
   
 export type RouteKey = keyof typeof ROUTES;
