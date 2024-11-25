@@ -42,6 +42,7 @@ model buyer {
   bid     bid[]
   user    user     @relation(fields: [user_id], references: [user_id], onUpdate: Restrict, map: "buyer_user_id_foreign")
   orders  orders[]
+  review  review[]
 
   @@index([user_id], map: "buyer_user_id_foreign")
 }
@@ -103,6 +104,7 @@ model product {
   category         String?            @db.VarChar(100)
   auction          auction[]
   order_details    order_details[]
+  review           review[]
   seller_inventory seller_inventory[]
 }
 
@@ -155,4 +157,17 @@ model wallet {
   email           String?   @db.VarChar(255)
   password        String?   @db.VarChar(255)
   current_balance Decimal   @default(0.00) @db.Decimal(8, 2)
+}
+
+model review {
+  review_id      Int     @id @default(autoincrement()) @db.UnsignedInt
+  review_content String  @db.VarChar(255)
+  user_id        Int     @db.UnsignedInt
+  product_id     Int     @db.UnsignedInt
+  rating         Decimal @db.Decimal(8, 2)
+  buyer          buyer   @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "review_buyer_id_foreign")
+  product        product @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "review_product_id_foreign")
+
+  @@index([user_id], map: "review_buyer_id_foreign")
+  @@index([product_id], map: "review_product_id_foreign")
 }
