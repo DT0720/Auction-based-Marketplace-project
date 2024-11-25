@@ -1,44 +1,64 @@
-import React from "react";
-import { Card } from "../card"; // Reuse Card component
-import { Button } from "../button"; // Reuse Button component
+import * as React from "react";
+import { Button } from "@/components/ui/button"; // Corrected import statement
+import { useState } from "react";
 
-type CartItemProps = {
+// Define the type for CartItem props
+interface CartItemProps {
   id: string;
   name: string;
-  image: string;
+  description: string;
   price: number;
   quantity: number;
+  image: string;
   onRemove: (id: string) => void;
   onUpdateQuantity: (id: string, quantity: number) => void;
-  onBuyNow: (id: string) => void;
-};
+}
 
-const CartItem: React.FC<CartItemProps> = ({ id, name, image, price, quantity, onRemove, onUpdateQuantity, onBuyNow }) => {
+const CartItem: React.FC<CartItemProps> = ({
+  id,
+  name,
+  description,
+  price,
+  quantity,
+  image,
+  onRemove,
+  onUpdateQuantity,
+}) => {
+  const [itemQuantity, setItemQuantity] = useState(quantity);
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuantity = parseInt(e.target.value);
+    setItemQuantity(newQuantity);
+    onUpdateQuantity(id, newQuantity);
+  };
+
+  const handleRemove = () => {
+    onRemove(id);
+  };
+
   return (
-    <Card className="flex items-center gap-4 p-4">
-      <img src={image} alt={name} className="w-20 h-20 object-cover rounded" />
-      <div className="flex-1">
-        <h3 className="text-lg font-semibold">{name}</h3>
-        <p className="text-sm text-gray-500">Price: ${price.toFixed(2)}</p>
-        <div className="flex items-center gap-2 mt-2">
-          <Button variant="outline" onClick={() => onUpdateQuantity(id, Math.max(1, quantity - 1))}>
-            -
-          </Button>
-          <span>{quantity}</span>
-          <Button variant="outline" onClick={() => onUpdateQuantity(id, quantity + 1)}>
-            +
-          </Button>
+    <div className="cart-item flex justify-between items-center p-4 border-b">
+      <div className="flex items-center space-x-4">
+        <img src={image} alt={name} className="h-16 w-16 object-cover" />
+        <div>
+          <h3 className="font-medium">{name}</h3>
+          <p>{description}</p>
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <Button variant="destructive" onClick={() => onRemove(id)}>
+      <div className="flex flex-col items-end">
+        <input
+          type="number"
+          value={itemQuantity}
+          onChange={handleQuantityChange}
+          min="1"
+          className="border rounded p-1 w-16 text-center"
+        />
+        <p className="text-lg font-semibold">${(price * itemQuantity).toFixed(2)}</p>
+        <Button variant="destructive" onClick={handleRemove}>
           Remove
         </Button>
-        <Button variant="primary" onClick={() => onBuyNow(id)}>
-          Buy It Now
-        </Button>
       </div>
-    </Card>
+    </div>
   );
 };
 
