@@ -7,7 +7,7 @@ export const ROUTES = {
     HOME: "/",
     SIGNUP: "/signup",
     LOGIN: "/login",
-    PROFILE: "/profile",
+    USER_PROFILE: "/user_profile",
     BUYER_DASHBOARD: "/buyer_dashboard",
     SELLER_DASHBOARD: "/seller_dashboard",
     FORGOT_PASSWORD: "/forgot-password",

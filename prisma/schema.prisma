@@ -144,6 +144,7 @@ model user {
   type                                          String          @db.Char(255)
   phone                                         String          @db.VarChar(255)
   photo                                         String?         @db.VarChar(255)
+  address                                       address[]
   buyer                                         buyer[]
   notifications_notifications_reciever_idTouser notifications[] @relation("notifications_reciever_idTouser")
   notifications_notifications_sender_idTouser   notifications[] @relation("notifications_sender_idTouser")
@@ -173,4 +174,19 @@ model review {
 
   @@index([user_id], map: "review_buyer_id_foreign")
   @@index([product_id], map: "review_product_id_foreign")
+}
+
+model address {
+  id         Int     @id @default(autoincrement()) @db.UnsignedInt
+  user_id    Int     @db.UnsignedInt
+  flat_no    String? @db.VarChar(255)
+  house_no   String  @db.VarChar(255)
+  road_no    String  @db.VarChar(255)
+  sector     Int?
+  area       String  @db.VarChar(255)
+  city       String  @db.VarChar(255)
+  house_name String? @db.VarChar(255)
+  user       user    @relation(fields: [user_id], references: [user_id], onUpdate: Restrict, map: "address_user_id_foreign")
+
+  @@index([user_id], map: "address_user_id_foreign")
 }
