@@ -5,41 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2 } from "lucide-react"; // Icon for removing items
 import { useRouter } from "next/navigation";
-
-// Mock data for cart items
-const mockCartItems = [
-  {
-    id: 1,
-    name: "Product 1",
-    price: 20.99,
-    quantity: 2,
-    imageUrl: "https://via.placeholder.com/150",
-  },
-  {
-    id: 2,
-    name: "Product 2",
-    price: 35.99,
-    quantity: 1,
-    imageUrl: "https://via.placeholder.com/150",
-  },
-  {
-    id: 3,
-    name: "Product 3",
-    price: 50.0,
-    quantity: 3,
-    imageUrl: "https://via.placeholder.com/150",
-  },
-];
+import { formatCurrency } from "@/lib/stringUtils";
+import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
+import { useCart } from "@/hooks/use-cart";
 
 export default function ShoppingCartPage() {
-  const [cartItems, setCartItems] = useState(mockCartItems);
+
+  const { updateCart, removeFromCart, cartItems } = useCart();
+
+  const [userCartItems, setUserCartItems] = useState(cartItems);
   const taxRate = 0.1; // 10% tax rate
   const router = useRouter(); // Hook for navigation
 
   // Function to calculate the subtotal
   const calculateSubtotal = () => {
-    return cartItems.reduce(
-      (acc, item) => acc + item.price * item.quantity,
+    return userCartItems.reduce(
+      (acc, item) => acc + item.pricePerUnit * item.quantity,
       0
     );
   };
@@ -57,15 +38,19 @@ export default function ShoppingCartPage() {
   };
 
   const handleQuantityChange = (id: number, newQuantity: number) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
+    setUserCartItems((prevItems) =>
+      prevItems.map((item) => {
+          const newItem = item.id === id ? { ...item, quantity: newQuantity } : item
+          return newItem;
+        }
       )
     );
+    updateCart(id, newQuantity);
   };
 
   const handleRemoveItem = (id: number) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    setUserCartItems((prevItems) => prevItems.filter((item) => item.id !== id ));
+    removeFromCart(id);
   };
 
   const subtotal = calculateSubtotal();
@@ -95,19 +80,19 @@ export default function ShoppingCartPage() {
                 </tr>
               </thead>
               <tbody>
-                {cartItems.map((item) => (
+                {userCartItems.map((item) => (
                   <tr key={item.id} className="border-b">
                     <td className="px-4 py-2">
                       <div className="flex items-center space-x-4">
                         <img
-                          src={item.imageUrl}
+                          src={item.photo ? item.photo : ImageStorageService.productPlaceholderImage}
                           alt={item.name}
                           className="w-16 h-16 object-cover rounded-md"
                         />
-                        <span className="font-semibold">{item.name}</span>
+                        <span className="font-semibold">{item.productName}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-2">${item.price.toFixed(2)}</td>
+                    <td className="px-4 py-2">{formatCurrency(item.pricePerUnit)}</td>
                     <td className="px-4 py-2">
                       <Input
                         type="number"
@@ -120,7 +105,7 @@ export default function ShoppingCartPage() {
                       />
                     </td>
                     <td className="px-4 py-2">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {formatCurrency((item.pricePerUnit * item.quantity))}
                     </td>
                     <td className="px-4 py-2 text-center">
                       <Button
@@ -141,15 +126,15 @@ export default function ShoppingCartPage() {
           <div className="mt-8">
             <div className="flex justify-between items-center text-lg font-semibold">
               <p>Subtotal</p>
-              <p>${subtotal.toFixed(2)}</p>
+              <p>{formatCurrency(subtotal)}</p>
             </div>
             <div className="flex justify-between items-center text-lg font-semibold mt-2">
               <p>Tax (10%)</p>
-              <p>${tax.toFixed(2)}</p>
+              <p>{formatCurrency(tax)}</p>
             </div>
             <div className="flex justify-between items-center text-lg font-semibold mt-2">
               <p>Total</p>
-              <p>${total.toFixed(2)}</p>
+              <p>{formatCurrency(total)}</p>
             </div>
           </div>
 

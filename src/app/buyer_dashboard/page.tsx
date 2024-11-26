@@ -11,12 +11,19 @@ import NoOngoingAuctions from "@/components/ui/custom/NoOngoingAuctions";
 import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
 import { formatCurrency } from "@/lib/stringUtils";
 import getProductsOnSale from "@/application/usecases/sellerDashboard/products/getProductsOnSale";
+import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
+import { useToast } from "@/hooks/use-toast";
+import useAuth from "@/hooks/use-auth";
+import { useCart } from "@/hooks/use-cart";
 
 // Main BuyerDashboard component
 export default function BuyerDashboard() {
     const [products, setProducts] = useState<Product[]>([]);
     const [ongoingAuctions, setOngoingAuctions] = useState<Product[]>([]); // State for ongoing auctions
     const { showLoader, hideLoader } = useLoader();
+    const { addProductToCart } = useCart(); 
+    const { user } = useAuth();
+    const { toast } = useToast();   
     const router = useRouter();
 
     // Fetch products from API
@@ -27,13 +34,6 @@ export default function BuyerDashboard() {
                 const fetchedProducts = await getProductsOnSale();
                 setProducts(fetchedProducts);
 
-                // Create dummy ongoing auction products using the Product constructor parameters
-                // const dummyOngoingAuctions: Product[] = [
-                //     new Product(201, "Antique Vase", 5, 150.00, "Antiques", null),
-                //     new Product(202, "Vintage Guitar", 2, 300.00, "Musical Instruments", null),
-                //     new Product(203, "Rare Comic Book", 10, 75.00, "Collectibles", null),
-                //     new Product(204, "Collectible Stamp Set", 8, 50.00, "Philately", null),
-                // ];
                 const dummyOngoingAuctions: Product[] = [
                     
                 ];
@@ -47,6 +47,18 @@ export default function BuyerDashboard() {
         };
         fetchProducts();
     }, []);
+
+    const handleAddToCart = (productId: number) => {
+        showLoader();
+        try {
+            addProductToCart(user?.user_id ?? 0, productId);
+            successMessage(toast, 'Product added to cart!');
+        }catch(error: any){
+            errorMessage(toast, error.message);
+        }finally{
+            hideLoader();
+        }
+    }
 
     return (
         <div className="min-h-screen bg-white">
@@ -71,7 +83,12 @@ export default function BuyerDashboard() {
                                         <p className="font-bold mt-2">Price: {formatCurrency(product.pricePerUnit)}</p>
                                     </div>
                                     <div className="flex justify-end mt-auto">
-                                        <Button onClick={() => console.log(`Adding ${product.productName} to cart`)} className="w-full rounded p-2" variant="outline">
+                                        <Button className="w-full rounded p-2" variant="outline" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleAddToCart(product.id)
+                                            } 
+                                        } >
                                             Add to Cart
                                         </Button>
                                     </div>

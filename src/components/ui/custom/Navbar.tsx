@@ -14,12 +14,14 @@ import {
     DropdownMenuItem,
   } from "@/components/ui/dropdown-menu";
 import SearchBar from "./SearchBar";
+import { useCart } from "@/hooks/use-cart";
 
 
 const Navbar = () => {
   const { user, isAuthenticated, logout, currentBalance } = useAuth(); // Hook for authentication state
   const router = useRouter(); // Next.js router
   const pathname = usePathname(); // To determine the active page
+  const { cartCount, clearCart } = useCart(); // Hook for cart state
 
   const isBuyer = user?.type.toLocaleLowerCase() === "b"; 
   const isSeller = user?.type.toLocaleLowerCase() === "s";
@@ -30,6 +32,7 @@ const Navbar = () => {
   }).format(currentBalance);
 
   const logoutHandler = () => {
+    clearCart();
     logout();
     router.push(ROUTES.LOGIN);
   };
@@ -74,8 +77,11 @@ const Navbar = () => {
             <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
               <Bell />
             </Button>
-            <Button variant="ghost" className="mr-4" onClick={() => console.log("View Cart")}>
+            <Button variant="ghost" className="mr-4" onClick={() => router.push(ROUTES.SHOPPING_CART)}>
               <ShoppingCart />
+              {cartCount > 0 && (
+                <span className="mb-1 bg-red-500 text-white rounded-full px-1 text-xs">{cartCount}</span>
+              )}
             </Button>
             <Button variant="ghost" className="mr-4">
               <CreditCard />
@@ -125,12 +131,9 @@ const Navbar = () => {
           </>
         ) : isSeller ? (
           <>
-            {/* Buyer View */}
+            {/* Seller View */}
             <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
               <Bell />
-            </Button>
-            <Button variant="ghost" className="mr-4" onClick={() => console.log("View Cart")}>
-              <ShoppingCart />
             </Button>
             <Button variant="ghost" className="mr-4">
               <CreditCard />
