@@ -2,9 +2,13 @@ import { NextResponse } from 'next/server';
 import { UserRepository } from '@/infrastructure/repositories/UserRepository';
 import { generateToken } from '@/lib/tokenUtils';
 import { WalletRepository } from '@/infrastructure/repositories/WalletRepository';
+import { SellerRepository } from '@/infrastructure/repositories/SellerRepository';
+import { BuyerRepository } from '@/infrastructure/repositories/BuyerRepository';
 
 const userRepository = new UserRepository();
 const walletRepository = new WalletRepository();
+const sellerRepository = new SellerRepository();
+const buyerRepository = new BuyerRepository();
 
 export async function POST(req: Request) {
   try {
@@ -20,11 +24,20 @@ export async function POST(req: Request) {
       return new Response('No User found', { status: 400 });
     }
     
+    let userIdByType;
+
+    if(user.type.toLocaleLowerCase() == 's'){
+      userIdByType = await sellerRepository.findById(user.user_id);
+    }else{
+      userIdByType = await buyerRepository.findById(user.user_id);
+    }
+
     const wallet = await walletRepository.getWallet(user.user_id);
 
     const token = generateToken({
       user: user.toJson(), 
-      credit: wallet ? wallet.current_balance : 0
+      credit: wallet ? wallet.current_balance : 0,
+      buyer_seller_id: userIdByType ? userIdByType.id : null
     });
 
     return NextResponse.json(
@@ -33,6 +46,7 @@ export async function POST(req: Request) {
         data: {
           user: user ? user : null,
           credit: wallet ? wallet.current_balance : null,
+          buyer_seller_id: userIdByType ? userIdByType.id : null,
           token: token
         } 
       },

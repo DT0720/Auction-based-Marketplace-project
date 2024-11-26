@@ -49,10 +49,13 @@ export default function LoginPage(){
         try {
           showLoader();
           const data = await useLogin(body);
+
+          console.log("Buyer Seller Id: " + data.buyer_seller_id);
+
           if(data != null){
             successMessage(toast, "Login successful!", "You have been logged in successfully.");
             setTimeout(() => {
-              login(data.token, data.user, data.credit);
+              login(data.token, data.user, data.credit, data.buyer_seller_id);
               window.location.href = data.user.type.toLocaleLowerCase() === "b" 
                   ? ROUTES.BUYER_DASHBOARD 
                   : ROUTES.SELLER_DASHBOARD;

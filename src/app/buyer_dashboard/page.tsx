@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import getAllProducts from "@/application/usecases/buyerDashboard/products/getAllProducts";
 import { Product } from "@/domain/entities/Product";
 import { Card } from "@/components/ui/card";
 import { useLoader } from "@/hooks/use-loader";
@@ -10,12 +9,21 @@ import { useRouter } from "next/navigation";
 import NoProductsAvailable from "@/components/ui/custom/NoProductsAvailable";
 import NoOngoingAuctions from "@/components/ui/custom/NoOngoingAuctions";
 import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
+import { formatCurrency } from "@/lib/stringUtils";
+import getProductsOnSale from "@/application/usecases/sellerDashboard/products/getProductsOnSale";
+import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
+import { useToast } from "@/hooks/use-toast";
+import useAuth from "@/hooks/use-auth";
+import { useCart } from "@/hooks/use-cart";
 
 // Main BuyerDashboard component
 export default function BuyerDashboard() {
     const [products, setProducts] = useState<Product[]>([]);
     const [ongoingAuctions, setOngoingAuctions] = useState<Product[]>([]); // State for ongoing auctions
     const { showLoader, hideLoader } = useLoader();
+    const { addProductToCart } = useCart(); 
+    const { user } = useAuth();
+    const { toast } = useToast();   
     const router = useRouter();
 
     // Fetch products from API
@@ -23,16 +31,9 @@ export default function BuyerDashboard() {
         const fetchProducts = async () => {
             try {
                 showLoader();
-                const fetchedProducts = await getAllProducts();
+                const fetchedProducts = await getProductsOnSale();
                 setProducts(fetchedProducts);
 
-                // Create dummy ongoing auction products using the Product constructor parameters
-                // const dummyOngoingAuctions: Product[] = [
-                //     new Product(201, "Antique Vase", 5, 150.00, "Antiques", null),
-                //     new Product(202, "Vintage Guitar", 2, 300.00, "Musical Instruments", null),
-                //     new Product(203, "Rare Comic Book", 10, 75.00, "Collectibles", null),
-                //     new Product(204, "Collectible Stamp Set", 8, 50.00, "Philately", null),
-                // ];
                 const dummyOngoingAuctions: Product[] = [
                     
                 ];
@@ -46,6 +47,18 @@ export default function BuyerDashboard() {
         };
         fetchProducts();
     }, []);
+
+    const handleAddToCart = (productId: number) => {
+        showLoader();
+        try {
+            addProductToCart(user?.user_id ?? 0, productId);
+            successMessage(toast, 'Product added to cart!');
+        }catch(error: any){
+            errorMessage(toast, error.message);
+        }finally{
+            hideLoader();
+        }
+    }
 
     return (
         <div className="min-h-screen bg-white">
@@ -67,10 +80,15 @@ export default function BuyerDashboard() {
                                         <p className="text-sm text-gray-500">Category: {product.category}</p>
                                         {/* <p className="text-sm text-gray-500">Rating: {product.rating ? product.rating : 'N/A'} / 5</p>
                                         <p className="text-sm text-gray-500">Reviews: {product.reviewsCount || 0}</p> */}
-                                        <p className="font-bold mt-2">Price: ${product.pricePerUnit}</p>
+                                        <p className="font-bold mt-2">Price: {formatCurrency(product.pricePerUnit)}</p>
                                     </div>
                                     <div className="flex justify-end mt-auto">
-                                        <Button onClick={() => console.log(`Adding ${product.productName} to cart`)} className="w-full rounded p-2" variant="outline">
+                                        <Button className="w-full rounded p-2" variant="outline" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleAddToCart(product.id)
+                                            } 
+                                        } >
                                             Add to Cart
                                         </Button>
                                     </div>
@@ -97,7 +115,7 @@ export default function BuyerDashboard() {
                                 </div>
                                 <div className="mb-4">
                                     <h3 className="font-semibold text-lg">{auction.productName}</h3>
-                                    <p className="font-bold mt-2">Starting Bid: ${auction.pricePerUnit}</p>
+                                    <p className="font-bold mt-2">Starting Bid: formatCurrency(auction.pricePerUnit)</p>
                                 </div>
                                 <div className="flex justify-end mt-auto">
                                     <Button onClick={() => console.log(`Bidding on ${auction.productName}`)} className="w-full rounded p-2" variant="outline">

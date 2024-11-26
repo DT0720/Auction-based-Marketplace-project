@@ -34,6 +34,8 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
             }
         }
 
+        console.log("Get By Id photo: " + product.photo);
+
         return NextResponse.json({ message: 'Product found successfully', data: product }, { status: 200 });
     } catch (error: any) {
         console.error('Error in GET request:', error);

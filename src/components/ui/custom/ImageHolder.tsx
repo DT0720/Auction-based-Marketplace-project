@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
 
 // Memoized ImageHolder Component
 const ImageHolder = React.memo(({ image, handleImageUpdate }: { image: File | null; handleImageUpdate: (e: React.ChangeEvent<HTMLInputElement>) => void }) => {
@@ -13,7 +14,7 @@ const ImageHolder = React.memo(({ image, handleImageUpdate }: { image: File | nu
             {imageUrl ? (
               <AvatarImage src={imageUrl} alt="User Avatar" />
             ) : (
-              <AvatarImage alt="User Avatar" />
+              <AvatarImage src={ImageStorageService.productPlaceholderImage} alt="User Avatar" />
             )}
             <AvatarFallback>U</AvatarFallback>
           </Avatar>
