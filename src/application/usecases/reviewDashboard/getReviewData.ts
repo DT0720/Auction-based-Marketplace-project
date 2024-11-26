@@ -3,14 +3,21 @@
 import { Review } from "@/domain/entities/Review";
 import NetworkUtils from "@/lib/networkUtils";
 
-const endpoint = "/api/reviews/";
+// Define the endpoint for fetching reviews by user ID
 
-async function getReviewData(reviewId: number): Promise<Review | null> {
-  const response = await NetworkUtils.getRequest<Review>(
-    endpoint + reviewId
-  );
+const endpoint = "/api/reviews/user/";
 
-  return response ?? null;
+/**
+ * Fetches review data for a given user ID.
+ * @param userId - The ID of the user whose reviews are to be fetched.
+ * @returns A promise that resolves to an array of Review objects.
+ */
+
+async function getReviewData(userId: number): Promise<Review[]> {
+  // Make a GET request to the endpoint with the user ID
+  const response = await NetworkUtils.getRequest<{ message: string; data: Review[] }>(endpoint + userId);
+   // Return the fetched review data or an empty array if no data is found
+  return response?.data ?? [];
 }
 
 export default getReviewData;
