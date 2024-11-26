@@ -91,7 +91,6 @@ export class SellerInventoryRepository implements ISellerInvertoryRepository {
                     }
                 },
             });
-    
             // Use Promise.all to await all async calls and filter out null results
             const products = await Promise.all(
                 result.map(async (seller_inventory) => {

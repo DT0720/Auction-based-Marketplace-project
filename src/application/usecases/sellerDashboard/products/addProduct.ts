@@ -74,7 +74,7 @@ const handleImageUpload = async (_id: number, image : File | null) => {
     if (image) {
       const fileName = image?.name ?? "default.jpg";
       const path = fileName;
-      const photoUrl = await fileStorageService.uploadFile(image ?? undefined, path, PhotoTypeEnum.PRODUCT);
+      const photoUrl = await fileStorageService.uploadFile(image ?? undefined, path);
 
       // Update the user profile with the image URL
       await NetworkUtils.postRequest('/api/products/update-product', {

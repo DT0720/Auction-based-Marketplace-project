@@ -23,7 +23,7 @@ describe('ImageStoreService', () => {
       phone: '123456789987654321',
     };
     // Act
-    const success = await imageStorageService.fileExists("product/Bumblebee.jpg");
+    const success = await imageStorageService.getFileUrl("Screenshot 2024-06-11 070954.png");
 
     console.log("Test is: " + success);
 
