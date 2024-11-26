@@ -1,4 +1,6 @@
 'use client';
+
+// Import necessary components and hooks
 import {
   Card,
   CardContent,
@@ -12,31 +14,38 @@ import { Review } from '@/domain/entities/Review';
 import getReviewData from '@/application/usecases/reviewDashboard/getReviewData';
 import useAuth from '@/hooks/use-auth';
 
+// Define the HomePage component
 const HomePage: React.FC = () => {
+   // State to store reviews and loading status
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const { user } = useAuth();
 
+  // Get the authenticated user using the useAuth hook
+  const { user } = useAuth();
+ // Fetch reviews when the component mounts or the user changes
   useEffect(() => {
     async function fetchReviews() {
       if (user) {
-        setLoading(true);
-        const fetchedReviews = await getReviewData(user.user_id);
-        setReviews(fetchedReviews);
-        setLoading(false);
+        setLoading(true); // Set loading to true while fetching data
+        const fetchedReviews = await getReviewData(user.user_id); // Fetch reviews for the user
+        setReviews(fetchedReviews); // Update the reviews state with fetched data
+        setLoading(false);  // Set loading to false after data is fetched
       }
     }
     fetchReviews();
   }, [user]);
 
+  // Render loading state
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
+   // Render message if no reviews are found
   if (reviews.length === 0) {
     return <div>No reviews found.</div>;
   }
-
+// Render the reviews in cards
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Welcome, {user?.name}</h1>

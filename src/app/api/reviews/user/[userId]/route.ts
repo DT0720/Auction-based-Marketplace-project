@@ -3,7 +3,15 @@
 import { NextResponse } from 'next/server';
 import { ReviewRepository } from '@/infrastructure/repositories/ReviewRepository';
 
+// Create an instance of the ReviewRepository
 const reviewRepository = new ReviewRepository();
+
+/**
+ * GET handler for fetching reviews by user ID.
+ * @param req - The request object.
+ * @param params - The route parameters containing the user ID.
+ * @returns A JSON response with the reviews or an error message.
+ */
 
 export async function GET(
   req: Request,
