@@ -10,7 +10,7 @@ export class ImageStorageService implements IFileStorageService{
         this.bucketName = bucketName ? bucketName : "uploads";
     }
 
-    async uploadFile(file?: File, path?: string, folderPath?: string): Promise<string> {
+    async uploadFile(file?: File, path?: string, folderPath?: string): Promise<string> {      //Need to work on folder path
 
         if (!file) {
             throw new Error('No file provided');
@@ -20,14 +20,11 @@ export class ImageStorageService implements IFileStorageService{
             throw new Error('No path provided');
         }
 
-        if(folderPath){
-          path = folderPath + "/" + path;
-        }
+        const fullPath = folderPath ? `${folderPath}/${path}` : path;
     
-
         const { data, error } = await supabase.storage
         .from(this.bucketName)
-        .upload(path, file);
+        .upload(fullPath, file);
   
       if (error) {
         throw new Error(`Upload failed: ${error.message}`);
@@ -36,15 +33,13 @@ export class ImageStorageService implements IFileStorageService{
       return data.path;
     }
 
-    async deleteFile(filePath: string,folderPath?: string): Promise<boolean> {
+    async deleteFile(filePath: string,folderPath?: string): Promise<boolean> {              //Need to work on folder path  
 
-        if(folderPath){
-          filePath = folderPath + "/" + filePath;
-        }
+        const fullPath = folderPath ? `${folderPath}/${filePath}` : filePath;
   
         const { error } = await supabase.storage
         .from(this.bucketName)
-        .remove([filePath]);
+        .remove([fullPath]);
   
       if (error) {
         throw new Error(`Delete failed: ${error.message}`);
@@ -53,19 +48,15 @@ export class ImageStorageService implements IFileStorageService{
       return true;
     }
 
-    async getFileUrl(filePath: string, folderPath?: string): Promise<string | null> {
+    async getFileUrl(filePath: string, folderPath?: string): Promise<string | null> {       //Need to work on folder path
 
-        if(folderPath){
-          filePath = folderPath + "/" + filePath;
-        }
+        const fullPath = folderPath ? `${folderPath}/${filePath}` : filePath;
   
         const { data } = supabase.storage
         .from(this.bucketName)
-        .getPublicUrl(filePath);
+        .getPublicUrl(fullPath);
     
-        const imageExists = await this.fileExists(filePath); 
-
-        console.log("Image exists: " + imageExists);
+        const imageExists = await this.fileExists(fullPath); 
 
         if (!data || !data.publicUrl || !imageExists) {
             return null;
@@ -74,22 +65,21 @@ export class ImageStorageService implements IFileStorageService{
       return data.publicUrl;
     }
 
-    async fileExists(filePath: string, folderPath?: string): Promise<boolean> {
-      if(folderPath){
-        filePath = folderPath + "/" + filePath;
-      }
+    async fileExists(filePath: string, folderPath?: string): Promise<boolean> {           //Need to work on folder path
 
-      console.log("Checking file exists: " + filePath);
+      const fullPath = folderPath ? `${folderPath}/${filePath}` : filePath;
+
 
         const { data, error } = await supabase.storage
         .from(this.bucketName)
-        .list('', { search: filePath });
+        .list('', { search: fullPath});
   
+
       if (error) {
         throw new Error(`File existence check failed: ${error.message}`);
       }
   
-      return data.some(file => file.name === filePath);
+      return data.some(file => file.name === fullPath);
     }
     
 }
