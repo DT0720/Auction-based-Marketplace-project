@@ -5,20 +5,20 @@ import { prisma } from '@/infrastructure/database/prisma';
 export class ReviewRepository {
   // Existing methods...
 
-  async getReviewById(reviewId: number) {
+  async getReviewsByUserId(userId: number) {
     try {
-      const review = await prisma.review.findUnique({
+      const reviews = await prisma.review.findMany({
         where: {
-          review_id: reviewId,
+          user_id: userId,
         },
         include: {
           buyer: true,
           product: true,
         },
       });
-      return review;
+      return reviews;
     } catch (error) {
-      console.error('Error fetching review by ID:', error);
+      console.error('Error fetching reviews by user ID:', error);
       throw error;
     }
   }

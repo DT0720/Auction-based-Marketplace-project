@@ -3,14 +3,11 @@
 import { Review } from "@/domain/entities/Review";
 import NetworkUtils from "@/lib/networkUtils";
 
-const endpoint = "/api/reviews/";
+const endpoint = "/api/reviews/user/";
 
-async function getReviewData(reviewId: number): Promise<Review | null> {
-  const response = await NetworkUtils.getRequest<Review>(
-    endpoint + reviewId
-  );
-
-  return response ?? null;
+async function getReviewData(userId: number): Promise<Review[]> {
+  const response = await NetworkUtils.getRequest<{ message: string; data: Review[] }>(endpoint + userId);
+  return response?.data ?? [];
 }
 
 export default getReviewData;
