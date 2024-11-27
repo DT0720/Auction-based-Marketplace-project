@@ -1,13 +1,24 @@
 import { IFileStorageService } from "@/application/services/IFileStorageService";
+import { Auction } from "@/domain/entities/Auction";
 import { Product } from "@/domain/entities/Product";
 import { SellerInventory } from "@/domain/entities/SellerInventory";
-import { PhotoTypeEnum } from "@/domain/enums/PhotoTypeEnum";
 import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
 import NetworkUtils, { ApiResponse } from "@/lib/networkUtils";
 
 const fileStorageService : IFileStorageService = new ImageStorageService();
 
 const endpoint = "/api/products/addProduct";
+
+/**
+ * Adds a new product to the inventory, uploads product images, and optionally adds it to the seller's inventory.
+ * 
+ * @param {any} data - The product data.
+ * @param {File | null} image - The product image file.
+ * @param {number} [buyer_seller_id] - The ID of the buyer/seller.
+ * @param {number} [quantity_for_sale=0] - The number of items to put on sale.
+ * @returns {Promise<Product | null>} - The created product object or null.
+ * @throws {Error} - Throws an error if product creation or inventory update fails.
+ */
 
 async function addProduct(data: any, image: File | null, buyer_seller_id?: number, quantity_for_sale: number = 0): Promise<Product | null> {
 
@@ -28,6 +39,15 @@ async function addProduct(data: any, image: File | null, buyer_seller_id?: numbe
    return response?.data ?? null;
 }
 
+/**
+ * Adds a product to the seller's inventory.
+ * 
+ * @param {Product} [product] - The product to be added.
+ * @param {number} [buyer_seller_id] - The ID of the buyer/seller.
+ * @param {number} [quantity_for_sale=0] - The number of items to put on sale.
+ * @returns {Promise<SellerInventory | null>} - The updated seller inventory object or null.
+ * @throws {Error} - Throws an error if inventory update fails.
+ */
 async function addProductToSellerInventory(product?: Product, buyer_seller_id?: number, quantity_for_sale: number = 0): Promise<SellerInventory | null> {
   
       const data = {
@@ -47,6 +67,15 @@ async function addProductToSellerInventory(product?: Product, buyer_seller_id?: 
 
   }
 
+
+/**
+ * Adds a product to be available for sale.
+ * 
+ * @param {any} data - The product data.
+ * @param {number} [buyer_seller_id] - The ID of the buyer/seller.
+ * @returns {Promise<SellerInventory | null>} - The updated seller inventory object or null.
+ * @throws {Error} - Throws an error if the product cannot be added for sale.
+ */
 async function addProductOnSale(data: any, buyer_seller_id?: number): Promise<SellerInventory | null> {
 
     if(data.quantity_for_sale === 0) {
@@ -69,7 +98,45 @@ async function addProductOnSale(data: any, buyer_seller_id?: number): Promise<Se
     return response?.data ?? null;
 }
 
-const handleImageUpload = async (_id: number, image : File | null) => {
+
+/**
+ * Puts a product up for auction.
+ * 
+ * @param {any} data - The product data for auction.
+ * @returns {Promise<Auction | null>} - The created auction object or null.
+ * @throws {Error} - Throws an error if the auction cannot be created.
+ */
+async function addProductOnAuction(data: any): Promise<Auction | null> {
+
+  const body = {
+    product_id: data.product_id,
+    seller_id: data.seller_id,
+    current_price: data.current_price,
+    desired_price: data.desired_price,
+    quantity_for_sale: data.quantity_for_sale,
+    status: data.status,
+    createdAt: Date.now(),
+  }    
+
+  const response = await NetworkUtils.postRequest<ApiResponse<Auction>>(endpoint + "/on_auction", body);
+
+  if (!response) {
+      throw new Error("Product creation failed.");
+  }
+
+  return response?.data ?? null;
+}
+
+
+/**
+ * Handles image upload for a product and updates the product with the uploaded image URL.
+ * 
+ * @param {number} _id - The ID of the product.
+ * @param {File | null} image - The image file to be uploaded.
+ * @returns {Promise<void>} - Resolves once the image is uploaded and the product is updated.
+ * @throws {Error} - Throws an error if image upload fails.
+ */
+const handleImageUpload = async (_id: number, image : File | null): Promise<void> => {
 
     if (image) {
       const fileName = image?.name ?? "default.jpg";
@@ -86,4 +153,4 @@ const handleImageUpload = async (_id: number, image : File | null) => {
 
 
 
-export { addProduct, addProductToSellerInventory, addProductOnSale };
+export { addProduct, addProductToSellerInventory, addProductOnSale, addProductOnAuction };

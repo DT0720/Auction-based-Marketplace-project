@@ -8,16 +8,17 @@ datasource db {
 }
 
 model auction {
-  id            Int      @id @default(autoincrement()) @db.UnsignedInt
-  product_id    Int      @db.UnsignedInt
-  seller_id     Int      @db.UnsignedInt
-  current_price Decimal  @db.Decimal(8, 2)
-  desired_price Decimal  @db.Decimal(8, 2)
-  status        Boolean
-  created_at    DateTime @db.DateTime(0)
-  product       product  @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "auction_product_id_foreign")
-  seller        seller   @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "auction_seller_id_foreign")
-  bid           bid[]
+  id                Int      @id @default(autoincrement()) @db.UnsignedInt
+  product_id        Int      @db.UnsignedInt
+  seller_id         Int      @db.UnsignedInt
+  current_price     Decimal  @db.Decimal(8, 2)
+  desired_price     Decimal  @db.Decimal(8, 2)
+  status            Boolean
+  created_at        DateTime @db.DateTime(0)
+  quantity_for_sale Int?     @db.UnsignedInt
+  product           product  @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "auction_product_id_foreign")
+  seller            seller   @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "auction_seller_id_foreign")
+  bid               bid[]
 
   @@index([product_id], map: "auction_product_id_foreign")
   @@index([seller_id], map: "auction_seller_id_foreign")
