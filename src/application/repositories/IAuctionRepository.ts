@@ -1,4 +1,5 @@
 import { Auction } from "@/domain/entities/Auction";
+import { Product } from "@/domain/entities/Product";
 
 /**
  * Interface for Auction Repository.
@@ -23,7 +24,21 @@ export interface IAuctionRepository {
      * Finds an auction by its ID.
      * 
      * @param {number} id - The ID of the auction to find.
-     * @returns {Promise<Auction | null>} - The auction if found, otherwise null.
+     * @returns {Promise<{Product, Auction} | null>} - The auction and product if found, otherwise null.
      */
-    findById(id: number): Promise<Auction | null>;
+    findById(id: number): Promise<{ product: Product; auction: Auction } | null>;
+
+    /**
+     * Finds all auctions.
+     * 
+     * @returns {Promise<Auction[]>} - The list of all auctions.
+     */
+    findAll(): Promise<Auction[]>;
+
+    /**
+     * Finds all products on auction.
+     * 
+     * @returns {Promise<{Product, Auction}[] | null>} - The list of auctions and products if found, otherwise empty list.
+     */
+    findAllProductsOnAuction(): Promise<{ product: Product; auction: Auction }[]>;
 }
