@@ -165,13 +165,9 @@ const Navbar = () => {
                 Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => console.log("Navigate to My Cart")}>
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                My Cart
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => console.log("Navigate to Ongoing Bids")}>
                 <List className="mr-2 h-4 w-4" />
-                Ongoing Bids
+                Your Auctions
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logoutHandler}>

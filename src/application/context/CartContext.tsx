@@ -6,12 +6,11 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { LocalStorageService } from '@/infrastructure/services/LocalStorageService';
 import { getProductById } from '../usecases/sellerDashboard/products/getProductById';
 import useAuth from '@/hooks/use-auth';
-import { useLoader } from '@/hooks/use-loader';
 
 interface CartContextProps {
   cartItems: any[];
   cartCount: number;
-  addProductToCart: (userId: number, product_id: number) => Promise<boolean>;
+  addProductToCart: (product_id: number) => Promise<boolean>;
   removeFromCart: (itemId: number) => void;
   updateCart: (id: number, newQuantity: number) => void;
   clearCart: () => void;

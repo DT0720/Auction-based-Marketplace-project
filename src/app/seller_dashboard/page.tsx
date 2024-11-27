@@ -59,7 +59,7 @@ export default function SellerDashboard() {
                         <div className="flex justify-between mt-auto">
                         <Button onClick={(e) => {
                             e.stopPropagation();
-                            console.log(`Putting ${product.productName} up for auction`)
+                            router.push(ROUTES.ADD_ITEM_ON_AUCTION(product.id))
                         }} className="w-1/2 rounded p-2 mr-2">
                             Put Up for Auction
                         </Button>

@@ -15,14 +15,16 @@ import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
 import { useToast } from "@/hooks/use-toast";
 import useAuth from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
+import { Auction } from "@/domain/entities/Auction";
+import { getProductsOnAuction } from "@/application/usecases/buyerDashboard/products/getProductsOnAuction";
+import { ROUTES } from "@/application/routing/routes";
 
 // Main BuyerDashboard component
 export default function BuyerDashboard() {
     const [products, setProducts] = useState<Product[]>([]);
-    const [ongoingAuctions, setOngoingAuctions] = useState<Product[]>([]); // State for ongoing auctions
+    const [ongoingAuctions, setOngoingAuctions] = useState<{product: Product, auction: Auction}[]>([]); // State for ongoing auctions
     const { showLoader, hideLoader } = useLoader();
     const { addProductToCart } = useCart(); 
-    const { user } = useAuth();
     const { toast } = useToast();   
     const router = useRouter();
 
@@ -34,11 +36,9 @@ export default function BuyerDashboard() {
                 const fetchedProducts = await getProductsOnSale();
                 setProducts(fetchedProducts);
 
-                const dummyOngoingAuctions: Product[] = [
-                    
-                ];
+                const ongoingAuctions: {product: Product, auction: Auction}[] = await getProductsOnAuction(); // Fetch ongoing auctions
 
-                setOngoingAuctions(dummyOngoingAuctions); // Set the dummy auctions
+                setOngoingAuctions(ongoingAuctions); // Set the dummy auctions
             } catch (error: any) {
                 console.error('Error fetching products:', error.message);
             } finally {
@@ -51,7 +51,7 @@ export default function BuyerDashboard() {
     const handleAddToCart = (productId: number) => {
         showLoader();
         try {
-            addProductToCart(user?.user_id ?? 0, productId);
+            addProductToCart(productId);
             successMessage(toast, 'Product added to cart!');
         }catch(error: any){
             errorMessage(toast, error.message);
@@ -104,25 +104,27 @@ export default function BuyerDashboard() {
                 <h2 className="text-xl font-bold mt-8 mb-4">Ongoing Auctions</h2>
                     {ongoingAuctions.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {ongoingAuctions.map((auction) => (
-                            <Card 
-                                key={auction.id} 
-                                className="border border-gray-300 rounded-lg p-4 flex flex-col justify-between cursor-pointer hover:shadow-lg"
-                                onClick={() => router.push(`/auction/${auction.id}`)} // Assuming you have a separate auction page
-                            >
-                                <div className="mb-4">
-                                    <img src={auction.photo ?? ImageStorageService.productPlaceholderImage} alt={auction.productName ?? ""} className="w-full h-auto mb-2" />
-                                </div>
-                                <div className="mb-4">
-                                    <h3 className="font-semibold text-lg">{auction.productName}</h3>
-                                    <p className="font-bold mt-2">Starting Bid: formatCurrency(auction.pricePerUnit)</p>
-                                </div>
-                                <div className="flex justify-end mt-auto">
-                                    <Button onClick={() => console.log(`Bidding on ${auction.productName}`)} className="w-full rounded p-2" variant="outline">
-                                        Place Bid
-                                    </Button>
-                                </div>
-                            </Card>
+                        {ongoingAuctions.map(({ product, auction }) => (
+                        <Card 
+                            key={auction.id} 
+                            className="border border-gray-300 rounded-lg p-4 flex flex-col justify-between cursor-pointer hover:shadow-lg"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(ROUTES.PRODUCT_ON_AUCTION(product.id))
+                            }} // Assuming you have a separate auction page
+                        >
+                            <div className="mb-4">
+                            <img 
+                                src={product.photo ?? ImageStorageService.productPlaceholderImage} 
+                                alt={product.productName ?? ""} 
+                                className="w-full h-auto mb-2" 
+                            />
+                            </div>
+                            <div className="mb-4">
+                            <h3 className="font-semibold text-lg">{product.productName}</h3>
+                            <p className="font-bold mt-2">Starting Bid: {formatCurrency(auction.minimumPrice)}</p>
+                            </div>
+                        </Card>
                         ))}
                         </div>
                     ) : (

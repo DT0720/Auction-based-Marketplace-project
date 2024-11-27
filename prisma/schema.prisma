@@ -8,16 +8,17 @@ datasource db {
 }
 
 model auction {
-  id            Int      @id @default(autoincrement()) @db.UnsignedInt
-  product_id    Int      @db.UnsignedInt
-  seller_id     Int      @db.UnsignedInt
-  current_price Decimal  @db.Decimal(8, 2)
-  desired_price Decimal  @db.Decimal(8, 2)
-  status        Boolean
-  created_at    DateTime @db.DateTime(0)
-  product       product  @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "auction_product_id_foreign")
-  seller        seller   @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "auction_seller_id_foreign")
-  bid           bid[]
+  id               Int       @id @default(autoincrement()) @db.UnsignedInt
+  product_id       Int       @db.UnsignedInt
+  seller_id        Int       @db.UnsignedInt
+  buy_it_now_price Decimal?  @db.Decimal(8, 2)
+  minimum_price    Decimal?  @db.Decimal(8, 2)
+  status           Boolean
+  start_time       DateTime? @db.DateTime(0)
+  end_time         DateTime? @db.DateTime(0)
+  product          product   @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "auction_product_id_foreign")
+  seller           seller    @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "auction_seller_id_foreign")
+  bid              bid[]
 
   @@index([product_id], map: "auction_product_id_foreign")
   @@index([seller_id], map: "auction_seller_id_foreign")
@@ -83,7 +84,7 @@ model orders {
   id            Int             @id @default(autoincrement()) @db.UnsignedInt
   buyer_id      Int             @db.UnsignedInt
   offer_id      Int?            @db.UnsignedInt
-  status        String          @db.Char(255)
+  status        String?         @db.VarChar(255)
   seller_id     Int             @db.UnsignedInt
   order_details order_details[]
   buyer         buyer           @relation(fields: [buyer_id], references: [id], onUpdate: Restrict, map: "orders_buyer_id_foreign")
@@ -144,6 +145,7 @@ model user {
   type                                          String          @db.Char(255)
   phone                                         String          @db.VarChar(255)
   photo                                         String?         @db.VarChar(255)
+  address                                       address[]
   buyer                                         buyer[]
   notifications_notifications_reciever_idTouser notifications[] @relation("notifications_reciever_idTouser")
   notifications_notifications_sender_idTouser   notifications[] @relation("notifications_sender_idTouser")
@@ -173,4 +175,19 @@ model review {
 
   @@index([user_id], map: "review_buyer_id_foreign")
   @@index([product_id], map: "review_product_id_foreign")
+}
+
+model address {
+  id         Int     @id @default(autoincrement()) @db.UnsignedInt
+  user_id    Int     @db.UnsignedInt
+  flat_no    String? @db.VarChar(255)
+  house_no   String  @db.VarChar(255)
+  road_no    String  @db.VarChar(255)
+  sector     Int?
+  area       String  @db.VarChar(255)
+  city       String  @db.VarChar(255)
+  house_name String? @db.VarChar(255)
+  user       user    @relation(fields: [user_id], references: [user_id], onUpdate: Restrict, map: "address_user_id_foreign")
+
+  @@index([user_id], map: "address_user_id_foreign")
 }
