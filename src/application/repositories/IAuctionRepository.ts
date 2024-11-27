@@ -1,5 +1,7 @@
 import { Auction } from "@/domain/entities/Auction";
+import { Bid } from "@/domain/entities/Bid";
 import { Product } from "@/domain/entities/Product";
+import { Review } from "@/domain/entities/Review";
 
 /**
  * Interface for Auction Repository.
@@ -41,4 +43,11 @@ export interface IAuctionRepository {
      * @returns {Promise<{Product, Auction}[] | null>} - The list of auctions and products if found, otherwise empty list.
      */
     findAllProductsOnAuction(): Promise<{ product: Product; auction: Auction }[]>;
+
+    /**
+     * Finds all products on auction with reviews and bidders.
+     * 
+     * @returns {Promise<{Product, Auction, User[], Review[]}[]>} - The auction, products, bidders, and reviews if found, otherwise empty list.
+     */
+    findProductByIdWithDetails(productId: Number): Promise<{ reviews: Review[]; bids: Bid[] } | null>;
 }

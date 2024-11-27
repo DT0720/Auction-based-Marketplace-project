@@ -110,7 +110,7 @@ export default function BuyerDashboard() {
                             className="border border-gray-300 rounded-lg p-4 flex flex-col justify-between cursor-pointer hover:shadow-lg"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                router.push(`/auction/${auction.id}`)
+                                router.push(ROUTES.PRODUCT_ON_AUCTION(product.id))
                             }} // Assuming you have a separate auction page
                         >
                             <div className="mb-4">
@@ -123,14 +123,6 @@ export default function BuyerDashboard() {
                             <div className="mb-4">
                             <h3 className="font-semibold text-lg">{product.productName}</h3>
                             <p className="font-bold mt-2">Starting Bid: {formatCurrency(auction.minimumPrice)}</p>
-                            </div>
-                            <div className="flex justify-end mt-auto">
-                            <Button onClick={(e) => {
-                                e.stopPropagation();
-                                router.push(ROUTES.PRODUCT_ON_AUCTION(product.id))
-                            }} className="w-full rounded p-2" variant="outline">
-                                Place Bid
-                            </Button>
                             </div>
                         </Card>
                         ))}

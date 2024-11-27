@@ -3,6 +3,9 @@ import { Auction } from "@/domain/entities/Auction";
 import { prisma } from "../database/prisma";
 import { Prisma } from "@prisma/client";
 import { Product } from "@/domain/entities/Product";
+import { User } from "@/domain/entities/User";
+import { Review } from "@/domain/entities/Review";
+import { Bid } from "@/domain/entities/Bid";
 
 /**
  * Auction Repository class.
@@ -98,7 +101,7 @@ export class AuctionRepository implements IAuctionRepository{
     /**
      * Finds all products on auction.
      * 
-     * @returns {Promise<Product[]>} - The list of all products on auction.
+     * @returns {Promise<{Product, Auction}>} - The list of all products on auction.
      */
     async findAllProductsOnAuction(): Promise<{ product: Product; auction: Auction }[]> {
         try{
@@ -130,4 +133,42 @@ export class AuctionRepository implements IAuctionRepository{
             return [];
         }
     }
+
+    /**
+     * Finds product by id on auction with reviews and bidders.
+     * 
+     * @returns {Promise<{Review[], Bid[]}>} - The bidders, and reviews if found, otherwise empty list.
+     */
+    async findProductByIdWithDetails(productId: number): Promise<{ reviews: Review[]; bids: Bid[] } | null> {
+        try{
+            const auctionWithDetails = await prisma.auction.findFirst({
+                where: {
+                    product_id: productId,
+                    status: true
+                },
+                include: {
+                    bid: true,
+                    product: {
+                        include: {
+                            review: true
+                        }
+                    }
+                }
+            });
+      
+            if(!auctionWithDetails){
+                throw new Error("Error fetching auction details");
+            }
+      
+            const reviews = auctionWithDetails.product.review.map((review) => Review.fromJson(review));
+            const bids = auctionWithDetails.bid.map((bid) => Bid.fromJson(bid));
+      
+            return { reviews, bids };
+        }catch(error){
+            console.log(error);
+            return null;
+        }
+      }
+      
+      
 }
