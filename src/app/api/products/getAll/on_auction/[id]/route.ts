@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
           return NextResponse.json({ message: 'Invalid product ID' }, { status: 400 });
         }
 
-        const productAuction = await auctionRepository.findById(productId);
+        const productAuction = await auctionRepository.findActiveAuctionsById(productId);
 
         if (!productAuction) {
             return NextResponse.json({ message: 'Product not found' }, { status: 404 });

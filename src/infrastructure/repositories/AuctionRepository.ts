@@ -59,7 +59,7 @@ export class AuctionRepository implements IAuctionRepository{
      * @param {number} id - The ID of the auction to find.
      * @returns {Promise<Auction | null>} - The auction object if found, otherwise null.
      */
-    async findById(id: number): Promise<{ product: Product; auction: Auction } | null> {
+    async findActiveAuctionsById(id: number): Promise<{ product: Product; auction: Auction } | null> {
         try{
             const productsOnSale = await prisma.product.findFirst({
                 where: {
@@ -88,7 +88,34 @@ export class AuctionRepository implements IAuctionRepository{
             return null;
         }
     }
+    async findById(id: number): Promise<{ product: Product; auction: Auction } | null> {
+        try{
+            const productsOnSale = await prisma.product.findFirst({
+                where: {
+                    auction: {
+                        some: {
+                            product_id: id,
+                        }
+                    }
+                },
+                include: {
+                    auction: true
+                }
+            });
     
+            if(!productsOnSale){
+                throw new Error("Error fetching products on sale by id");
+            }
+    
+            return {
+                product: Product.fromJson(productsOnSale),
+                auction: Auction.fromJson(productsOnSale.auction[0])
+            };
+        }catch(error){
+            console.log(error);
+            return null;
+        }
+    }
     /**
      * Finds all auctions.
      * 
@@ -96,6 +123,42 @@ export class AuctionRepository implements IAuctionRepository{
      */
     async findAll(): Promise<Auction[]> {
         throw new Error("Method not implemented.");
+    }
+
+    /**
+     * Finds all active auctions.
+     * 
+     * @returns {Promise<Auction[]>} - The list of active auctions.
+     */
+    async findActiveAuctions(): Promise<{ product: Product; auction: Auction }[]> {
+        try{
+            const productsOnSale = await prisma.product.findMany({
+                where: {
+                    auction: {
+                        some: {
+                            status: true
+                        }
+                    }
+                },
+                include: {
+                    auction: true
+                }
+            });
+    
+            if(!productsOnSale){
+                throw new Error("Error fetching products on sale");
+            }
+    
+            return productsOnSale.flatMap(product => 
+                product.auction.map(auction => ({
+                    product: Product.fromJson(product),
+                    auction: Auction.fromJson(auction)
+                }))
+            );
+        }catch(error){
+            console.log(error);
+            return [];
+        }
     }
 
     /**

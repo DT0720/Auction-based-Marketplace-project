@@ -26,21 +26,26 @@ export interface IAuctionRepository {
      * Finds an auction by its ID.
      * 
      * @param {number} id - The ID of the auction to find.
+     * @returns {Promise<{Product, Auction} | null>} - The auction and product of active auctions if found, otherwise null.
+     */
+    findActiveAuctionsById(id: number): Promise<{ product: Product; auction: Auction } | null>;
+    /**
+     * Finds an auction by its ID.
+     * 
+     * @param {number} id - The ID of the auction to find.
      * @returns {Promise<{Product, Auction} | null>} - The auction and product if found, otherwise null.
      */
     findById(id: number): Promise<{ product: Product; auction: Auction } | null>;
-
     /**
      * Finds all auctions.
      * 
      * @returns {Promise<Auction[]>} - The list of all auctions.
      */
     findAll(): Promise<Auction[]>;
-
     /**
-     * Finds all products on auction.
+     * Finds all active auctions.
      * 
-     * @returns {Promise<{Product, Auction}[] | null>} - The list of auctions and products if found, otherwise empty list.
+     * @returns {Promise<{ Product; Auction }[]>} - The list of active auctions and products.
      */
     findAllProductsOnAuction(): Promise<{ product: Product; auction: Auction }[]>;
 
