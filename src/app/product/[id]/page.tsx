@@ -84,10 +84,10 @@ export default function ProductDetails() {
             )}
             {isSeller && (
               <div className="flex flex-col space-y-4 mt-4">
-                <Button className="w-full" variant= "outline" onClick={() => {
+                <Button className="w-full" onClick={() => {
                   if (typeof id === 'string') router.push(ROUTES.ADD_ITEM_ON_AUCTION(parseInt(id, 10)));
                 }}>Put Up for Auction</Button>
-                <Button className="w-full" onClick={() => {
+                <Button className="w-full" variant= "outline" onClick={() => {
                   if (typeof id === 'string') router.push(ROUTES.ADD_ITEM_ON_SALE(parseInt(id, 10)));
                 }}>Put Up for Sale</Button>
               </div>

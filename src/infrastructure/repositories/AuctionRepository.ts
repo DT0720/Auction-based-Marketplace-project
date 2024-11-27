@@ -1,6 +1,7 @@
 import { IAuctionRepository } from "@/application/repositories/IAuctionRepository";
 import { Auction } from "@/domain/entities/Auction";
 import { prisma } from "../database/prisma";
+import { Prisma } from "@prisma/client";
 
 /**
  * Auction Repository class.
@@ -16,17 +17,17 @@ export class AuctionRepository implements IAuctionRepository{
      */
     async create(auction: Auction): Promise<boolean> {
         try{
-            const nowAuction = prisma.auction.create({
+            const nowAuction = await prisma.auction.create({
                 data: {
                     product_id: auction.productId,
-                    created_at: auction.createdAt,
-                    desired_price: auction.desiredPrice,
-                    current_price: auction.currentPrice,
+                    seller_id: auction.sellerId,
+                    minimum_price: new Prisma.Decimal(auction.minimumPrice), // Use Prisma.Decimal for decimal fields
+                    buy_it_now_price: new Prisma.Decimal(auction.buyItNowPrice), // Use Prisma.Decimal for decimal fields
                     status: auction.status,
-                    quantity_for_sale: auction.quantity_for_sale,
-                    seller_id: auction.sellerId, // Add the 'seller_id' property with a valid value
+                    start_time: auction.startTime,
+                    end_time: auction.endTime,
                 }
-            })
+            });
 
             if(!nowAuction){
                 throw new Error("Error creating auction");

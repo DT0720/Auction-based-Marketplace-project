@@ -106,22 +106,24 @@ async function addProductOnSale(data: any, buyer_seller_id?: number): Promise<Se
  * @returns {Promise<Auction | null>} - The created auction object or null.
  * @throws {Error} - Throws an error if the auction cannot be created.
  */
-async function addProductOnAuction(data: any): Promise<Auction | null> {
+async function addProductOnAuction(data: any, buyer_seller_id?: number): Promise<Auction | null> {
 
   const body = {
     product_id: data.product_id,
-    seller_id: data.seller_id,
-    current_price: data.current_price,
-    desired_price: data.desired_price,
-    quantity_for_sale: data.quantity_for_sale,
+    seller_id: buyer_seller_id,
+    minimum_price: data.minimum_price,
+    buy_it_now_price: data.buy_it_now_price,
     status: data.status,
-    createdAt: Date.now(),
+    start_time: new Date().toISOString(),
+    end_time: data.end_time,  
   }    
 
   const response = await NetworkUtils.postRequest<ApiResponse<Auction>>(endpoint + "/on_auction", body);
 
-  if (!response) {
-      throw new Error("Product creation failed.");
+  console.log("Auction created: " + response?.data);
+
+  if (!response?.data) {
+      throw new Error(response?.message ?? "Failed to put product up for auction.");
   }
 
   return response?.data ?? null;

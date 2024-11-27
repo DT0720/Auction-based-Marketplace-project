@@ -22,26 +22,29 @@ export async function POST(req: Request) {
     const currentInventory = await sellerInventoryRepository.findByProductId(body.product_id);    
 
     if (!currentInventory) {
+        console.log("Inventory not found");
         throw new Error('Inventory not found'); // Throw an error if the product was not created
     }
 
     if (body.quantity_for_sale > currentInventory.quantity) {
+        console.log("Quantity for sale cannot be greater than quantity in inventory");
         throw new Error('Quantity for sale cannot be greater than quantity in inventory'); // Throw an error if the product was not created
     }
 
     console.log(Auction.fromJson(body));
 
-    const auction = await auctionRepository.create(Auction.fromJson(body)); // Create the product using the use case
+    const success = await auctionRepository.create(Auction.fromJson(body)); // Create the product using the use case
+
+    if(success) console.log("Auction created successfully");
 
     return NextResponse.json(
-      { message: auction ? 'Auction created successfully' : 'Failed to update inventory', data: auction },
-      { status: auction ? 201 : 400 }
+      { message: success ? 'Auction created successfully' : 'Failed to update inventory', data: success },
+      { status: success ? 201 : 400 }
     );
 
   } catch (error: any) {
-      console.log(error.message);
       return NextResponse.json(
-        { message: 'Failed to create auction', data: null },
+        { message: error.message, data: false },
         { status: 400 }
       );
   }

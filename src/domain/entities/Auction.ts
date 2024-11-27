@@ -3,11 +3,11 @@ export class Auction{
         public id: number,
         public productId: number,
         public sellerId: number,
-        public currentPrice: number,
-        public desiredPrice: number,
-        public quantity_for_sale: number,
+        public buyItNowPrice: number,
+        public minimumPrice: number,
         public status: boolean,
-        public createdAt: Date,
+        public startTime: Date,
+        public endTime: Date,
     ){}
 
     static fromJson(data: any): Auction {
@@ -15,11 +15,11 @@ export class Auction{
             data.id,
             data.product_id,
             data.seller_id,
-            data.current_price,
-            data.desired_price,
-            data.quantity_for_sale,
+            data.buy_it_now_price,
+            data.minimum_price,
             data.status,
-            data.created_at
+            data.start_time,
+            data.end_time
         );
     }
 
@@ -28,11 +28,11 @@ export class Auction{
             id: this.id,
             product_id: this.productId,
             seller_id: this.sellerId,
-            current_price: this.currentPrice,
-            desired_price: this.desiredPrice,
-            quantity_for_sale: this.quantity_for_sale,
+            buy_it_now_price: this.buyItNowPrice,
+            minimum_price: this.minimumPrice,
             status: this.status,
-            created_at: this.createdAt
+            start_time: this.startTime,
+            end_time: this.endTime
         }
     }
 }

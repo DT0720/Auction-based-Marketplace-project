@@ -51,7 +51,7 @@ export default function BuyerDashboard() {
     const handleAddToCart = (productId: number) => {
         showLoader();
         try {
-            addProductToCart(user?.user_id ?? 0, productId);
+            addProductToCart(productId);
             successMessage(toast, 'Product added to cart!');
         }catch(error: any){
             errorMessage(toast, error.message);
