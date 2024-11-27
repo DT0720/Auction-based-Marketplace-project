@@ -32,7 +32,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
         }
 
         if (product.photo) {
-            product.photo = await imageStorageService.getFileUrl(product.photo,PhotoTypeEnum.PRODUCT);
+            product.photo = await imageStorageService.getFileUrl(product.photo);
             if (!product.photo) {
               product.photo = ImageStorageService.productPlaceholderImage;
             }
