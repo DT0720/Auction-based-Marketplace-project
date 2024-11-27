@@ -1,25 +1,31 @@
 // ReviewRepository.test.ts
+// Import the ReviewRepository class to be tested and the prisma client mock
 import { ReviewRepository } from '@/infrastructure/repositories/ReviewRepository';
 import { prisma } from '@/infrastructure/database/prisma';
 
+// Mock the prisma client to isolate tests from the real database
 jest.mock('@/infrastructure/database/prisma', () => ({
   prisma: {
     review: {
-      findMany: jest.fn(),
+      findMany: jest.fn(),// Mock the findMany method used in tests
     },
   },
 }));
 
+// Define a test suite for the ReviewRepository class
 describe('ReviewRepository', () => {
   let reviewRepository: ReviewRepository;
 
+// Instantiate a new ReviewRepository before each test
   beforeEach(() => {
     reviewRepository = new ReviewRepository();
   });
 
+  // Clear all mocked functions after each test to prevent test data leakage
   afterEach(() => {
     jest.clearAllMocks();
   });
+
 
   it('should fetch reviews by buyer ID', async () => {
     // Arrange
