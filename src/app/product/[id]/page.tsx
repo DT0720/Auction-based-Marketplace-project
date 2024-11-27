@@ -1,5 +1,6 @@
 'use client';
 
+import { ROUTES } from "@/application/routing/routes";
 import { getProductById } from "@/application/usecases/sellerDashboard/products/getProductById";
 import { Button } from "@/components/ui/button";
 import ReviewBox from "@/components/ui/custom/ReviewBox";
@@ -9,7 +10,7 @@ import useAuth from "@/hooks/use-auth";
 import { useLoader } from "@/hooks/use-loader";
 import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
 import { formatCurrency } from "@/lib/stringUtils";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ProductDetails() {
@@ -20,6 +21,7 @@ export default function ProductDetails() {
   const [rating, setRating] = useState<number>(4.5);
   const [totalReviews, setTotalReview] = useState<number>(10);
   const { user } = useAuth();
+  const router = useRouter();
 
   const isBuyer = user?.type.toLocaleLowerCase() === "b";
   const isSeller = user?.type.toLocaleLowerCase() === "s";
@@ -82,8 +84,12 @@ export default function ProductDetails() {
             )}
             {isSeller && (
               <div className="flex flex-col space-y-4 mt-4">
-                <Button className="w-full" variant= "outline">Put Up for Auction</Button>
-                <Button className="w-full">Put Up for Sale</Button>
+                <Button className="w-full" variant= "outline" onClick={() => {
+                  if (typeof id === 'string') router.push(ROUTES.ADD_ITEM_ON_AUCTION(parseInt(id, 10)));
+                }}>Put Up for Auction</Button>
+                <Button className="w-full" onClick={() => {
+                  if (typeof id === 'string') router.push(ROUTES.ADD_ITEM_ON_SALE(parseInt(id, 10)));
+                }}>Put Up for Sale</Button>
               </div>
             )}
           </div>

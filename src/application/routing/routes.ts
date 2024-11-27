@@ -13,7 +13,8 @@ export const ROUTES = {
     FORGOT_PASSWORD: "/forgot-password",
     ADD_PRODUCT: "/product/addItem",
     SHOPPING_CART: "/shopping_cart",
-    ADD_ITEM_ON_SALE: (id: string | number) => `/product/${id}/addItem/on_sale`
+    ADD_ITEM_ON_SALE: (id: string | number) => `/product/${id}/addItem/on_sale`,
+    ADD_ITEM_ON_AUCTION: (id: string | number) => `/product/${id}/addItem/on_auction`,
   } as const;
   
 export type RouteKey = keyof typeof ROUTES;
