@@ -11,6 +11,7 @@ export const ROUTES = {
     BUYER_DASHBOARD: "/buyer_dashboard",
     SELLER_DASHBOARD: "/seller_dashboard",
     FORGOT_PASSWORD: "/forgot-password",
+    REVIEW_DASHBOARD: "/review_dashboard",
     ADD_PRODUCT: "/product/addItem",
     SHOPPING_CART: "/shopping_cart",
     ADD_ITEM_ON_SALE: (id: string | number) => `/product/${id}/addItem/on_sale`,
