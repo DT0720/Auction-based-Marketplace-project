@@ -52,7 +52,7 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
  * Configures the routes that the middleware should match.
  */
 export const config = {
-    matcher: ['/login', '/signup', '/forgot-password', '/buyer_dashboard', '/seller_dashboard', '/product/:path*'], 
+    matcher: ['/login', '/signup', '/forgot-password', '/buyer_dashboard', '/seller_dashboard', '/review_dashboard', '/product/:path*'], 
 };
 
 

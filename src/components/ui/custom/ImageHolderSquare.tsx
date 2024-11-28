@@ -3,8 +3,15 @@ import { Input } from "@/components/ui/input";
 import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
 
 // Memoized CustomSquareImageHolder Component
-const ImageHolderSquare = React.memo(({ image, handleImageUpdate }: { image: File | null; handleImageUpdate?: (e: React.ChangeEvent<HTMLInputElement>) => void }) => {
-  const imageUrl = useMemo(() => (image ? URL.createObjectURL(image) : null), [image]);
+const ImageHolderSquare = React.memo(({ image, handleImageUpdate }: { image: File | string | null; handleImageUpdate?: (e: React.ChangeEvent<HTMLInputElement>) => void }) => {
+  const imageUrl = useMemo(() => {
+    if (image instanceof File) {
+      return URL.createObjectURL(image);
+    } else if (typeof image === "string") {
+      return image;
+    }
+    return null;
+  }, [image]);
 
   return (
     <div className="flex justify-center relative w-full md:w-2/5">

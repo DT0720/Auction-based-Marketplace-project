@@ -1,4 +1,7 @@
 import { Auction } from "@/domain/entities/Auction";
+import { Bid } from "@/domain/entities/Bid";
+import { Product } from "@/domain/entities/Product";
+import { Review } from "@/domain/entities/Review";
 
 /**
  * Interface for Auction Repository.
@@ -23,7 +26,33 @@ export interface IAuctionRepository {
      * Finds an auction by its ID.
      * 
      * @param {number} id - The ID of the auction to find.
-     * @returns {Promise<Auction | null>} - The auction if found, otherwise null.
+     * @returns {Promise<{Product, Auction} | null>} - The auction and product of active auctions if found, otherwise null.
      */
-    findById(id: number): Promise<Auction | null>;
+    findActiveAuctionsById(id: number): Promise<{ product: Product; auction: Auction } | null>;
+    /**
+     * Finds an auction by its ID.
+     * 
+     * @param {number} id - The ID of the auction to find.
+     * @returns {Promise<{Product, Auction} | null>} - The auction and product if found, otherwise null.
+     */
+    findById(id: number): Promise<{ product: Product; auction: Auction } | null>;
+    /**
+     * Finds all auctions.
+     * 
+     * @returns {Promise<Auction[]>} - The list of all auctions.
+     */
+    findAll(): Promise<Auction[]>;
+    /**
+     * Finds all active auctions.
+     * 
+     * @returns {Promise<{ Product; Auction }[]>} - The list of active auctions and products.
+     */
+    findAllProductsOnAuction(): Promise<{ product: Product; auction: Auction }[]>;
+
+    /**
+     * Finds all products on auction with reviews and bidders.
+     * 
+     * @returns {Promise<{Product, Auction, User[], Review[]}[]>} - The auction, products, bidders, and reviews if found, otherwise empty list.
+     */
+    findProductByIdWithDetails(productId: Number): Promise<{ reviews: Review[]; bids: Bid[] } | null>;
 }

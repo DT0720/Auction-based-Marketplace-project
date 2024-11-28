@@ -17,8 +17,6 @@ export async function POST(req: Request) {
       throw new Error('No body received');  // Throw an error if no body is received
     }
 
-    console.log(JSON.stringify(body));  
-
     const currentInventory = await sellerInventoryRepository.findByProductId(body.product_id);    
 
     if (!currentInventory) {
@@ -31,14 +29,17 @@ export async function POST(req: Request) {
         throw new Error('Quantity for sale cannot be greater than quantity in inventory'); // Throw an error if the product was not created
     }
 
-    console.log(Auction.fromJson(body));
+    const activeAuctions = await auctionRepository.findAllProductsOnAuction();
+
+    if (activeAuctions.some(auction => auction.auction.productId === body.product_id)) {
+        console.log("Product already on auction");
+        throw new Error('Product already on auction'); // Throw an error if the product was not created
+    }
 
     const success = await auctionRepository.create(Auction.fromJson(body)); // Create the product using the use case
 
-    if(success) console.log("Auction created successfully");
-
     return NextResponse.json(
-      { message: success ? 'Auction created successfully' : 'Failed to update inventory', data: success },
+      { message: success ? 'Auction created successfully' : 'Failed to create auction', data: success },
       { status: success ? 201 : 400 }
     );
 
