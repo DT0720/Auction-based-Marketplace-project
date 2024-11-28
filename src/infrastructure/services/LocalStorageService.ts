@@ -11,11 +11,15 @@ export class LocalStorageService implements ILocalStorageService {
   /**
    * Constructor to initialize LocalStorageService with a user ID and a storage key.
    * 
-   * @param {number} userId - The user ID used to create a unique storage key.
+   * @param {number} userId - The optional user ID used to create a unique storage key.
    * @param {string} [key=StorageKeyEnums.CART] - Optional storage key, defaults to CART.
    */    
-    constructor(userId: number,key: string = StorageKeyEnums.CART) {
+    constructor(userId?: number | null,key: string = StorageKeyEnums.CART) {
+      if (userId && userId > 0) {
         this.cacheKey = `${userId}_${key}`;
+      } else {
+        this.cacheKey = `TEMP_${key}`; // Use a generic key for non-logged-in users
+      }
     }
 
 

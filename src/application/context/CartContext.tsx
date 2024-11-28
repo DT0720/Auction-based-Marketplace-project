@@ -23,13 +23,32 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cartCount, setCartCount] = useState(0);
   const { user } = useAuth();
 
-  const localStorageService = new LocalStorageService(user?.user_id ?? 0);
+  const localStorageService = new LocalStorageService(user?.user_id ?? null);
 
   useEffect(() => {
-    const items = localStorageService.getCache();
-    setCartItems(items);
-    setCartCount(items.length);
-  }, []);
+    // If user is logged in, merge TEMP_CART with user-specific cart
+    if (user?.user_id) {
+      const tempCartService = new LocalStorageService(null);
+      const userCartService = new LocalStorageService(user.user_id);
+      const tempCart = tempCartService.getCache();
+      const userCart = userCartService.getCache();
+
+      // Merge temp cart into user cart and clear temp cart
+      const mergedCart = [...userCart, ...tempCart];
+      userCartService.clearCache(); // Clear the old user cart
+      userCartService.appendToCache(mergedCart);
+      tempCartService.clearCache(); // Clear the temp cart
+
+      // Update cart state with merged cart
+      setCartItems(mergedCart);
+      setCartCount(mergedCart.length);
+    } else {
+      // If no user is logged in, load the TEMP_CART
+      const items = localStorageService.getCache();
+      setCartItems(items);
+      setCartCount(items.length);
+    }
+  }, [user]);
 
   const addProductToCart = async (product_id: number): Promise<boolean> => {
     try {
