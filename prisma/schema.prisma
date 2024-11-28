@@ -63,7 +63,7 @@ model notifications {
 
 model offers {
   id              Int      @id @default(autoincrement()) @db.UnsignedInt
-  type            String   @db.VarChar(255)
+  type            String   @unique(map: "UQ_offer_type") @db.VarChar(255)
   discount_amount Decimal  @db.Decimal(8, 2)
   orders          orders[]
 }
