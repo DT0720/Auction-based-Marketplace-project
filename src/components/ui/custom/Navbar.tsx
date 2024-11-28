@@ -32,7 +32,6 @@ const Navbar = () => {
   }).format(currentBalance);
 
   const logoutHandler = () => {
-    clearCart();
     logout();
     router.push(ROUTES.LOGIN);
   };
