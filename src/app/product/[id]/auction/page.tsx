@@ -34,7 +34,7 @@ export default function ProductAuctionPage() {
   const [timeLeft, setTimeLeft] = useState<string | null>(null);
   const [auctionActive, setAuctionActive] = useState(true);
   const { showLoader, hideLoader } = useLoader();
-  const { user, currentBalance } = useAuth();
+  const { user, currentBalance, buyer_seller_id } = useAuth();
 
 
   useEffect(() => {
@@ -109,13 +109,15 @@ const handleBidSubmit = async (e: React.FormEvent) => {
     try {
       showLoader();
       
-      const userId = user?.user_id || 0; // Replace this with the actual user id from context or state.
+      const buyerId = buyer_seller_id; // Replace this with the actual user id from context or state.
       const auctionId = productAuction.auction.id;
       const price = bidAmount;
 
+      console.log("Buyer ID: " + buyerId);
+
       // Make sure userId is valid
-      if (userId <= 0) {
-        throw new Error("Invalid user ID");
+      if (buyerId <= 0) {
+        throw new Error("Invalid buyer ID");
       }
 
       if (price <= 0) {
@@ -127,7 +129,7 @@ const handleBidSubmit = async (e: React.FormEvent) => {
         return;
       }
 
-      const success = await placeBid(userId, auctionId, price);
+      const success = await placeBid(buyerId, auctionId, price);
 
       if (success) {
         successMessage(toast, "Bid placed successfully");
