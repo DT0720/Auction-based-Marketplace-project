@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import { formatCurrency } from "@/lib/stringUtils";
+import { PrismaClient } from "@prisma/client"; // Import Prisma client
+
+// Initialize Prisma client
+const prisma = new PrismaClient();
 
 export default function CheckoutPage() {
+  const router = useRouter();
+
+  // Billing Information
   const [billingInfo, setBillingInfo] = useState({
     name: "",
     address: "",
@@ -14,218 +23,156 @@ export default function CheckoutPage() {
     country: "US",
   });
 
+  // Payment Method and Discounts
   const [paymentMethod, setPaymentMethod] = useState<string>("creditCard");
   const [couponCode, setCouponCode] = useState<string>("");
   const [discountApplied, setDiscountApplied] = useState<boolean>(false);
+  const [discountAmount, setDiscountAmount] = useState<number>(0); // Store discount amount
 
-  // Mock cart data
-  const [cartData] = useState<any>({
-    cartItems: [
-      { id: 1, name: "Product 1", quantity: 2, price: 20 }, // 2 items, $20 each
-      { id: 2, name: "Product 2", quantity: 1, price: 50 }, // 1 item, $50
-    ],
-  });
+  // Total Amount (received via query)
+  const [total, setTotal] = useState<number>(0);
+  const [finalTotal, setFinalTotal] = useState<number>(0); // Updated total after discount
 
-  // Calculate subtotal
-  const subtotal = cartData.cartItems.reduce(
-    (acc: number, item: any) => acc + item.price * item.quantity,
-    0
-  );
-  
-  // Apply discount if applicable
-  const total = discountApplied ? subtotal * 0.9 : subtotal; // Apply discount if applicable
+  // Load total from the query string
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const totalFromQuery = urlParams.get("total");
+    if (totalFromQuery) {
+      const parsedTotal = parseFloat(totalFromQuery);
+      setTotal(parsedTotal); // Set total from query
+      setFinalTotal(parsedTotal); // Initial final total is the same as the original total
+    }
+  }, []);
 
+  // Handle changes in billing information
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setBillingInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePaymentChange = (method: string) => {
-    setPaymentMethod(method);
-  };
+  // Apply Discount Logic (fetch from DB)
+  const applyDiscount = async () => {
+    if (couponCode && !discountApplied) {
+      try {
+        // Fetch discount from the database using the coupon code
+        const offer = await prisma.offers.findFirst({
+          where: { type: couponCode }, // Assuming coupon code is stored in the 'type' field
+        });
 
-  const handleCouponChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCouponCode(e.target.value);
-  };
+        if (offer) {
+          // Convert discount from Decimal to number
+          const discountValue = offer.discount_amount.toNumber();
+          setDiscountAmount(discountValue);
 
-  const applyDiscount = () => {
-    if (couponCode === "DISCOUNT10") {
-      setDiscountApplied(true);
-      alert("Discount Applied: 10% off!");
-    } else {
-      alert("Invalid Coupon Code");
+          // Calculate new total after discount
+          const newTotal = total - discountValue;
+          setFinalTotal(newTotal); // Update the final total
+
+          // Mark discount as applied
+          setDiscountApplied(true);
+          alert(`Discount Applied: ${formatCurrency(discountValue)} off!`);
+        } else {
+          alert("Invalid Coupon Code");
+        }
+      } catch (error) {
+        console.error("Error applying discount:", error);
+        alert("There was an error applying the discount.");
+      }
+    } else if (discountApplied) {
+      alert("Discount has already been applied!");
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Checkout Info Submitted:", billingInfo, paymentMethod);
-  };
 
-  const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
+    // Validate billing information
+    if (!billingInfo.name || !billingInfo.address || !billingInfo.city || !billingInfo.zip) {
+      alert("Please fill out all required fields.");
+      return;
+    }
+
+    // Create order in Prisma with applied discount
+    try {
+      // Create the order in the database
+      const order = await prisma.orders.create({
+        data: {
+          buyer_id: 1, // Assuming a hardcoded buyer ID (you should use the authenticated user's ID)
+          seller_id: 1, // Assuming a hardcoded seller ID
+          offer_id: discountApplied ? 1 : null, // Apply the discount offer if discount is applied
+          status: "pending",
+          order_details: {
+            create: [
+              {
+                product_id: 1, // Assuming a hardcoded product ID
+                quantity: 1, // Assuming quantity of 1 for the product
+              },
+            ],
+          },
+        },
+      });
+
+      // Redirect to confirmation page on success
+      if (order) {
+        router.push("/order-confirmation");
+      } else {
+        alert("Error during checkout.");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("There was an issue processing your order.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Checkout</h1>
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg space-y-6">
-          {/* Billing Information Header */}
+          {/* Billing Information */}
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Billing Information</h2>
+          <div className="space-y-4">
+            <Input name="name" placeholder="Full Name" value={billingInfo.name} onChange={handleChange} required />
+            <Input name="address" placeholder="Address" value={billingInfo.address} onChange={handleChange} required />
+            <Input name="city" placeholder="City" value={billingInfo.city} onChange={handleChange} required />
+            <Input name="zip" placeholder="ZIP Code" value={billingInfo.zip} onChange={handleChange} required />
+          </div>
+
+          {/* Coupon Code */}
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Billing Information</h2>
-          </div>
-          
-          {/* Billing Information Form */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <Input
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Enter your full name"
-                value={billingInfo.name}
-                onChange={handleChange}
-                className="mt-2 w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                Address
-              </label>
-              <Input
-                type="text"
-                id="address"
-                name="address"
-                placeholder="Enter your address"
-                value={billingInfo.address}
-                onChange={handleChange}
-                className="mt-2 w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Discount Coupon</h2>
+            <Input
+              name="couponCode"
+              placeholder="Enter Coupon Code"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+            />
+            <Button type="button" onClick={applyDiscount} className="mt-2">Apply Discount</Button>
           </div>
 
-          {/* City, Zip, and Country */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                City
-              </label>
-              <Input
-                type="text"
-                id="city"
-                name="city"
-                placeholder="Enter your city"
-                value={billingInfo.city}
-                onChange={handleChange}
-                className="mt-2 w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="zip" className="block text-sm font-medium text-gray-700">
-                Zip Code
-              </label>
-              <Input
-                type="text"
-                id="zip"
-                name="zip"
-                placeholder="Enter your zip code"
-                value={billingInfo.zip}
-                onChange={handleChange}
-                className="mt-2 w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-                Country
-              </label>
-              <Input
-                type="text"
-                id="country"
-                name="country"
-                placeholder="Enter your country"
-                value={billingInfo.country}
-                onChange={handleChange}
-                className="mt-2 w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Payment Method */}
-          <div>
-            <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700">
-              Payment Method
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              {["creditCard", "bkash", "rocket", "nagad"].map((method) => (
-                <Card
-                  key={method}
-                  className={`p-4 rounded-md border ${
-                    paymentMethod === method ? "border-blue-500 bg-blue-50" : "border-gray-300"
-                  }`}
-                  onClick={() => handlePaymentChange(method)}
-                >
-                  <h3 className="text-xl font-semibold text-gray-800 capitalize">{method}</h3>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Discount Coupon */}
-          <div>
-            <label htmlFor="coupon" className="block text-sm font-medium text-gray-700">
-              Discount Coupon
-            </label>
-            <div className="flex items-center space-x-4 mt-4">
-              <Input
-                type="text"
-                id="coupon"
-                name="coupon"
-                placeholder="Enter coupon code"
-                value={couponCode}
-                onChange={handleCouponChange}
-                className="w-3/4 p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-              <Button
-                type="button"
-                onClick={applyDiscount}
-                className="w-1/4 py-3"
-              >
-                Apply
-              </Button>
-            </div>
-            {discountApplied && <p className="mt-2 text-green-600">Discount applied successfully!</p>}
-          </div>
-
-          {/* Total Amount to Pay */}
+          {/* Total Amount */}
           <div className="border-t pt-4 mt-6">
             <h2 className="text-xl font-semibold text-gray-900">Total Amount to Pay</h2>
-            <div className="space-y-4 mt-4">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>{formatCurrency(subtotal)}</span>
+            <div className="flex justify-between">
+              <span>Total (including tax)</span>
+              <span>{formatCurrency(total)}</span>
+            </div>
+            {discountApplied && (
+              <div className="flex justify-between text-red-600">
+                <span>Discount Applied</span>
+                <span>{formatCurrency(discountAmount)}</span>
               </div>
-              {discountApplied && (
-                <div className="flex justify-between font-semibold text-lg mb-4 text-green-600">
-                  <span>Discount (10%)</span>
-                  <span>-{formatCurrency(subtotal * 0.1)}</span>
-                </div>
-              )}
-              <div className="flex justify-between font-bold text-xl mb-4">
-                <span>Total</span>
-                <span>{formatCurrency(total)}</span>
-              </div>
+            )}
+            <div className="flex justify-between font-bold">
+              <span>Final Total</span>
+              <span>{formatCurrency(finalTotal)}</span>
             </div>
           </div>
 
-          {/* Proceed to Checkout Button */}
-          <Button
-            type="submit"
-            className="w-full py-3 mt-4"
-            variant="outline"
-          >
-            Proceed to Checkout
+          {/* Submit Button */}
+          <Button type="submit" className="w-full py-3 mt-4" variant="outline">
+            Place Order
           </Button>
         </form>
       </div>

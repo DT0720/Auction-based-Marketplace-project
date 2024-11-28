@@ -5,12 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d91dbfd2-ad36-4537-8523-7a07a142a09b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/dcc9ea35-8882-4add-b98a-0ef90fcbe788.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/dcc9ea35-8882-4add-b98a-0ef90fcbe788/storage_v2/_src_/schema/eCommerce.YBryXg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/dcc9ea35-8882-4add-b98a-0ef90fcbe788/storage_v2/_src_/schema/information_schema.FNRwLQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/checkout/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/checkout/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/shopping_cart/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shopping_cart/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ui/custom/CartItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ui/custom/CartItem.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
