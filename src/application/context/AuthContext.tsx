@@ -4,6 +4,7 @@ import React, { createContext, useState, useEffect } from 'react';
 import { User } from '@/domain/entities/User';
 import Cookies from 'js-cookie';
 import { CookieEnum } from '@/domain/enums/CookieEnum';
+import { getUserBalance } from '../usecases/walletManagement/getWallet';
 
 interface AuthContextProps {
   user: User | null;
@@ -12,6 +13,7 @@ interface AuthContextProps {
   buyer_seller_id: number;
   login: (token: string, user: User, credit: number, buyer_seller_id: number) => void;
   logout: () => void;
+  fetchAndUpdateBalance: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -64,12 +66,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthenticated(false);
   };
 
+  const fetchAndUpdateBalance = async () => {
+    if (user && user.user_id) {
+      try {
+        const balance = await getUserBalance(user.user_id);
+        if (balance !== null) {
+          setCurrentBalance(balance);
+        }
+      } catch (error) {
+        console.error('Failed to fetch wallet balance:', error);
+      }
+    }
+  };
+
+    // Function to fetch and update current balance from the database
+
   if (loading) {
     return null; 
   }
 
   return (
-    <AuthContext.Provider value={{ user, currentBalance ,isAuthenticated, buyer_seller_id ,login, logout }}>
+    <AuthContext.Provider value={{ user, currentBalance ,isAuthenticated, buyer_seller_id ,login, logout, fetchAndUpdateBalance }}>
       {children}
     </AuthContext.Provider>
   );
