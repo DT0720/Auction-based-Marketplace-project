@@ -131,6 +131,8 @@ const handleBidSubmit = async (e: React.FormEvent) => {
 
       const lastBidder = await placeBid(buyerId, auctionId, user?.user_id ?? 0,price);
 
+      console.log("Last bidder: " + JSON.stringify(lastBidder));  
+
       if (lastBidder > 0) {
         const updatedReviewAndBidderData = await getReviewAndBiddersByProductId((typeof id == "string") ? parseInt(id, 10) : 0);
         if (updatedReviewAndBidderData) {

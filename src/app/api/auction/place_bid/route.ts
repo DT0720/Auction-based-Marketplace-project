@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     console.log("After creating bid");
 
     return NextResponse.json(
-      { message: success ? 'Bid created successfully' : 'Failed to create bid', data: lastBid },
+      { message: success ? 'Bid created successfully' : 'Failed to create bid', data: lastBid?.buyer_id },
       { status: success ? 201 : 400 }
     );
 
