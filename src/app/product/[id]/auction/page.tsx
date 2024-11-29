@@ -34,7 +34,7 @@ export default function ProductAuctionPage() {
   const [timeLeft, setTimeLeft] = useState<string | null>(null);
   const [auctionActive, setAuctionActive] = useState(true);
   const { showLoader, hideLoader } = useLoader();
-  const { user, currentBalance, buyer_seller_id } = useAuth();
+  const { user, currentBalance, buyer_seller_id, fetchAndUpdateBalance } = useAuth();
 
 
   useEffect(() => {
@@ -129,14 +129,15 @@ const handleBidSubmit = async (e: React.FormEvent) => {
         return;
       }
 
-      const success = await placeBid(buyerId, auctionId, price);
+      const success = await placeBid(buyerId, auctionId, user?.user_id ?? 0,price);
 
       if (success) {
-        successMessage(toast, "Bid placed successfully");
         const updatedReviewAndBidderData = await getReviewAndBiddersByProductId((typeof id == "string") ? parseInt(id, 10) : 0);
         if (updatedReviewAndBidderData) {
           setReviewAndBidderData(updatedReviewAndBidderData);
         }
+        fetchAndUpdateBalance();
+        successMessage(toast, "Bid placed successfully");
       } else {
         errorMessage(toast, "Failed to place bid. Please try again.");
       }
