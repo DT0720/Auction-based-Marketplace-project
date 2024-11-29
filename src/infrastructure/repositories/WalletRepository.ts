@@ -41,6 +41,24 @@ export class WalletRepository implements IWalletRepository {
         return wallet ? Wallet.fromJson(wallet) : null;
     }
 
+    async updateWalletBalance(_id: number, balance: number): Promise<boolean> {
+        try {
+            const updatedWallet = await prisma.wallet.update({
+                where: { user_id: _id },
+                data: {
+                    current_balance: balance
+                }
+            });
+            
+            // If the update is successful, return true
+            return updatedWallet !== null;
+        } catch (error) {
+            console.error("Error updating wallet balance:", error);
+            // Return false if there was an error (e.g., wallet not found)
+            return false;
+        }
+    }
+
     async updateWallet(wallet: Wallet): Promise<Wallet> {
         throw new Error("Method not implemented.");
     }

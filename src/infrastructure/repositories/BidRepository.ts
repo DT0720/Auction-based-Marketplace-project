@@ -50,4 +50,49 @@ export class BidRepository implements IBidRepository{
             return [];
         }
     }
+
+    async placeBidAndUpdateWallet(userId: number, buyerId: number,auctionId: number, bidAmount: number, increment: number): Promise<boolean> {
+        try {
+            await prisma.$transaction(async (prisma) => {
+                // Step 1: Find the user's wallet and ensure they have enough balance
+                const wallet = await prisma.wallet.findUnique({
+                    where: { user_id: userId },
+                });
+    
+                if (!wallet) {
+                    throw new Error(`Wallet not found for user with ID: ${userId}`);
+                }
+                console.log("Wallet balance: " + wallet.current_balance + "creating bid: " + bidAmount);
+                // Step 2: Create a new bid
+                await prisma.bid.create({
+                    data: {
+                        auction_id: auctionId,
+                        buyer_id: buyerId,
+                        price: new Prisma.Decimal(bidAmount),
+                        created_at: new Date().toISOString()
+                    },
+                });
+    
+                console.log("Bid created successfully " + bidAmount + " " + auctionId + " " + buyerId + " Now updating wallet balance");
+                // Step 3: Update the wallet balance
+                await prisma.wallet.update({
+                    where: { user_id: userId },
+                    data: {
+                        current_balance: (increment === 0) 
+                        ? Number(wallet.current_balance) - Number(bidAmount)
+                        : Number(wallet.current_balance) - Number(increment),
+                    },
+                });
+
+                console.log("Wallet balance updated successfully" + (Number(wallet.current_balance) - Number(new Prisma.Decimal(bidAmount))));
+            });
+    
+            // If transaction succeeds, return true
+            return true;
+        } catch (error) {
+            console.error("Error placing bid and updating wallet balance in transaction:", error);
+            // If transaction fails, return false
+            return false;
+        }
+    }
 }
