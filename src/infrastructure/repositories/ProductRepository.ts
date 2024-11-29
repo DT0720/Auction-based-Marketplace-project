@@ -98,15 +98,51 @@ export class ProductRepository implements IProductRepository{
         throw new Error("Method not implemented.");
     }
 
-    findByCategory(product_type: typeof ProductTypeEnum): Promise<Product[]> {
-        throw new Error("Method not implemented.");
-    }
-
-    findByPrice(price: number): Promise<Product[]> {
-        throw new Error("Method not implemented.");
-    }
-    findByProductName(productName: string): Promise<Product[]> {
-        throw new Error("Method not implemented.");
+    async findByCategory(categoryKey: keyof typeof ProductTypeEnum): Promise<Product[]> {
+        try {
+            const products = await prisma.product.findMany({
+                where: {
+                    category: {
+                        equals: categoryKey, // Enforces exact match
+                    },
+                },
+            });
+            return products.map(product => Product.fromJson(product));
+        } catch (e: any) {
+            console.log(e.message);
+            return [];
+        }
     }
     
+    async findByPrice(price: number): Promise<Product[]> {
+        try {
+            const products = await prisma.product.findMany({
+                where: {
+                    price_per_unit: price, // Exact price match
+                },
+            });
+            return products.map(product => Product.fromJson(product));
+        } catch (e: any) {
+            console.log(e.message);
+            return [];
+        }
+    }
+    
+    async findByProductName(productName: string): Promise<Product[]> {
+        try {
+            const products = await prisma.product.findMany({
+                where: {
+                    product_name: {
+                        contains: productName.toLowerCase(), // Convert input to lowercase
+                    },
+                },
+            });
+            return products.map(product => Product.fromJson(product));
+        } catch (e: any) {
+            console.log(e.message);
+            return [];
+        }
+    }
+    
+
 }
