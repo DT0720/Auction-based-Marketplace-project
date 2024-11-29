@@ -1,0 +1,27 @@
+import { Decimal } from "@prisma/client/runtime/library";
+
+export class Offers {
+    constructor(
+      public id: number,
+      public type: string,
+      public discount_amount: Decimal,
+    ) {}
+  
+    static fromJson(data : any) : Offers{
+      return new Offers(
+        data.id,
+        data.type,
+        data.discount_amount,
+      );
+    }
+    
+    toJson(): any {
+      return {
+        id: this.id,
+        type: this.type,
+        discount_amount: this.discount_amount,
+      };
+    }
+    
+}
+  

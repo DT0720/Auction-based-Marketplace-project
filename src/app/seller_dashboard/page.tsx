@@ -14,15 +14,17 @@ import useAuth from "@/hooks/use-auth";
 import { getProductBySellerId } from "@/application/usecases/sellerDashboard/products/getProductById";
 import { formatCurrency } from "@/lib/stringUtils";
 
-// Main BuyerDashboard component
-export default function SellerDashboard() {
+// Main sellerDashboard component
+export default function sellerDashboard()
+ {
     const [products, setProducts] = useState<Product[]>([]);
     const { showLoader, hideLoader } = useLoader();
     const { buyer_seller_id } = useAuth();
     const router = useRouter();
     // Fetch products from API
     useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchProducts = async () => 
+            {
             try {
                 showLoader();
                 const fetchedProducts = await getProductBySellerId(buyer_seller_id);
