@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { UserRepository } from '@/infrastructure/repositories/UserRepository';
 import { AddressRepository } from '@/infrastructure/repositories/AddressRepository';
 import { Address } from '@/domain/entities/Address';
 

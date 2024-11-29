@@ -2,6 +2,8 @@ import { Address } from "@/domain/entities/Address"; // Adjust import path based
 import { IAddressRepository } from "@/application/repositories/IAddressRepository"; // Adjust import path based on your project structure
 import { AddressRepository } from "@/infrastructure/repositories/AddressRepository";
 
+const endpoint = "/api/users/user-address/"
+
 // Function to add a new address
 export async function addAddress(user_id: number, flat_no: string, house_no: string, house_name: string, road_no: string, sector: number, area: string, city: string): Promise<Address | null> {
     const addressRepository : IAddressRepository = new AddressRepository();

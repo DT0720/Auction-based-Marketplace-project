@@ -83,14 +83,4 @@ export class AddressRepository implements IAddressRepository {
             return [];
         }
     }
-
-    async findAllAddresses(): Promise<Address[]> {
-        try {
-            const addresses = await prisma.address.findMany();
-            return addresses.map(Address.fromJSON); // Convert each raw address to an Address instance
-        } catch (e) {
-            console.error("Error fetching all addresses:", e);
-            return [];
-        }
-    }
 }
