@@ -3,17 +3,16 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"; // Adjust imports if needed
 import { Input } from "@/components/ui/input"; // Input component
 import { Search } from "lucide-react"; // Search icon
 import { ProductTypeEnum, ProductTypeEnumKey } from "@/domain/enums/ProductTypeEnum";
 import { Select, SelectTrigger,SelectContent,SelectValue,SelectItem } from "../select";
+import { useFilters } from "@/hooks/use-filter";
 
 const SearchBar: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<ProductTypeEnumKey | "">("");
-  const router = useRouter();
+  const { searchQuery, category, setSearchQuery, setCategory } = useFilters();
 
   const selectRef = useRef<HTMLDivElement | null>(null); // Ref for the select element
   const spanRef = useRef<HTMLSpanElement | null>(null); // Ref for the hidden span
@@ -30,16 +29,17 @@ const SearchBar: React.FC = () => {
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`); // Redirect to search results page
-    }
+    console.log("Filters applied:", { searchQuery, category });
   };
 
   return (
     <form onSubmit={handleSearchSubmit} className="w-full max-w-3xl flex items-center space-x-4">
       {/* Category Select Dropdown */}
       <div ref={selectRef} className="w-auto">
-        <Select onValueChange={(value: ProductTypeEnumKey | "") => setSelectedCategory(value)}>
+        <Select onValueChange={(value: ProductTypeEnumKey | "") => {
+            setSelectedCategory(value)
+            setCategory(value);
+        }}>
           <SelectTrigger className="w-auto">
             <SelectValue placeholder= {ProductTypeEnum.ALL} />
           </SelectTrigger>

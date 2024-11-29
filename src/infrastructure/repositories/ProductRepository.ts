@@ -72,6 +72,7 @@ export class ProductRepository implements IProductRepository{
     delete(id: string): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
+    
     async findById(product_id: number): Promise<Product | null> {
 
         console.log(`Product ID findById: ${product_id}`);
@@ -84,6 +85,7 @@ export class ProductRepository implements IProductRepository{
 
         return Product.fromJson(product);
     }
+    
     async findAllProducts(): Promise<Product[]> {
         try{
             const products = await prisma.product.findMany(); // Fetch all products from the database
@@ -94,6 +96,7 @@ export class ProductRepository implements IProductRepository{
             return [];
         }
     }
+    
     findBySellerId(sellerId: string): Promise<Product[]> {
         throw new Error("Method not implemented.");
     }
@@ -134,7 +137,7 @@ export class ProductRepository implements IProductRepository{
                 where: {
                     product_name: {
                         contains: productName.toLowerCase(), // Convert input to lowercase
-                    },
+                    },  
                 },
             });
             return products.map(product => Product.fromJson(product));

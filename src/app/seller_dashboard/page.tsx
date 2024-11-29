@@ -13,12 +13,16 @@ import { ImageStorageService } from "@/infrastructure/services/ImageStorageServi
 import useAuth from "@/hooks/use-auth";
 import { getProductBySellerId } from "@/application/usecases/sellerDashboard/products/getProductById";
 import { formatCurrency } from "@/lib/stringUtils";
+import { useFilters } from "@/hooks/use-filter";
+import { ProductTypeEnum } from "@/domain/enums/ProductTypeEnum";
 
 // Main sellerDashboard component
 export default function sellerDashboard()
  {
     const [products, setProducts] = useState<Product[]>([]);
     const { showLoader, hideLoader } = useLoader();
+    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+    const { searchQuery, category } = useFilters();
     const { buyer_seller_id } = useAuth();
     const router = useRouter();
     // Fetch products from API
@@ -29,6 +33,7 @@ export default function sellerDashboard()
                 showLoader();
                 const fetchedProducts = await getProductBySellerId(buyer_seller_id);
                 setProducts(fetchedProducts);
+                setFilteredProducts(fetchedProducts);
             } catch (error: any) {
                 console.error('Error fetching products:', error.message);
             }finally{
@@ -38,13 +43,33 @@ export default function sellerDashboard()
         fetchProducts();
     }, []);
 
+    useEffect(() => {
+        const filtered = products.filter((product) => {
+            const lowercasedQuery = searchQuery.toLowerCase();
+          
+            // Map the selected category to the enum key for proper comparison
+            const selectedCategory = category === ProductTypeEnum.ALL ? ProductTypeEnum.ALL : category;
+          
+            // Matches category from the enum key or from the 'All' category
+            const matchesCategory = selectedCategory === ProductTypeEnum.ALL || product.category === selectedCategory;
+
+            console.log("Selected Category is: " + selectedCategory + " Product category is: " + product.category);
+          
+            // Matches search query (case-insensitive)
+            const matchesQuery = !searchQuery || product.productName?.toLowerCase().includes(lowercasedQuery);
+          
+            return matchesCategory && matchesQuery;
+          });
+        setFilteredProducts(filtered);
+      }, [searchQuery, category, products]);
+
     return (
         <div className="min-h-screen bg-white">
             {/* Products Display */}
             <main className="mt-8 p-4">
-                {products.length > 0 ? (
+                {filteredProducts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {products.map((product) => (
+                    {filteredProducts.map((product) => (
                     <Card
                         key={product.id}
                         className="border border-gray-300 rounded-lg p-4 flex flex-col justify-between cursor-pointer hover:shadow-lg hover:cursor-pointer"
@@ -55,7 +80,7 @@ export default function sellerDashboard()
                         </div>
                         <div className="mb-4">
                         <h3 className="font-semibold text-lg">{product.productName}</h3>
-                        <p className="text-sm text-gray-500">Category: {product.category}</p>
+                        <p className="text-sm text-gray-500">Category: {ProductTypeEnum[product.category as keyof typeof ProductTypeEnum] ?? ProductTypeEnum.NO_CATEGORY}</p>
                         <p className="font-bold mt-2">Price: {formatCurrency(product.pricePerUnit)}</p>
                         </div>
                         <div className="flex justify-between mt-auto">

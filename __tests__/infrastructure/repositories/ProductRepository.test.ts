@@ -52,7 +52,7 @@ describe('ProductRepository', () => {
     it('should fetch the products by product name', async () => {
      
       // Act
-      const products = await productRepository.findByProductName("");
+      const products = await productRepository.findByProductName("mallick");
   
       console.log("Test is: " + JSON.stringify(products));
       // if(success){
