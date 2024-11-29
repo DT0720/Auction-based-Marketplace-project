@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { CookieEnum } from './domain/enums/CookieEnum';
-import { getPublicRoutes,getProtectedRoutes, ROUTES } from './application/routing/routes';
+import { getPublicRoutes,getProtectedRoutes } from './application/routing/routes';
 
 const publicPaths = getPublicRoutes();
 const protectedPaths = getProtectedRoutes();
 const allPaths = [...publicPaths, ...protectedPaths];
-
 /**
  * Middleware to handle route access control based on authentication status.
  *
