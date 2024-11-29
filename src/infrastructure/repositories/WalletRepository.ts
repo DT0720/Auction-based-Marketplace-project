@@ -36,7 +36,7 @@ export class WalletRepository implements IWalletRepository {
 
     async getWallet(_id: number): Promise<Wallet | null> {
         const wallet = await prisma.wallet.findUnique({
-            where: { id: _id },
+            where: { user_id: _id },
         });
         return wallet ? Wallet.fromJson(wallet) : null;
     }
