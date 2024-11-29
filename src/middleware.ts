@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { CookieEnum } from './domain/enums/CookieEnum';
-import { getPublicRoutes,getProtectedRoutes, ROUTES } from './application/routing/routes';
+import { getPublicRoutes,getProtectedRoutes } from './application/routing/routes';
 
 const publicPaths = getPublicRoutes();
 const protectedPaths = getProtectedRoutes();
 const allPaths = [...publicPaths, ...protectedPaths];
-
 /**
  * Middleware to handle route access control based on authentication status.
  *
@@ -52,7 +51,7 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
  * Configures the routes that the middleware should match.
  */
 export const config = {
-    matcher: ['/login', '/signup', '/forgot-password', '/buyer_dashboard', '/seller_dashboard', '/review_dashboard', '/product/:path*'], 
+    matcher: ['/login', '/signup', '/forgot-password', '/buyer_dashboard', '/seller_dashboard','/discount', '/product/:path*', '/review_dashboard'], 
 };
 
 

@@ -63,7 +63,7 @@ model notifications {
 
 model offers {
   id              Int      @id @default(autoincrement()) @db.UnsignedInt
-  type            String   @db.VarChar(255)
+  type            String   @unique(map: "UQ_offer_type") @db.VarChar(255)
   discount_amount Decimal  @db.Decimal(8, 2)
   orders          orders[]
 }
@@ -73,11 +73,14 @@ model order_details {
   order_id   Int     @db.UnsignedInt
   product_id Int     @db.UnsignedInt
   quantity   Int
+  seller_id  Int     @db.UnsignedInt
+  seller     seller  @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "fk_seller_order_details")
   orders     orders  @relation(fields: [order_id], references: [id], onUpdate: Restrict, map: "order_details_order_id_foreign")
   product    product @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "order_details_product_id_foreign")
 
   @@index([order_id], map: "order_details_order_id_foreign")
   @@index([product_id], map: "order_details_product_id_foreign")
+  @@index([seller_id], map: "fk_seller_order_details")
 }
 
 model orders {
@@ -85,15 +88,13 @@ model orders {
   buyer_id      Int             @db.UnsignedInt
   offer_id      Int?            @db.UnsignedInt
   status        String?         @db.VarChar(255)
-  seller_id     Int             @db.UnsignedInt
+  total_amount  Decimal?        @db.Decimal(8, 2)
   order_details order_details[]
   buyer         buyer           @relation(fields: [buyer_id], references: [id], onUpdate: Restrict, map: "orders_buyer_id_foreign")
   offers        offers?         @relation(fields: [offer_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "orders_offer_id_foreign")
-  seller        seller          @relation(fields: [seller_id], references: [id], onUpdate: Restrict, map: "orders_seller_id_foreign")
 
   @@index([buyer_id], map: "orders_buyer_id_foreign")
   @@index([offer_id], map: "orders_offer_id_foreign")
-  @@index([seller_id], map: "orders_seller_id_foreign")
 }
 
 model product {
@@ -114,7 +115,7 @@ model seller {
   id               Int                @id @default(autoincrement()) @db.UnsignedInt
   user_id          Int                @db.UnsignedInt
   auction          auction[]
-  orders           orders[]
+  order_details    order_details[]
   user             user               @relation(fields: [user_id], references: [user_id], onUpdate: Restrict, map: "seller_user_id_foreign")
   seller_inventory seller_inventory[]
 
@@ -154,7 +155,7 @@ model user {
 
 model wallet {
   id              Int       @id @default(autoincrement()) @db.UnsignedInt
-  user_id         Int       @db.UnsignedInt
+  user_id         Int       @unique(map: "UK_User") @db.UnsignedInt
   payment_type    String?   @db.VarChar(255)
   card_number     String?   @db.VarChar(255)
   expiry_date     DateTime? @db.Date
