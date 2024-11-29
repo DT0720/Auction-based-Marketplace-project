@@ -1,79 +1,57 @@
+// ReviewRepository.test.ts
+// Import the ReviewRepository class to be tested and the prisma client mock
+import { ReviewRepository } from '@/infrastructure/repositories/ReviewRepository';
 import { prisma } from '@/infrastructure/database/prisma';
-import { getReviewData,createReview } from '@/infrastructure/repositories/ReviewRepository';
 
-
+// Mock the prisma client to isolate tests from the real database
 jest.mock('@/infrastructure/database/prisma', () => ({
-    prisma: {
-        review: {
-            findUnique: jest.fn(),
-            create: jest.fn(),
-        },
+  prisma: {
+    review: {
+      findMany: jest.fn(),// Mock the findMany method used in tests
     },
+  },
 }));
 
-describe('getReviewData', () => {
-    it('should return review data for a valid user and review ID', async () => {
-        const mockReview = {
-            review_id: 1,
-            review_content: 'Great product!',
-            user_id: 1,
-            product_id: 1,
-            rating: 5,
-            buyer: { id: 1, name: 'John Doe' },
-            product: { id: 1, name: 'Product 1' },
-        };
+// Define a test suite for the ReviewRepository class
+describe('ReviewRepository', () => {
+  let reviewRepository: ReviewRepository;
 
-        (prisma.review.findUnique as jest.Mock).mockResolvedValue(mockReview);
+// Instantiate a new ReviewRepository before each test
+  beforeEach(() => {
+    reviewRepository = new ReviewRepository();
+  });
 
-        const result = await getReviewData(1, 1);
+  // Clear all mocked functions after each test to prevent test data leakage
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-        expect(result).toEqual(mockReview);
+
+  it('should fetch reviews by buyer ID', async () => {
+    // Arrange
+    const buyerId = 1;
+    const mockReviews = [
+      {
+        review_id: 1,
+        review_content: 'Excellent product!',
+        buyer_id: buyerId,
+        product_id: 2,
+        rating: 5,
+        buyer: { id: buyerId, user_id: buyerId, name: 'Alice' },
+        product: { id: 2, product_name: 'Gadget' },
+      },
+    ];
+    (prisma.review.findMany as jest.Mock).mockResolvedValue(mockReviews);
+
+    // Act
+    const reviews = await reviewRepository.getReviewsByUserId(buyerId);
+    console.log('Fetched Reviews:', reviews);
+
+    // Assert
+    expect(prisma.review.findMany).toHaveBeenCalledWith({
+      where: { user_id: buyerId },
+      include: { buyer: true, product: true },
     });
-
-    it('should throw an error if review is not found', async () => {
-        (prisma.review.findUnique as jest.Mock).mockResolvedValue(null);
-
-        await expect(getReviewData(1, 1)).rejects.toThrow('Review not found or user does not have access to this review');
-    });
-
-    it('should throw an error if user does not have access to the review', async () => {
-        const mockReview = {
-            review_id: 1,
-            review_content: 'Great product!',
-            user_id: 2,
-            product_id: 1,
-            rating: 5,
-            buyer: { id: 2, name: 'Jane Doe' },
-            product: { id: 1, name: 'Product 1' },
-        };
-
-        (prisma.review.findUnique as jest.Mock).mockResolvedValue(mockReview);
-
-        await expect(getReviewData(1, 1)).rejects.toThrow('Review not found or user does not have access to this review');
-    });
-});
-describe('createReview', () => {
-    it('should create a new review', async () => {
-        const mockReview = {
-            review_id: 1,
-            review_content: 'Great product!',
-            user_id: 1,
-            product_id: 1,
-            rating: 5,
-        };
-
-        (prisma.review.create as jest.Mock).mockResolvedValue(mockReview);
-
-        const result = await createReview(1, 1, 'Great product!', 5);
-
-        expect(result).toEqual(mockReview);
-        expect(prisma.review.create).toHaveBeenCalledWith({
-            data: {
-                review_content: 'Great product!',
-                user_id: 1,
-                product_id: 1,
-                rating: 5,
-            },
-        });
-    });
+    expect(reviews).toEqual(mockReviews);
+  });
 });

@@ -124,43 +124,6 @@ export class AuctionRepository implements IAuctionRepository{
     async findAll(): Promise<Auction[]> {
         throw new Error("Method not implemented.");
     }
-
-    /**
-     * Finds all active auctions.
-     * 
-     * @returns {Promise<Auction[]>} - The list of active auctions.
-     */
-    async findActiveAuctions(): Promise<{ product: Product; auction: Auction }[]> {
-        try{
-            const productsOnSale = await prisma.product.findMany({
-                where: {
-                    auction: {
-                        some: {
-                            status: true
-                        }
-                    }
-                },
-                include: {
-                    auction: true
-                }
-            });
-    
-            if(!productsOnSale){
-                throw new Error("Error fetching products on sale");
-            }
-    
-            return productsOnSale.flatMap(product => 
-                product.auction.map(auction => ({
-                    product: Product.fromJson(product),
-                    auction: Auction.fromJson(auction)
-                }))
-            );
-        }catch(error){
-            console.log(error);
-            return [];
-        }
-    }
-
     /**
      * Finds all products on auction.
      * 
