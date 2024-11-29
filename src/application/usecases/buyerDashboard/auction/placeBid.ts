@@ -2,9 +2,9 @@ import NetworkUtils, { ApiResponse } from "@/lib/networkUtils";
 
 const endpoint = "/api/auction/place_bid/";
 
-export async function placeBid(userId: number, auction_id: number, price: number): Promise<boolean> {
+export async function placeBid(buyer_id: number, auction_id: number, price: number): Promise<boolean> {
     const body = {
-        user_id: userId,
+        buyer_id: buyer_id,
         auction_id: auction_id,
         price: price
     }
@@ -13,7 +13,7 @@ export async function placeBid(userId: number, auction_id: number, price: number
         throw new Error("Price must be greater than 0");
     }
 
-    if (userId <= 0) {
+    if (buyer_id <= 0) {
         throw new Error("Invalid user id");
     }
 

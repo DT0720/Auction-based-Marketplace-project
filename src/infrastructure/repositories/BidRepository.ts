@@ -5,11 +5,13 @@ import { Prisma } from "@prisma/client";
 
 export class BidRepository implements IBidRepository{
 
-    async createBid(auction_id: number, user_id: number, price: number): Promise<boolean> {
+    async createBid(auction_id: number, buyer_id: number, price: number): Promise<boolean> {
+
+        console.log("Creating bid" + auction_id + " " + buyer_id + " " + price);
 
         const body = {
             auction_id: auction_id,
-            buyer_id: user_id,
+            buyer_id: buyer_id,
             price: new Prisma.Decimal(price), // Use Prisma.Decimal for decimal fields  
             created_at: new Date().toISOString()
         }
@@ -20,7 +22,7 @@ export class BidRepository implements IBidRepository{
             await prisma.bid.create({
                 data: {
                     auction_id: auction_id,
-                    buyer_id: user_id,
+                    buyer_id: buyer_id,
                     price: new Prisma.Decimal(price), // Use Prisma.Decimal for decimal fields  
                     created_at: new Date().toISOString()
                 }

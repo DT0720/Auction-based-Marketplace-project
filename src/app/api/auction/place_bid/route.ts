@@ -15,7 +15,6 @@ export async function POST(req: Request) {
 
     const bidHistory = await bidRepository.getBidsByAuctionId(body.auction_id);
 
-    
     console.log("Not own bid: "+ JSON.stringify(body));
     if(bidHistory.length > 0){
         bidHistory.sort((a, b) => a.price - b.price);
@@ -24,13 +23,13 @@ export async function POST(req: Request) {
             throw new Error('Bid price must be greater than the current highest bid'); // Throw an error if the product was not created
         }
 
-        if(bidHistory[bidHistory.length - 1].buyer_id === body.user_id){
+        if(bidHistory[bidHistory.length - 1].buyer_id === body.buyer_id){
             console.log("You cannot bid on your own product");
             throw new Error('You cannot bid on your own product'); // Throw an error if the product was not created
         }
     }
 
-    const success = await bidRepository.createBid(body.auction_id, body.user_id, body.price); // Create the product using the use case
+    const success = await bidRepository.createBid(body.auction_id, body.buyer_id, body.price); // Create the product using the use case
 
     console.log("After creating bid");
 
