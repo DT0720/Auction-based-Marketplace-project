@@ -16,7 +16,7 @@ export async function GET(req: Request) {
       productList.map(async (product) => {
         if (product.photo) {
           console.log("Before: " + product.photo );
-          product.photo = await imageStorageService.getFileUrl(product.photo, PhotoTypeEnum.PRODUCT);
+          product.photo = await imageStorageService.getFileUrl(product.photo);
           console.log("After: " + product.photo);
         }else{
           product.photo = ImageStorageService.productPlaceholderImage;

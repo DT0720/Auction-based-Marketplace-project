@@ -21,7 +21,7 @@ const Navbar = () => {
   const { user, isAuthenticated, logout, currentBalance } = useAuth(); // Hook for authentication state
   const router = useRouter(); // Next.js router
   const pathname = usePathname(); // To determine the active page
-  const { cartCount, clearCart } = useCart(); // Hook for cart state
+  const { cartCount } = useCart(); // Hook for cart state
 
   const isBuyer = user?.type.toLocaleLowerCase() === "b"; 
   const isSeller = user?.type.toLocaleLowerCase() === "s";
@@ -32,7 +32,6 @@ const Navbar = () => {
   }).format(currentBalance);
 
   const logoutHandler = () => {
-    clearCart();
     logout();
     router.push(ROUTES.LOGIN);
   };
@@ -165,13 +164,9 @@ const Navbar = () => {
                 Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => console.log("Navigate to My Cart")}>
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                My Cart
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => console.log("Navigate to Ongoing Bids")}>
                 <List className="mr-2 h-4 w-4" />
-                Ongoing Bids
+                Your Auctions
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logoutHandler}>

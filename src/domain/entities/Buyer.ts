@@ -5,6 +5,7 @@ export class Buyer{
     ){}
 
     static fromJson(data: any): Buyer{
+        console.log("Buyer data is " + data);
         return new Buyer(data.id, data.user_id);
     }
 }

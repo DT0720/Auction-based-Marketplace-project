@@ -2,7 +2,6 @@
 
 import { IProductRepository } from '@/application/repositories/IProductRepository';
 import { IFileStorageService } from '@/application/services/IFileStorageService';
-import { PhotoTypeEnum } from '@/domain/enums/PhotoTypeEnum';
 import { ProductRepository } from '@/infrastructure/repositories/ProductRepository';
 import { ImageStorageService } from '@/infrastructure/services/ImageStorageService';
 import { NextRequest, NextResponse } from 'next/server';
@@ -29,11 +28,13 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
         }
 
         if (product.photo) {
-            product.photo = await imageStorageService.getFileUrl(product.photo,PhotoTypeEnum.PRODUCT);
+            product.photo = await imageStorageService.getFileUrl(product.photo);
             if (!product.photo) {
               product.photo = ImageStorageService.productPlaceholderImage;
             }
         }
+
+        console.log("Get By Id photo: " + product.photo);
 
         return NextResponse.json({ message: 'Product found successfully', data: product }, { status: 200 });
     } catch (error: any) {
