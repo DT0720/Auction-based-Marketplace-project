@@ -132,7 +132,7 @@ export default function AddItemOnSale() {
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(ProductTypeEnum).map(([key, value]) => (
-                  <SelectItem key={key} value={value}>{value}</SelectItem>
+                  <SelectItem key={key} value={key}>{value}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
