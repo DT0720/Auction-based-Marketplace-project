@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="kadir" uuid="d0511a93-0039-46dc-bd1d-03ea54320e12">
+    <data-source source="LOCAL" name="fuad" uuid="4edef56c-c3b2-43ff-9f15-11440a4ab9c4">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://94.250.203.197:3306/eCommerce</jdbc-url>
+      <jdbc-url>jdbc:mysql://94.250.203.197:3306</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

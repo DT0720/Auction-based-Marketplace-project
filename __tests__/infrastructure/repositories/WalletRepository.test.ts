@@ -21,7 +21,7 @@ describe('WalletRepository', () => {
     }
     
     // Act
-    const wallet = await walletRepository.createWallet(mockWallet);
+    const wallet = await walletRepository.decrementWalletBalance(46, 10000);
 
     console.log("Test is: " + JSON.stringify(wallet));
   });

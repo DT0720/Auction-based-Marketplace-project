@@ -39,7 +39,7 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
+      <div className="w-full flex h-14 items-center justify-between px-4">
         {/* Left: Logo */}
         <div className="flex items-center">
           <Home className="mr-2 text-blue-500" />
@@ -55,7 +55,6 @@ const Navbar = () => {
 
         {/* Right: Conditional buttons */}
         <div className="flex items-center gap-4">
-          <NotificationDropdown />
           {!isAuthenticated ? (
             <>
               {/* Guest View: Login & Signup */}
@@ -72,13 +71,16 @@ const Navbar = () => {
               >
                 Sign Up
               </Button>
+
             </>
           ) : isBuyer ? (
             <>
               {/* Buyer View */}
-              <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
+              {/* <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
                 <Bell />
-              </Button>
+              </Button> */}
+
+              <NotificationDropdown />
               <Button variant="ghost" className="mr-4" onClick={() => router.push(ROUTES.SHOPPING_CART)}>
                 <ShoppingCart />
                 {cartCount > 0 && (
@@ -134,9 +136,10 @@ const Navbar = () => {
           ) : isSeller ? (
             <>
               {/* Seller View */}
-              <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
+              {/* <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
                 <Bell />
-              </Button>
+              </Button> */}
+              <NotificationDropdown />
               <Button variant="ghost" className="mr-4">
                 <CreditCard />
                 <span className="ml-2">{formattedCurrency}</span>

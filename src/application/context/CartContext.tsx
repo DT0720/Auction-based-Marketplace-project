@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import { LocalStorageService } from '@/infrastructure/services/LocalStorageService';
 import { getProductById } from '../usecases/sellerDashboard/products/getProductById';
 import useAuth from '@/hooks/use-auth';
