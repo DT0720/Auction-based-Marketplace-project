@@ -1,20 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/stringUtils";
-import { PrismaClient } from "@prisma/client"; // Import Prisma client
+import { useRouter } from "next/navigation";
+import { getAllDiscounts } from "@/application/usecases/discountManagement/getDiscount";
+import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
+import { useToast } from "@/hooks/use-toast";
+import { OrderStatusEnum } from "@/domain/enums/OrderStatusEnum";
+import createOrder from "@/application/usecases/orderManagement/createOrder";
+import useAuth from "@/hooks/use-auth";
+import { useCart } from "@/hooks/use-cart";
+import { ROUTES } from "@/application/routing/routes";
 
-// Initialize Prisma client
-const prisma = new PrismaClient();
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const {toast} = useToast();
+  const {buyer_seller_id, user, fetchAndUpdateBalance} = useAuth();
+  const {clearCart} = useCart();
 
-  // Billing Information
+  // Billing Information State
   const [billingInfo, setBillingInfo] = useState({
     name: "",
     address: "",
@@ -23,13 +30,13 @@ export default function CheckoutPage() {
     country: "US",
   });
 
-  // Payment Method and Discounts
-  const [paymentMethod, setPaymentMethod] = useState<string>("creditCard");
+  // Payment Method and Discounts State
+  const [paymentMethod, setPaymentMethod] = useState<string>("creditCard"); // Default payment method
   const [couponCode, setCouponCode] = useState<string>("");
   const [discountApplied, setDiscountApplied] = useState<boolean>(false);
   const [discountAmount, setDiscountAmount] = useState<number>(0); // Store discount amount
 
-  // Total Amount (received via query)
+  // Total Amount States (Received via query)
   const [total, setTotal] = useState<number>(0);
   const [finalTotal, setFinalTotal] = useState<number>(0); // Updated total after discount
 
@@ -44,86 +51,134 @@ export default function CheckoutPage() {
     }
   }, []);
 
+  useEffect(() => {
+    setFinalTotal(total - discountAmount);
+  }, [discountAmount, total]);
+
   // Handle changes in billing information
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setBillingInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Apply Discount Logic (fetch from DB)
+  // Apply Discount Logic (API call to validate and apply discount)
   const applyDiscount = async () => {
-    if (couponCode && !discountApplied) {
-      try {
-        // Fetch discount from the database using the coupon code
-        const offer = await prisma.offers.findFirst({
-          where: { type: couponCode }, // Assuming coupon code is stored in the 'type' field
-        });
-
-        if (offer) {
-          // Convert discount from Decimal to number
-          const discountValue = offer.discount_amount.toNumber();
-          setDiscountAmount(discountValue);
-
-          // Calculate new total after discount
-          const newTotal = total - discountValue;
-          setFinalTotal(newTotal); // Update the final total
-
-          // Mark discount as applied
-          setDiscountApplied(true);
-          alert(`Discount Applied: ${formatCurrency(discountValue)} off!`);
-        } else {
-          alert("Invalid Coupon Code");
-        }
-      } catch (error) {
-        console.error("Error applying discount:", error);
-        alert("There was an error applying the discount.");
-      }
-    } else if (discountApplied) {
-      alert("Discount has already been applied!");
-    }
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate billing information
-    if (!billingInfo.name || !billingInfo.address || !billingInfo.city || !billingInfo.zip) {
-      alert("Please fill out all required fields.");
+    if (!couponCode) {
+      alert("Please enter a coupon code.");
       return;
     }
 
-    // Create order in Prisma with applied discount
-    try {
-      // Create the order in the database
-      const order = await prisma.orders.create({
-        data: {
-          buyer_id: 1, // Assuming a hardcoded buyer ID (you should use the authenticated user's ID)
-          offer_id: discountApplied ? 1 : null, // Apply the discount offer if discount is applied
-          status: "pending",
-          order_details: {
-            create: [
-              {
-                product_id: 1, // Assuming a hardcoded product ID
-                quantity: 1, // Assuming quantity of 1 for the product
-                seller_id: 1, // Assuming a hardcoded seller ID
-              },
-            ],
-          },
-        },
-      });
+    if (discountApplied) {
+      alert("Discount has already been applied.");
+      return;
+    }
 
-      // Redirect to confirmation page on success
-      if (order) {
-        router.push("/order-confirmation");
+    try {
+      const discounts = await getAllDiscounts();
+
+      // Check if the entered coupon code matches any discount code
+      const discount = discounts.find(d => d.type === couponCode);
+      if (discount) {
+        // Apply the discount
+        setDiscountAmount(discount.discountAmount);
+        setDiscountApplied(true);
+        alert("Discount applied successfully!");
       } else {
-        alert("Error during checkout.");
+        alert("Invalid coupon code.");
       }
+
     } catch (error) {
-      console.error("Checkout error:", error);
-      alert("There was an issue processing your order.");
+      console.error("Error applying discount:", error);
+      errorMessage(toast, "Failed to apply discount. Please try again.");
     }
   };
+
+  // Product Details State
+const [productDetails, setProductDetails] = useState([]);
+
+// Load product details from sessionStorage
+useEffect(() => {
+    const storedProductDetails = sessionStorage.getItem("checkoutProductDetails");
+    if (storedProductDetails) {
+        setProductDetails(JSON.parse(storedProductDetails));
+    }
+}, []);
+
+
+  // // Create order and order details
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   // Validate billing information
+  //   if (!billingInfo.name || !billingInfo.address || !billingInfo.city || !billingInfo.zip) {
+  //     alert("Please fill out all required fields.");
+  //     return;
+  //   }
+
+  //   try {
+  //     // Prepare order data for submission
+  //     const orderData = {
+  //       buyer_id: buyer_seller_id,
+  //       status: OrderStatusEnum.Pending,
+  //       total_amount: finalTotal
+  //     };
+  
+  //     // Make API request to create order
+  //     const success = await createOrder(orderData);
+  
+  //     if (success) {
+  //       successMessage(toast, "Order placed successfully!", "Order Created!");
+  //       router.push("/order-confirmation");
+  //     } else {
+  //       errorMessage(toast, "There was an error processing your order.");
+  //     }
+  
+  //   } catch (error) {
+  //     console.error("Error creating order:", error);
+  //     errorMessage(toast, "Failed to create order. Please try again.");
+  //   }
+  
+  // };
+  
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Validate billing information
+    if (!billingInfo.name || !billingInfo.address || !billingInfo.city || !billingInfo.zip) {
+        alert("Please fill out all required fields.");
+        return;
+    }
+
+    try {
+        // Prepare order data for submission
+        const orderData = {
+            user_id: user?.user_id,
+            buyer_id: buyer_seller_id,
+            status: OrderStatusEnum.Pending,
+            total_amount: finalTotal,
+            orderDetails: productDetails, // Include product details here
+        };
+
+        // Make API request to create order
+        const success = await createOrder(orderData);
+
+        if (success) {
+          fetchAndUpdateBalance();
+          // Clear the cart from sessionStorage once the order is placed
+          clearCart();
+          successMessage(toast, "Order placed successfully!", "Order Created!");
+      
+          // Use router.replace() to replace the current page with the buyer dashboard
+          router.replace(ROUTES.BUYER_DASHBOARD);
+      } else {
+            errorMessage(toast, "There was an error processing your order.");
+        }
+    } catch (error) {
+        console.error("Error creating order:", error);
+        errorMessage(toast, "Failed to create order. Please try again.");
+    }
+  };
+  
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -137,6 +192,46 @@ export default function CheckoutPage() {
             <Input name="address" placeholder="Address" value={billingInfo.address} onChange={handleChange} required />
             <Input name="city" placeholder="City" value={billingInfo.city} onChange={handleChange} required />
             <Input name="zip" placeholder="ZIP Code" value={billingInfo.zip} onChange={handleChange} required />
+          </div>
+
+          {/* Payment Method */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Payment Method</h2>
+            <div className="space-y-2">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="creditCard"
+                  checked={paymentMethod === "creditCard"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="mr-2"
+                />
+                Credit Card
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="paypal"
+                  checked={paymentMethod === "paypal"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="mr-2"
+                />
+                PayPal
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="cashOnDelivery"
+                  checked={paymentMethod === "cashOnDelivery"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="mr-2"
+                />
+                Cash on Delivery
+              </label>
+            </div>
           </div>
 
           {/* Coupon Code */}
@@ -153,7 +248,7 @@ export default function CheckoutPage() {
 
           {/* Total Amount */}
           <div className="border-t pt-4 mt-6">
-            <h2 className="text-xl font-semibold text-gray-900">Total Amount to Pay</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Amount to Pay</h2>
             <div className="flex justify-between">
               <span>Total (including tax)</span>
               <span>{formatCurrency(total)}</span>
@@ -161,10 +256,10 @@ export default function CheckoutPage() {
             {discountApplied && (
               <div className="flex justify-between text-red-600">
                 <span>Discount Applied</span>
-                <span>{formatCurrency(discountAmount)}</span>
+                <span>-{formatCurrency(discountAmount)}</span>
               </div>
             )}
-            <div className="flex justify-between font-bold">
+            <div className={`flex justify-between font-bold ${discountApplied ? 'text-green-600' : ''}`}>
               <span>Final Total</span>
               <span>{formatCurrency(finalTotal)}</span>
             </div>
