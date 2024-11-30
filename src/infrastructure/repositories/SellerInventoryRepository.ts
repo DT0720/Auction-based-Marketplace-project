@@ -138,4 +138,30 @@ export class SellerInventoryRepository implements ISellerInvertoryRepository {
         throw new Error("Method not implemented.");
     }
 
+    async getSellerIdsByProductIds(productIds: number[]): Promise<{ seller_id: number; product_id: number }[]> {
+        try {
+          const sellers = await prisma.seller_inventory.findMany({
+            where: {
+              product_id: {
+                in: productIds, // Filters seller_inventory records by product IDs
+              },
+            },
+            select: {
+              seller_id: true, // Select the seller_id field
+              product_id: true, // Select the product_id field
+            },
+          });
+      
+          // Return the array of objects containing seller_id and product_id
+          return sellers.map(seller => ({
+            seller_id: seller.seller_id,
+            product_id: seller.product_id,
+          }));
+        } catch (error) {
+          console.error("Error fetching seller IDs by product IDs:", error);
+          return [];
+        }
+      }
+      
+
 }
