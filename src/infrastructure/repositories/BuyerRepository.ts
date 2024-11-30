@@ -21,9 +21,9 @@ export class BuyerRepository implements IBuyerRepository {
     }
     async findById(id: number): Promise<Buyer | null> {
         try{
-            const buyer = await prisma.buyer.findUnique({
+            const buyer = await prisma.buyer.findFirst({
                 where: {
-                    id: id
+                    user_id: id
                 }
             });
             return Buyer.fromJson(buyer);

@@ -1,25 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { UserRepository } from '@/infrastructure/repositories/UserRepository';
 import { AddressRepository } from '@/infrastructure/repositories/AddressRepository';
 import { Address } from '@/domain/entities/Address';
 
 const addressRepository = new AddressRepository();
-
-// Handle GET requests for fetching user addresses
-export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+//Find addresses by user ID
+export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await context.params;
 
         const userId = parseInt(id, 10);
-        const addresses = await addressRepository.findByUserId(userId); // Fetch addresses by user ID
 
-        return NextResponse.json({
-            data: addresses,
-            message: "Address received successfully"
-        }, { status: 200 });
+        if (!userId) throw new Error('User ID is required');
 
+        const addresses = await addressRepository.findByUserId(userId);
+
+        return NextResponse.json(
+            { message: 'Addresses retrieved successfully', data: addresses },
+            { status: 200 }
+        );
     } catch (error: any) {
         return NextResponse.json(
-            { message: error.message || 'Failed to fetch addresses' },
+            { message: error.message || 'Failed to retrieve addresses' },
             { status: 400 }
         );
     }

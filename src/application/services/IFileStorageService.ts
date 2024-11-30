@@ -1,5 +1,5 @@
 export interface IFileStorageService {
-      /**
+  /**
    * Uploads a file to the storage service.
    * @param file - The file to be uploaded.
    * @param path - The path or directory where the file will be stored.

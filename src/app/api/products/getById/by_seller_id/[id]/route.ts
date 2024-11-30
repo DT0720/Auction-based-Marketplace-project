@@ -20,22 +20,23 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
           return NextResponse.json({ message: 'Invalid product ID' }, { status: 400 });
         }
 
-        const product = await sellerInventoryRepository.findBySellerId(sellerId);
+        const products = await sellerInventoryRepository.findBySellerId(sellerId);
 
-        if (!product) {
+        if (!products) {
             return NextResponse.json({ message: 'Product list not found' }, { status: 404 });
         }
 
-        product.forEach(async (product) => {
+        const updatedProducts = await Promise.all(products.map(async (product) => {
             if (product.photo) {
-                product.photo = await imageStorageService.getFileUrl(product.photo);
-                if (!product.photo) {
-                  product.photo = ImageStorageService.productPlaceholderImage;
-                }
+              product.photo = await imageStorageService.getFileUrl(product.photo);
             }
-        });
+            if (!product.photo) {
+              product.photo = ImageStorageService.productPlaceholderImage;
+            }
+            return product;
+          }));
 
-        return NextResponse.json({ message: 'Product list found successfully', data: product }, { status: 200 });
+        return NextResponse.json({ message: 'Product list found successfully', data: updatedProducts }, { status: 200 });
     } catch (error: any) {
         console.error('Error in GET request:', error);
         return NextResponse.json({ message: 'Error processing request', data: null }, { status: 500 });

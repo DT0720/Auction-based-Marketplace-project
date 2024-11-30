@@ -1,69 +1,64 @@
 import { NextResponse } from 'next/server';
-import { IAddressRepository } from "@/application/repositories/IAddressRepository"; // Adjust import path based on your project structure
-import { AddressRepository } from "@/infrastructure/repositories/AddressRepository"; // Adjust import path based on your project structure
-import { Address } from "@/domain/entities/Address"; // Adjust import path based on your project structure
+import { UserRepository } from '@/infrastructure/repositories/UserRepository';
+import { AddressRepository } from '@/infrastructure/repositories/AddressRepository';
+import { Address } from '@/domain/entities/Address';
 
-const addressRepository: IAddressRepository = new AddressRepository();
+const addressRepository = new AddressRepository();
 
-// Handler for adding a new address
+// Create a new address
 export async function POST(req: Request) {
-    const { user_id, flat_no, house_no, house_name, road_no, sector, area, city } = await req.json();
-
     try {
-        const newAddress = new Address(0, user_id, flat_no, house_no, house_name, road_no, sector, area, city);
-        const createdAddress = await addressRepository.create(newAddress);
-        
-        return NextResponse.json(createdAddress, { status: 201 }); // Respond with created address
+        const body = await req.json();
+        const newAddress = await addressRepository.create(body as Address);
+
+        return NextResponse.json(
+            { message: 'Address created successfully', data: newAddress },
+            { status: 201 }
+        );
     } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 400 });
+        return NextResponse.json(
+            { message: error.message || 'Failed to create address' },
+            { status: 400 }
+        );
     }
 }
 
-// Handler for updating an existing address
+// Update an existing address
 export async function PUT(req: Request) {
-    const { id, flat_no, house_no, house_name, road_no, sector, area, city } = await req.json();
-
     try {
-        const existingAddress = await addressRepository.findById(id);
-        
-        if (!existingAddress) {
-            return NextResponse.json({ message: 'Address not found' }, { status: 404 });
-        }
+        const body = await req.json();
+        const success = await addressRepository.update(body as Address);
 
-        const updatedAddress = new Address(
-          id,
-          existingAddress.user_id,
-          flat_no ?? existingAddress.flat_no,
-          house_no ?? existingAddress.house_no,
-          house_name ?? existingAddress.house_name,
-          road_no ?? existingAddress.road_no,
-          sector ?? existingAddress.sector,
-          area ?? existingAddress.area,
-          city ?? existingAddress.city
-      );
-
-      await addressRepository.update(updatedAddress);
-
-      return NextResponse.json({ message: 'Updated successfully' });
-      
+        return NextResponse.json(
+            { message: success ? 'Address updated successfully' : 'Failed to update address' },
+            { status: success ? 200 : 400 }
+        );
     } catch (error: any) {
-      return NextResponse.json({ message: error.message }, { status: 400 });
-  }
+        return NextResponse.json(
+            { message: error.message || 'Failed to update address' },
+            { status: 400 }
+        );
+    }
 }
 
-// Handler for deleting an address
+// Delete an address
 export async function DELETE(req: Request) {
     const { id } = await req.json();
 
     try {
-        const success = await addressRepository.delete(id);
-        
-        if (!success) {
-            return NextResponse.json({ message: 'Address not found' }, { status: 404 });
-        }
-        
-        return NextResponse.json({ message: 'Successfully deleted' });
+        const url = new URL(req.url);
+        const addressId = Number(url.searchParams.get('id'));
+
+        if (!addressId) throw new Error('Address ID is required');
+
+        const success = await addressRepository.delete(addressId);
+
+        return NextResponse.json(
+            { message: success ? 'Address deleted successfully' : 'Failed to delete address' },
+            { status: success ? 200 : 400 }
+        );
     } catch (error: any) {
         return NextResponse.json({ message: error.message }, { status: 400 });
     }
 }
+
