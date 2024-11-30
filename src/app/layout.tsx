@@ -6,6 +6,7 @@ import { LoaderProvider } from "@/application/context/LoaderContext";
 import { AuthProvider } from "@/application/context/AuthContext";
 import Navbar from "@/components/ui/custom/Navbar";
 import { CartProvider } from "@/application/context/CartContext";
+import { FilterProvider } from "@/application/context/FilterContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,17 +32,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <LoaderProvider>
-          <AuthProvider>
-            <CartProvider>
-              <div suppressHydrationWarning>
-                <Navbar />
-              </div>
-                <main className="mt-14 md:mt-16 lg:mt-16 xl:mt-12">{children}</main>
-              <Toaster />
-            </CartProvider>
-          </AuthProvider>
-        </LoaderProvider>
+        <FilterProvider>
+          <LoaderProvider>
+            <AuthProvider>
+              <CartProvider>
+                <div suppressHydrationWarning>
+                  <Navbar />
+                </div>
+                  <main className="mt-14 md:mt-16 lg:mt-16 xl:mt-12">{children}</main>
+                <Toaster />
+              </CartProvider>
+            </AuthProvider>
+          </LoaderProvider>
+        </FilterProvider>
       </body>
     </html>
   );

@@ -32,8 +32,6 @@ export async function POST(req: Request) {
       userIdByType = await buyerRepository.findById(user.user_id);
     }
 
-    console.log("User Type: ", user.type, "User ID: ", user.user_id, "User ID By Type: ", userIdByType);
-
     const wallet = await walletRepository.getWallet(user.user_id);
 
     const token = generateToken({

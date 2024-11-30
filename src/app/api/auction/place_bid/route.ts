@@ -8,12 +8,15 @@ const bidRepository : IBidRepository = new BidRepository();
 export async function POST(req: Request) {
   try {
     const body = await req.json(); // Parse JSON request body
+    let increment = 0;
 
     if (!body) {
       throw new Error('No body received');  // Throw an error if no body is received
     }
 
     const bidHistory = await bidRepository.getBidsByAuctionId(body.auction_id);
+
+    const lastBid = bidHistory.length > 0 ? bidHistory[bidHistory.length - 1] : null;
 
     console.log("Not own bid: "+ JSON.stringify(body));
     if(bidHistory.length > 0){
@@ -24,25 +27,34 @@ export async function POST(req: Request) {
         }
 
         if(bidHistory[bidHistory.length - 1].buyer_id === body.buyer_id){
-            console.log("You cannot bid on your own product");
-            throw new Error('You cannot bid on your own product'); // Throw an error if the product was not created
+            console.log("You cannot bid on your own bid");
+            throw new Error('You cannot bid on your own bid'); // Throw an error if the product was not created
+        }
+
+        const userPreviousBids = bidHistory.filter(bid => bid.buyer_id === body.buyer_id);
+        if (userPreviousBids.length > 0) {
+            // Get the user's highest previous bid
+            const highestUserBid = userPreviousBids.reduce((max, bid) => bid.price > max ? bid.price : max, 0);
+
+            // Calculate the difference between the new bid and the highest previous bid
+            increment = body.price - highestUserBid;
         }
     }
 
-    const success = await bidRepository.createBid(body.auction_id, body.buyer_id, body.price); // Create the product using the use case
+    console.log("Before creating bid" + JSON.stringify(body));
+
+    const success = await bidRepository.placeBidAndUpdateWallet(body.user_id, body.buyer_id, body.auction_id,body.price, increment); // Create the product using the use case
 
     console.log("After creating bid");
 
-    if(success) console.log("Bid created successfully");
-
     return NextResponse.json(
-      { message: success ? 'Bid created successfully' : 'Failed to create bid', data: success },
+      { message: success ? 'Bid created successfully' : 'Failed to create bid', data: lastBid?.buyer_id },
       { status: success ? 201 : 400 }
     );
 
   } catch (error: any) {
       return NextResponse.json(
-        { message: error.message, data: false },
+        { message: error.message, data: null },
         { status: 400 }
       );
   }

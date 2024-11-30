@@ -21,7 +21,7 @@ const Navbar = () => {
   const { user, isAuthenticated, logout, currentBalance } = useAuth(); // Hook for authentication state
   const router = useRouter(); // Next.js router
   const pathname = usePathname(); // To determine the active page
-  const { cartCount, clearCart } = useCart(); // Hook for cart state
+  const { cartCount } = useCart(); // Hook for cart state
 
   const isBuyer = user?.type.toLocaleLowerCase() === "b"; 
   const isSeller = user?.type.toLocaleLowerCase() === "s";
@@ -183,3 +183,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
