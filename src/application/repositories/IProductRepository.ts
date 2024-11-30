@@ -11,5 +11,5 @@ export interface IProductRepository {
     findBySellerId(sellerId: string): Promise<Product[]>;
     findByPrice(price: number): Promise<Product[]>;
     findByProductName(productName: string): Promise<Product[]>;
-    findByCategory(product_type : typeof ProductTypeEnum): Promise<Product[]>;
+    findByCategory(categoryKey: keyof typeof ProductTypeEnum): Promise<Product[]>;
 }
