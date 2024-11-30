@@ -6,12 +6,17 @@ import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/stringUtils";
 import { useRouter } from "next/navigation";
 import { getAllDiscounts } from "@/application/usecases/discountManagement/getDiscount";
-import { errorMessage } from "@/components/ui/custom/Toast";
+import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
 import { useToast } from "@/hooks/use-toast";
+import { OrderStatusEnum } from "@/domain/enums/OrderStatusEnum";
+import createOrder from "@/application/usecases/orderManagement/createOrder";
+import useAuth from "@/hooks/use-auth";
+
 
 export default function CheckoutPage() {
   const router = useRouter();
   const {toast} = useToast();
+  const {buyer_seller_id} = useAuth();
 
   // Billing Information State
   const [billingInfo, setBillingInfo] = useState({
@@ -85,54 +90,86 @@ export default function CheckoutPage() {
     }
   };
 
-  // Create order and order details
-  const createOrder = async () => {
-    try {
-      const response = await fetch("/api/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          buyerId: 1, // Assuming buyer ID is known (should be from authenticated user)
-          sellerId: 1, // Assuming seller ID is hardcoded (replace with actual seller ID)
-          billingInfo,
-          paymentMethod, // Include selected payment method
-          discountApplied,
-          discountAmount,
-          finalTotal,
-        }),
-      });
+  // Product Details State
+const [productDetails, setProductDetails] = useState([]);
 
-      const data = await response.json();
-
-      // If the order creation is successful, redirect to the order confirmation page
-      if (data.success) {
-        alert("Order placed successfully!");
-        router.push("/order-confirmation");
-      } else {
-        alert("There was an error processing your order.");
-      }
-
-    } catch (error) {
-      console.error("Error creating order:", error);
-      errorMessage(toast, "Failed to create order. Please try again.");
+// Load product details from sessionStorage
+useEffect(() => {
+    const storedProductDetails = sessionStorage.getItem("checkoutProductDetails");
+    if (storedProductDetails) {
+        setProductDetails(JSON.parse(storedProductDetails));
     }
-  };
+}, []);
 
-  // Handle form submission
+
+  // // Create order and order details
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   // Validate billing information
+  //   if (!billingInfo.name || !billingInfo.address || !billingInfo.city || !billingInfo.zip) {
+  //     alert("Please fill out all required fields.");
+  //     return;
+  //   }
+
+  //   try {
+  //     // Prepare order data for submission
+  //     const orderData = {
+  //       buyer_id: buyer_seller_id,
+  //       status: OrderStatusEnum.Pending,
+  //       total_amount: finalTotal
+  //     };
+  
+  //     // Make API request to create order
+  //     const success = await createOrder(orderData);
+  
+  //     if (success) {
+  //       successMessage(toast, "Order placed successfully!", "Order Created!");
+  //       router.push("/order-confirmation");
+  //     } else {
+  //       errorMessage(toast, "There was an error processing your order.");
+  //     }
+  
+  //   } catch (error) {
+  //     console.error("Error creating order:", error);
+  //     errorMessage(toast, "Failed to create order. Please try again.");
+  //   }
+  
+  // };
+  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     // Validate billing information
     if (!billingInfo.name || !billingInfo.address || !billingInfo.city || !billingInfo.zip) {
-      alert("Please fill out all required fields.");
-      return;
+        alert("Please fill out all required fields.");
+        return;
     }
 
-    // Create order
-    await createOrder();
-  };
+    try {
+        // Prepare order data for submission
+        const orderData = {
+            buyer_id: buyer_seller_id,
+            status: OrderStatusEnum.Pending,
+            total_amount: finalTotal,
+            orderDetails: productDetails, // Include product details here
+        };
+
+        // Make API request to create order
+        const success = await createOrder(orderData);
+
+        if (success) {
+            successMessage(toast, "Order placed successfully!", "Order Created!");
+            router.push("/order-confirmation");
+        } else {
+            errorMessage(toast, "There was an error processing your order.");
+        }
+    } catch (error) {
+        console.error("Error creating order:", error);
+        errorMessage(toast, "Failed to create order. Please try again.");
+    }
+};
+  
 
   return (
     <div className="min-h-screen bg-gray-100">

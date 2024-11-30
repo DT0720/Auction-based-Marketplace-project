@@ -36,10 +36,30 @@ export default function ShoppingCartPage() {
     };
 
     // Proceed to checkout
+    // const handleProceedToCheckout = () => {
+    //     const total = calculateTotal();
+    //     router.push(`/checkout?total=${total}`); // Pass total as a query parameter
+    // };
+
     const handleProceedToCheckout = () => {
         const total = calculateTotal();
-        router.push(`/checkout?total=${total}`); // Pass total as a query parameter
+    
+        // Prepare the product details for checkout
+        const productDetails = userCartItems.map((item) => ({
+            product_id: item.id,
+            quantity: item.quantity,
+            seller_id: item.sellerId,
+        }));
+    
+        // Store product details in sessionStorage
+        sessionStorage.setItem("checkoutProductDetails", JSON.stringify(productDetails));
+    
+        // Manually construct the URL
+        const checkoutUrl = `/checkout?total=${encodeURIComponent(total)}`;
+        router.push(checkoutUrl); // Pass as a string
     };
+    
+    
 
     return (
         <div className="min-h-screen bg-gray-100">
