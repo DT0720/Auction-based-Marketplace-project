@@ -42,7 +42,7 @@ export class BidRepository implements IBidRepository{
             }); // Get all bids
 
             if(!bids){
-                throw new Error("Error getting bids");
+                return [];
             }
             return bids.map(bid => Bid.fromJson(bid));
         }catch(error){

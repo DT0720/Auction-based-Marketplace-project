@@ -1,11 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/stringUtils";
+import { useRouter } from "next/navigation";
+import { getAllDiscounts } from "@/application/usecases/discountManagement/getDiscount";
+import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
+import { useToast } from "@/hooks/use-toast";
+import { OrderStatusEnum } from "@/domain/enums/OrderStatusEnum";
+import createOrder from "@/application/usecases/orderManagement/createOrder";
+import useAuth from "@/hooks/use-auth";
+import { useCart } from "@/hooks/use-cart";
+import { ROUTES } from "@/application/routing/routes";
+import { useLoader } from "@/hooks/use-loader";
+
 
 export default function CheckoutPage() {
+  const router = useRouter();
+  const {toast} = useToast();
+  const {buyer_seller_id, user, fetchAndUpdateBalance} = useAuth();
+  const {clearCart} = useCart();
+
+  // Billing Information State
   const [billingInfo, setBillingInfo] = useState({
     name: "",
     address: "",
@@ -14,218 +31,248 @@ export default function CheckoutPage() {
     country: "US",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<string>("creditCard");
+  // Payment Method and Discounts State
+  const [paymentMethod, setPaymentMethod] = useState<string>("creditCard"); // Default payment method
   const [couponCode, setCouponCode] = useState<string>("");
   const [discountApplied, setDiscountApplied] = useState<boolean>(false);
+  const [discountAmount, setDiscountAmount] = useState<number>(0); // Store discount amount
+  const { showLoader, hideLoader } = useLoader();
 
-  // Mock cart data
-  const [cartData] = useState<any>({
-    cartItems: [
-      { id: 1, name: "Product 1", quantity: 2, price: 20 }, // 2 items, $20 each
-      { id: 2, name: "Product 2", quantity: 1, price: 50 }, // 1 item, $50
-    ],
-  });
+  // Total Amount States (Received via query)
+  const [total, setTotal] = useState<number>(0);
+  const [finalTotal, setFinalTotal] = useState<number>(0); // Updated total after discount
 
-  // Calculate subtotal
-  const subtotal = cartData.cartItems.reduce(
-    (acc: number, item: any) => acc + item.price * item.quantity,
-    0
-  );
-  
-  // Apply discount if applicable
-  const total = discountApplied ? subtotal * 0.9 : subtotal; // Apply discount if applicable
+  // Load total from the query string
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const totalFromQuery = urlParams.get("total");
+    if (totalFromQuery) {
+      const parsedTotal = parseFloat(totalFromQuery);
+      setTotal(parsedTotal); // Set total from query
+      setFinalTotal(parsedTotal); // Initial final total is the same as the original total
+    }
+  }, []);
 
+  useEffect(() => {
+    setFinalTotal(total - discountAmount);
+  }, [discountAmount, total]);
+
+  // Handle changes in billing information
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setBillingInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePaymentChange = (method: string) => {
-    setPaymentMethod(method);
-  };
+  // Apply Discount Logic (API call to validate and apply discount)
+  const applyDiscount = async () => {
+    if (!couponCode) {
+      alert("Please enter a coupon code.");
+      return;
+    }
 
-  const handleCouponChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCouponCode(e.target.value);
-  };
+    if (discountApplied) {
+      alert("Discount has already been applied.");
+      return;
+    }
 
-  const applyDiscount = () => {
-    if (couponCode === "DISCOUNT10") {
-      setDiscountApplied(true);
-      alert("Discount Applied: 10% off!");
-    } else {
-      alert("Invalid Coupon Code");
+    try {
+      const discounts = await getAllDiscounts();
+
+      // Check if the entered coupon code matches any discount code
+      const discount = discounts.find(d => d.type === couponCode);
+      if (discount) {
+        // Apply the discount
+        setDiscountAmount(discount.discountAmount);
+        setDiscountApplied(true);
+        alert("Discount applied successfully!");
+      } else {
+        alert("Invalid coupon code.");
+      }
+
+    } catch (error) {
+      console.error("Error applying discount:", error);
+      errorMessage(toast, "Failed to apply discount. Please try again.");
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Checkout Info Submitted:", billingInfo, paymentMethod);
-  };
+  // Product Details State
+const [productDetails, setProductDetails] = useState([]);
 
-  const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
+// Load product details from sessionStorage
+useEffect(() => {
+    const storedProductDetails = sessionStorage.getItem("checkoutProductDetails");
+    if (storedProductDetails) {
+        setProductDetails(JSON.parse(storedProductDetails));
+    }
+}, []);
+
+
+  // // Create order and order details
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   // Validate billing information
+  //   if (!billingInfo.name || !billingInfo.address || !billingInfo.city || !billingInfo.zip) {
+  //     alert("Please fill out all required fields.");
+  //     return;
+  //   }
+
+  //   try {
+  //     // Prepare order data for submission
+  //     const orderData = {
+  //       buyer_id: buyer_seller_id,
+  //       status: OrderStatusEnum.Pending,
+  //       total_amount: finalTotal
+  //     };
+  
+  //     // Make API request to create order
+  //     const success = await createOrder(orderData);
+  
+  //     if (success) {
+  //       successMessage(toast, "Order placed successfully!", "Order Created!");
+  //       router.push("/order-confirmation");
+  //     } else {
+  //       errorMessage(toast, "There was an error processing your order.");
+  //     }
+  
+  //   } catch (error) {
+  //     console.error("Error creating order:", error);
+  //     errorMessage(toast, "Failed to create order. Please try again.");
+  //   }
+  
+  // };
+  
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Validate billing information
+    if (!billingInfo.name || !billingInfo.address || !billingInfo.city || !billingInfo.zip) {
+        alert("Please fill out all required fields.");
+        return;
+    }
+
+    try {
+        showLoader();
+        // Prepare order data for submission
+        const orderData = {
+            user_id: user?.user_id,
+            buyer_id: buyer_seller_id,
+            status: OrderStatusEnum.Pending,
+            total_amount: finalTotal,
+            orderDetails: productDetails, // Include product details here
+        };
+
+        // Make API request to create order
+        const success = await createOrder(orderData);
+
+        if (success) {
+          fetchAndUpdateBalance();
+          // Clear the cart from sessionStorage once the order is placed
+          clearCart();
+          successMessage(toast, "Order placed successfully!", "Order Created!");
+      
+          // Use router.replace() to replace the current page with the buyer dashboard
+          router.replace(ROUTES.BUYER_DASHBOARD);
+      } else {
+            errorMessage(toast, "There was an error processing your order.");
+        }
+    } catch (error) {
+        console.error("Error creating order:", error);
+        errorMessage(toast, "Failed to create order. Please try again.");
+    }finally{
+        hideLoader();
+    }
+  };
+  
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Checkout</h1>
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg space-y-6">
-          {/* Billing Information Header */}
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Billing Information</h2>
-          </div>
-          
-          {/* Billing Information Form */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <Input
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Enter your full name"
-                value={billingInfo.name}
-                onChange={handleChange}
-                className="mt-2 w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                Address
-              </label>
-              <Input
-                type="text"
-                id="address"
-                name="address"
-                placeholder="Enter your address"
-                value={billingInfo.address}
-                onChange={handleChange}
-                className="mt-2 w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* City, Zip, and Country */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                City
-              </label>
-              <Input
-                type="text"
-                id="city"
-                name="city"
-                placeholder="Enter your city"
-                value={billingInfo.city}
-                onChange={handleChange}
-                className="mt-2 w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="zip" className="block text-sm font-medium text-gray-700">
-                Zip Code
-              </label>
-              <Input
-                type="text"
-                id="zip"
-                name="zip"
-                placeholder="Enter your zip code"
-                value={billingInfo.zip}
-                onChange={handleChange}
-                className="mt-2 w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-                Country
-              </label>
-              <Input
-                type="text"
-                id="country"
-                name="country"
-                placeholder="Enter your country"
-                value={billingInfo.country}
-                onChange={handleChange}
-                className="mt-2 w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+          {/* Billing Information */}
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Billing Information</h2>
+          <div className="space-y-4">
+            <Input name="name" placeholder="Full Name" value={billingInfo.name} onChange={handleChange} required />
+            <Input name="address" placeholder="Address" value={billingInfo.address} onChange={handleChange} required />
+            <Input name="city" placeholder="City" value={billingInfo.city} onChange={handleChange} required />
+            <Input name="zip" placeholder="ZIP Code" value={billingInfo.zip} onChange={handleChange} required />
           </div>
 
           {/* Payment Method */}
           <div>
-            <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700">
-              Payment Method
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              {["creditCard", "bkash", "rocket", "nagad"].map((method) => (
-                <Card
-                  key={method}
-                  className={`p-4 rounded-md border ${
-                    paymentMethod === method ? "border-blue-500 bg-blue-50" : "border-gray-300"
-                  }`}
-                  onClick={() => handlePaymentChange(method)}
-                >
-                  <h3 className="text-xl font-semibold text-gray-800 capitalize">{method}</h3>
-                </Card>
-              ))}
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Payment Method</h2>
+            <div className="space-y-2">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="creditCard"
+                  checked={paymentMethod === "creditCard"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="mr-2"
+                />
+                Credit Card
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="paypal"
+                  checked={paymentMethod === "paypal"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="mr-2"
+                />
+                PayPal
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="cashOnDelivery"
+                  checked={paymentMethod === "cashOnDelivery"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="mr-2"
+                />
+                Cash on Delivery
+              </label>
             </div>
           </div>
 
-          {/* Discount Coupon */}
+          {/* Coupon Code */}
           <div>
-            <label htmlFor="coupon" className="block text-sm font-medium text-gray-700">
-              Discount Coupon
-            </label>
-            <div className="flex items-center space-x-4 mt-4">
-              <Input
-                type="text"
-                id="coupon"
-                name="coupon"
-                placeholder="Enter coupon code"
-                value={couponCode}
-                onChange={handleCouponChange}
-                className="w-3/4 p-3 rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
-              />
-              <Button
-                type="button"
-                onClick={applyDiscount}
-                className="w-1/4 py-3"
-              >
-                Apply
-              </Button>
-            </div>
-            {discountApplied && <p className="mt-2 text-green-600">Discount applied successfully!</p>}
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Discount Coupon</h2>
+            <Input
+              name="couponCode"
+              placeholder="Enter Coupon Code"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+            />
+            <Button type="button" onClick={applyDiscount} className="mt-2">Apply Discount</Button>
           </div>
 
-          {/* Total Amount to Pay */}
+          {/* Total Amount */}
           <div className="border-t pt-4 mt-6">
-            <h2 className="text-xl font-semibold text-gray-900">Total Amount to Pay</h2>
-            <div className="space-y-4 mt-4">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>{formatCurrency(subtotal)}</span>
+            <h2 className="text-xl font-semibold text-gray-900">Amount to Pay</h2>
+            <div className="flex justify-between">
+              <span>Total (including tax)</span>
+              <span>{formatCurrency(total)}</span>
+            </div>
+            {discountApplied && (
+              <div className="flex justify-between text-red-600">
+                <span>Discount Applied</span>
+                <span>-{formatCurrency(discountAmount)}</span>
               </div>
-              {discountApplied && (
-                <div className="flex justify-between font-semibold text-lg mb-4 text-green-600">
-                  <span>Discount (10%)</span>
-                  <span>-{formatCurrency(subtotal * 0.1)}</span>
-                </div>
-              )}
-              <div className="flex justify-between font-bold text-xl mb-4">
-                <span>Total</span>
-                <span>{formatCurrency(total)}</span>
-              </div>
+            )}
+            <div className={`flex justify-between font-bold ${discountApplied ? 'text-green-600' : ''}`}>
+              <span>Final Total</span>
+              <span>{formatCurrency(finalTotal)}</span>
             </div>
           </div>
 
-          {/* Proceed to Checkout Button */}
-          <Button
-            type="submit"
-            className="w-full py-3 mt-4"
-            variant="outline"
-          >
-            Proceed to Checkout
+          {/* Submit Button */}
+          <Button type="submit" className="w-full py-3 mt-4" variant="outline">
+            Place Order
           </Button>
         </form>
       </div>

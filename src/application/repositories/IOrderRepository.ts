@@ -1,13 +1,14 @@
-import { Orders } from "@/domain/entities/Order"; // Adjust the import path based on your project structure
-
+import { Order } from "@/domain/entities/Order"; 
+import { OrderDetails } from "@/domain/entities/OrderDetails";
 export interface IOrderRepository {
-    create(order: Orders): Promise<Orders | null>; // Create a new order
-    update(order: Orders): Promise<boolean>; // Update an existing order
-    delete(id: number): Promise<boolean>; // Delete an order by ID
-    findById(id: number): Promise<Orders | null>; // Find an order by ID
-    findByBuyerId(buyerId: number): Promise<Orders[]>; // Find orders by buyer ID
-    findBySellerId(sellerId: number): Promise<Orders[]>; // Find orders by seller ID
-    findAllOrders(): Promise<Orders[]>; // Find all orders
-    findCanceledOrders(): Promise<Orders[]>;
-    findReturnedOrders(): Promise<Orders[]>
+  create(order: Order): Promise<Order>;
+  getById(id: number): Promise<Order | null>;
+  getByBuyerId(buyerId: number): Promise<Order[]>;
+  update(order: Order): Promise<Order>;
+  delete(id: number): Promise<void>;
+  createOrderWithDetailsAndUpdateInventory(
+    order: Order,
+    orderDetails: OrderDetails[],
+    user_id: number
+  ): Promise<{ order: Order; orderDetails: OrderDetails[] }>
 }

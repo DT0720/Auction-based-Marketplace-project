@@ -1,6 +1,7 @@
 import { Product } from "./Product";
 import { User } from "./User";
 
+// Define the Review class representing a product review
 export class Review {
     constructor(
         public review_id: number,
@@ -10,6 +11,7 @@ export class Review {
         public rating: number,
     ) {}
 
+// Static method to create a Review instance from a JSON object
     static fromJson(data: any): Review {
         return new Review(
             data.review_id,

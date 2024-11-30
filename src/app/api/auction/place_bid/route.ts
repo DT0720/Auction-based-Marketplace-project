@@ -16,6 +16,8 @@ export async function POST(req: Request) {
 
     const bidHistory = await bidRepository.getBidsByAuctionId(body.auction_id);
 
+    const lastBid = bidHistory.length > 0 ? bidHistory[bidHistory.length - 1] : null;
+
     console.log("Not own bid: "+ JSON.stringify(body));
     if(bidHistory.length > 0){
         bidHistory.sort((a, b) => a.price - b.price);
@@ -39,8 +41,6 @@ export async function POST(req: Request) {
         }
     }
 
-    // const success = await bidRepository.createBid(body.auction_id, body.buyer_id, body.price); // Create the product using the use case
-
     console.log("Before creating bid" + JSON.stringify(body));
 
     const success = await bidRepository.placeBidAndUpdateWallet(body.user_id, body.buyer_id, body.auction_id,body.price, increment); // Create the product using the use case
@@ -48,13 +48,13 @@ export async function POST(req: Request) {
     console.log("After creating bid");
 
     return NextResponse.json(
-      { message: success ? 'Bid created successfully' : 'Failed to create bid', data: success },
+      { message: success ? 'Bid created successfully' : 'Failed to create bid', data: lastBid?.buyer_id },
       { status: success ? 201 : 400 }
     );
 
   } catch (error: any) {
       return NextResponse.json(
-        { message: error.message, data: false },
+        { message: error.message, data: null },
         { status: 400 }
       );
   }

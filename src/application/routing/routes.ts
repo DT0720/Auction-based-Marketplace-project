@@ -10,6 +10,7 @@ export const ROUTES = {
     USER_PROFILE: "/user_profile",
     BUYER_DASHBOARD: "/buyer_dashboard",
     SELLER_DASHBOARD: "/seller_dashboard",
+    DISCOUNT: "/discount",
     FORGOT_PASSWORD: "/forgot-password",
     REVIEW_DASHBOARD: "/review_dashboard",
     ADD_PRODUCT: "/product/addItem",

@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
     const activeAuctions = await auctionRepository.findAllProductsOnAuction();
 
-    if (activeAuctions.some(auction => auction.auction.productId === body.product_id)) {
+    if (activeAuctions.some(auction => (auction.auction.productId === body.product_id) && auction.auction.status === true)) {
         console.log("Product already on auction");
         throw new Error('Product already on auction'); // Throw an error if the product was not created
     }
