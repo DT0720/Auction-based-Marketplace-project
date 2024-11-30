@@ -132,12 +132,13 @@ export class OrderRepository implements IOrderRepository {
  */
 async createOrderWithDetailsAndUpdateInventory(
   order: Order,
-  orderDetails: OrderDetails[]
+  orderDetails: OrderDetails[],
+  user_id: number
 ): Promise<{ order: Order; orderDetails: OrderDetails[] }> {
   try {
     // Perform the transaction
-    const result = await prisma.$transaction(async (prismaTransaction) => {
-      // Create the order within the transaction
+    // Step 1: Create the order, order details, and update wallet balance in one transaction
+    const { createdOrder, createdOrderDetails } = await prisma.$transaction(async (prismaTransaction) => {
       const createdOrder = await prismaTransaction.orders.create({
         data: {
           buyer_id: order.buyerId,
@@ -147,7 +148,6 @@ async createOrderWithDetailsAndUpdateInventory(
         },
       });
 
-      // Create associated order details within the transaction
       await prismaTransaction.order_details.createMany({
         data: orderDetails.map((detail) => ({
           order_id: createdOrder.id,
@@ -157,77 +157,43 @@ async createOrderWithDetailsAndUpdateInventory(
         })),
       });
 
-      // Update the stock in the product model
-      for (const detail of orderDetails) {
-        // Find the seller inventory entry first
-        const sellerInventory = await prismaTransaction.seller_inventory.findFirst({
-          where: {
-            seller_id: detail.sellerId,
-            product_id: detail.productId,
-          },
-        });
-
-        if (!sellerInventory) {
-          throw new Error(`Seller inventory not found for sellerId ${detail.sellerId} and productId ${detail.productId}`);
-        }
-
-        // Update the inventory using the unique identifier
-        await prismaTransaction.seller_inventory.update({
-          where: {
-            id: sellerInventory.id,
-          },
-          data: {
-            quantity: { decrement: detail.quantity },
-            quantity_for_sale: { decrement: detail.quantity },
-          },
-        });
-
-        // Update the product stock
-        await prismaTransaction.product.update({
-          where: {
-            id: detail.productId,
-          },
-          data: {
-            stock: { decrement: detail.quantity },
-          },
-        });
-      }
-
-      // Update buyer's wallet balance
+      // Deduct the total amount from the buyer's wallet
       await prismaTransaction.wallet.update({
-        where: {
-          user_id: order.buyerId,
-        },
+        where: { user_id: user_id },
         data: {
-          // current_balance: { decrement: order.totalAmount ?? 0 },
+          current_balance: { decrement: order.totalAmount ?? 0 },
         },
       });
 
-      return { createdOrder };
+      return { createdOrder, createdOrderDetails: orderDetails };
     });
 
-    // Map the created data back to domain entities
-    return {
-      order: new Order(
-        result.createdOrder.id,
-        result.createdOrder.buyer_id,
-        result.createdOrder.offer_id,
-        result.createdOrder.status,
-        result.createdOrder.total_amount ? result.createdOrder.total_amount.toNumber() : null // Convert Decimal to number
-      ),
-      orderDetails: orderDetails.map((detail) => {
-        return new OrderDetails(
-          detail.id,
-          result.createdOrder.id, // Associate with the created order ID
-          detail.productId,
-          detail.quantity,
-          detail.sellerId
-        );
-      }),
-    };
+    // // Step 2: Perform inventory updates in a separate transaction
+    // await prisma.$transaction(async (prismaTransaction) => {
+    //   for (const detail of orderDetails) {
+    //     // Update seller inventory quantity and quantity for sale
+    //     await prismaTransaction.seller_inventory.update({
+    //       where: { id: detail.productId },
+    //       data: {
+    //         quantity: { decrement: detail.quantity },
+    //         quantity_for_sale: { decrement: detail.quantity },
+    //       },
+    //     });
+
+    //     // Update product stock
+    //     await prismaTransaction.product.update({
+    //       where: { id: detail.productId },
+    //       data: {
+    //         stock: { decrement: detail.quantity },
+    //       },
+    //     });
+    //   }
+    // });
+
+    return { order: Order.fromJson(createdOrder), orderDetails: createdOrderDetails.map((detail) => OrderDetails.fromJson(detail)) };
   } catch (error: any) {
       console.error("Error during order transaction:", error.message);
       throw new Error("Failed to create order with details.");
-  }
+    }
   }
 }

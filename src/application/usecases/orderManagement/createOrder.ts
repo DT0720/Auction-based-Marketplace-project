@@ -41,14 +41,11 @@ async function createOrder(payload: CreateOrderPayload): Promise<{ order: Order;
     // If the API returns data
     if (response?.data) {
       const { order, orderDetails } = response.data;
-
-      // Map the raw order details data to OrderDetails instances
-      const mappedOrderDetails = orderDetails.map((detail) => OrderDetails.fromJson(detail));
-
+  
       // Return the created order and its associated order details
       return {
         order: Order.fromJson(order), // Mapping order data to Order entity
-        orderDetails: mappedOrderDetails, // Returning mapped order details
+        orderDetails: orderDetails, // Returning mapped order details
       };
     }
 

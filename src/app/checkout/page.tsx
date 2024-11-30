@@ -13,6 +13,7 @@ import createOrder from "@/application/usecases/orderManagement/createOrder";
 import useAuth from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { ROUTES } from "@/application/routing/routes";
+import { useLoader } from "@/hooks/use-loader";
 
 
 export default function CheckoutPage() {
@@ -35,6 +36,7 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState<string>("");
   const [discountApplied, setDiscountApplied] = useState<boolean>(false);
   const [discountAmount, setDiscountAmount] = useState<number>(0); // Store discount amount
+  const { showLoader, hideLoader } = useLoader();
 
   // Total Amount States (Received via query)
   const [total, setTotal] = useState<number>(0);
@@ -150,6 +152,7 @@ useEffect(() => {
     }
 
     try {
+        showLoader();
         // Prepare order data for submission
         const orderData = {
             user_id: user?.user_id,
@@ -176,6 +179,8 @@ useEffect(() => {
     } catch (error) {
         console.error("Error creating order:", error);
         errorMessage(toast, "Failed to create order. Please try again.");
+    }finally{
+        hideLoader();
     }
   };
   

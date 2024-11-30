@@ -2,16 +2,12 @@
 
 import { NextResponse } from 'next/server';
 import { OrderRepository } from '@/infrastructure/repositories/OrderRepository';
-import { OrderDetailsRepository } from '@/infrastructure/repositories/OrderDetailsRepository';
 import { Order } from '@/domain/entities/Order';
 import { OrderDetails } from '@/domain/entities/OrderDetails';
 import { SellerInventoryRepository } from '@/infrastructure/repositories/SellerInventoryRepository';
-import { WalletRepository } from '@/infrastructure/repositories/WalletRepository';
 
 const orderRepository = new OrderRepository();
-const orderDetailsRepository = new OrderDetailsRepository();
 const sellerInventoryRepository = new SellerInventoryRepository();
-const walletRepository = new WalletRepository();
 
 export async function POST(req: Request) {
   try {
@@ -50,7 +46,7 @@ export async function POST(req: Request) {
     // Use the repository method
     // const { order: createdOrder, orderDetails: createdOrderDetails } = await orderRepository.createOrderWithDetails(order, orderDetails);
 
-    const { order: createdOrder, orderDetails: createdOrderDetails } = await orderRepository.createOrderWithDetailsAndUpdateInventory(order, orderDetails);
+    const { order: createdOrder, orderDetails: createdOrderDetails } = await orderRepository.createOrderWithDetailsAndUpdateInventory(order, orderDetails, body.user_id);
     
     return NextResponse.json(
       {

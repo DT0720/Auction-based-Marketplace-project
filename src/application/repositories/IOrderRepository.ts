@@ -8,6 +8,7 @@ export interface IOrderRepository {
   delete(id: number): Promise<void>;
   createOrderWithDetailsAndUpdateInventory(
     order: Order,
-    orderDetails: OrderDetails[]
+    orderDetails: OrderDetails[],
+    user_id: number
   ): Promise<{ order: Order; orderDetails: OrderDetails[] }>
 }
