@@ -13,7 +13,6 @@ import { formatCurrency } from "@/lib/stringUtils";
 import getProductsOnSale from "@/application/usecases/sellerDashboard/products/getProductsOnSale";
 import { errorMessage, successMessage } from "@/components/ui/custom/Toast";
 import { useToast } from "@/hooks/use-toast";
-import useAuth from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { Auction } from "@/domain/entities/Auction";
 import { getProductsOnAuction } from "@/application/usecases/buyerDashboard/products/getProductsOnAuction";
@@ -56,19 +55,24 @@ export default function BuyerDashboard() {
         const filtered = products.filter((product) => {
             const lowercasedQuery = searchQuery.toLowerCase();
           
-            // Map the selected category to the enum key for proper comparison
-            const selectedCategory = category === ProductTypeEnum.ALL ? ProductTypeEnum.ALL : category;
+            // If the selected category is ALL, return all products that match the search query (or all if no query is provided)
+            console.log("Outside Category is: " + category + " Enum is: " + ProductTypeEnum.ALL + " Product is: " + product.productName);
+
+            if (category.toLocaleLowerCase() === ProductTypeEnum.ALL.toLocaleLowerCase()) {
+                console.log("Category is: " + category + " Enum is: " + ProductTypeEnum.ALL + " Product is: " + product.productName);
+                return !searchQuery || product.productName?.toLowerCase().includes(lowercasedQuery);
+            }
           
-            // Matches category from the enum key or from the 'All' category
-            const matchesCategory = selectedCategory === ProductTypeEnum.ALL || product.category === selectedCategory;
+            // Matches category from the enum key
+            const matchesCategory = product.category === category;
           
             // Matches search query (case-insensitive)
             const matchesQuery = !searchQuery || product.productName?.toLowerCase().includes(lowercasedQuery);
           
             return matchesCategory && matchesQuery;
-          });
+        });
         setFilteredProducts(filtered);
-      }, [searchQuery, category, products]);
+    }, [searchQuery, category, products]);
 
 
     const handleAddToCart = (productId: number) => {
@@ -95,8 +99,8 @@ export default function BuyerDashboard() {
                                     className="border border-gray-300 rounded-lg p-4 flex flex-col justify-between cursor-pointer hover:shadow-lg"
                                     onClick={() => router.push(`/product/${product.id}`)}
                                 >
-                                    <div className="mb-4">
-                                        <img src={product.photo ?? ImageStorageService.productPlaceholderImage} alt={product.productName ?? ""} className="w-full h-auto mb-2" />
+                                    <div className="mb-4 self-center">
+                                    <img src={product.photo ?? ImageStorageService.productPlaceholderImage} alt={product.productName ?? ""} className="w-48 h-48 object-cover mb-2" />
                                     </div>
                                     <div className="mb-4">
                                         <h3 className="font-semibold text-lg">{product.productName}</h3>

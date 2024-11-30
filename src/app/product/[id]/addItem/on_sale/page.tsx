@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { addProductOnSale } from "@/application/usecases/sellerDashboard/products/addProduct";
 import useAuth from "@/hooks/use-auth";
 import { ROUTES } from "@/application/routing/routes";
+import { Product } from "@/domain/entities/Product";
+import { ImageStorageService } from "@/infrastructure/services/ImageStorageService";
 
 export default function AddItemOnSale() {
   const params = useParams();
@@ -30,6 +32,7 @@ export default function AddItemOnSale() {
 
   const { showLoader, hideLoader } = useLoader();
   const [formData, setFormData] = useState(initialFormData);
+  const [product, setProduct] = useState<Product | null>(null);
   const [image, setImage] = useState<File | null>(null);
   const { toast } = useToast();
   const { buyer_seller_id } = useAuth();
@@ -50,6 +53,7 @@ export default function AddItemOnSale() {
               stock: productData.stock ? productData.stock: 0,
               description: productData.description ?? "",
             });
+            setProduct(productData);
             setImage(productData.photo ? new File([], productData.photo) : null);
           }
         } catch (error) {
@@ -102,108 +106,76 @@ export default function AddItemOnSale() {
       <div className="w-full max-w-3xl bg-white border border-gray-300 rounded-lg shadow-md p-10">
         <h1 className="text-3xl font-bold mb-6 text-gray-800">Update Product for Sale</h1>
         <div className="flex justify-center relative mb-6">
-          <ImageHolderSquare image={image}/>
+        {product ? (
+        <img src={product.photo ?? ImageStorageService.productPlaceholderImage} alt={product.productName ?? ""} className="w-48 h-48 object-cover mb-2" />
+        ) : (
+            <img src={ImageStorageService.productPlaceholderImage} alt={""} className="w-48 h-48 object-cover mb-2" />
+        )}
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="productName" className="block text-lg font-medium text-gray-700 mb-1">
-              Product Name
-            </label>
-            <Input
-              id="productName"
-              name="productName"
-              value={formData.productName}
-              placeholder="Enter product name"
-              required
-              readOnly
-            />
-          </div>
+        <div>
+        <label className="block text-lg font-medium text-gray-700 mb-1">
+            Product Name
+        </label>
+        <p className="text-gray-800 font-semibold">{formData.productName}</p>
+        </div>
 
-          <div>
-            <label htmlFor="category" className="block text-lg font-medium text-gray-700 mb-1">
-              Category
+        <div>
+            <label className="block text-lg font-medium text-gray-700 mb-1">
+                Category
             </label>
-            <Select
-              value={formData.category}
-              onValueChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(ProductTypeEnum).map(([key, value]) => (
-                  <SelectItem key={key} value={key}>{value}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <p className="text-gray-800 font-semibold">{formData.category}</p>
+        </div>
 
-          <div>
+        <div>
             <label htmlFor="pricePerUnit" className="block text-lg font-medium text-gray-700 mb-1">
-              Price per Unit
+                Price per Unit
             </label>
             <Input
-              id="pricePerUnit"
-              name="pricePerUnit"
-              type="number"
-              value={formData.pricePerUnit}
-              onChange={handleChange}
-              placeholder="Enter price per unit"
-              required
+                id="pricePerUnit"
+                name="pricePerUnit"
+                type="number"
+                value={formData.pricePerUnit}
+                onChange={handleChange}
+                placeholder="Enter price per unit"
+                required
             />
-          </div>
+        </div>
 
-          <div>
-            <label htmlFor="stock" className="block text-lg font-medium text-gray-700 mb-1">
-              Stock Quantity
+        <div>
+            <label className="block text-lg font-medium text-gray-700 mb-1">
+                Stock Quantity
+            </label>
+            <p className="text-gray-800 font-semibold">{formData.stock}</p>
+        </div>
+
+        <div>
+            <label htmlFor="quantity_for_sale" className="block text-lg font-medium text-gray-700 mb-1">
+                Number of items to put on sale
             </label>
             <Input
-              id="stock"
-              name="stock"
-              type="number"
-              value={formData.stock}
-              onChange={handleChange}
-              placeholder="Enter available stock"
-              required
-              readOnly
+                id="quantity_for_sale"
+                name="quantity_for_sale"
+                type="number"
+                value={formData.quantity_for_sale}
+                onChange={handleChange}
+                placeholder="Enter number of items to put on sale"
+                required
             />
-          </div>
+        </div>
 
-          <div>
-            <label htmlFor="stock" className="block text-lg font-medium text-gray-700 mb-1">
-              Number of items to put on sale
+        <div>
+            <label className="block text-lg font-medium text-gray-700 mb-3">
+                Description
             </label>
-            <Input
-              id="quantity_for_sale"
-              name="quantity_for_sale"
-              type="number"
-              value={formData.quantity_for_sale}
-              onChange={handleChange}
-              placeholder="Enter number of items to put on sale"
-              required
-            />
-          </div>
+            <p className="text-gray-800 font-semibold">{formData.description}</p>
+        </div>
 
-          <div>
-            <label htmlFor="description" className="block text-lg font-medium text-gray-700 mb-3">
-              Description
-            </label>
-            <Textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Enter product description"
-              required
-              className="h-40"
-            />
-          </div>
-
-          <Button type="submit" className="w-full py-4 text-lg font-bold" variant="outline">
+        <Button type="submit" className="w-full py-4 text-lg font-bold" variant="outline">
             Update Product for Sale
-          </Button>
+        </Button>
         </form>
+        </div>
       </div>
-    </div>
   );
 }
