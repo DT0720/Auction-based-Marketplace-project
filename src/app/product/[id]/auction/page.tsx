@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { placeBid } from "@/application/usecases/buyerDashboard/auction/placeBid";
 import useAuth from "@/hooks/use-auth";
 
+
 export default function ProductAuctionPage() {
   const params = useParams();
   const id = params?.id;
@@ -96,7 +97,7 @@ export default function ProductAuctionPage() {
     }
   };
 
-// Modified handleBidSubmit to include proper bid placement
+
 const handleBidSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
