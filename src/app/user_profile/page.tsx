@@ -10,16 +10,17 @@ import useAuth from "@/hooks/use-auth";
 import { Toast } from "@/components/ui/toast";
 import { UserRepository } from "@/infrastructure/repositories/UserRepository";
 import { Address } from "@/domain/entities/Address";
-import { Orders } from "@/domain/entities/Order";
+import { Order } from "@/domain/entities/Order";
 import { user } from "@prisma/client";
+import { OrderStatusEnum } from "@/domain/enums/OrderStatusEnum";
 
 const userProfile: React.FC = () => {
   const [user, setUser] = useState<user | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [newAddress, setNewAddress] = useState<Partial<Address>>({});
-  const [orders, setOrders] = useState<Orders[]>([]); 
-  const [canceledOrders, setCanceledOrders] = useState<Orders[]>([]);
-  const [returnedOrders, setReturnedOrders] = useState<Orders[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]); 
+  const [canceledOrders, setCanceledOrders] = useState<Order[]>([]);
+  const [returnedOrders, setReturnedOrders] = useState<Order[]>([]);
   const [userId, setUserId] = useState<number>(1); // Replace with dynamic user ID
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,17 +33,12 @@ const userProfile: React.FC = () => {
         const fetchedAddresses = await getAddressesByUserId(userId);
         setAddresses(fetchedAddresses);
 
-        // const fetchedCanceledOrders = await findCanceledOrders(userId);
-        // const fetchedReturnedOrders = await findReturnedOrders(userId);
-        // setCanceledOrders(fetchedCanceledOrders);
-        // setReturnedOrders(fetchedReturnedOrders);
-        // Fetch all orders
         const fetchedOrders = await findByBuyerId(6);
         setOrders(fetchedOrders);
 
         // Filter orders by status on the frontend
-        setCanceledOrders(fetchedOrders.filter((order) => order.status === "cancelled"));
-        setReturnedOrders(fetchedOrders.filter((order) => order.status === "returned"));
+        setCanceledOrders(fetchedOrders.filter((order) => order.status === OrderStatusEnum.Cancelled));
+        setReturnedOrders(fetchedOrders.filter((order) => order.status === OrderStatusEnum.Returned));
       } catch (error: any) {
         setError(error.message || "Failed to fetch addresses");
       } finally {

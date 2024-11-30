@@ -1,12 +1,12 @@
 import NetworkUtils, { ApiResponse } from '@/lib/networkUtils';
-import { Orders } from '@/domain/entities/Order';
-import { OrderStatusEnum } from '@/domain/enums/OrderStatusEnum';
+import { Order } from '@/domain/entities/Order';
 
-const endpoint = '/api/users/user-orders/';
+const endpoint = '/api/orders/get/';
 
 // Fetch all orders for a user
-export async function findByBuyerId(userId: number): Promise<Orders[]> {
-    console.log(" User Id " + userId)
-    const response = await NetworkUtils.getRequest<ApiResponse<Orders[]>>(endpoint + userId);
+export async function findByBuyerId(buyerId: number): Promise<Order[]> {
+    const response = await NetworkUtils.getRequest<ApiResponse<Order[]>>(endpoint + buyerId);
     return response?.data ?? [];
 }
+
+
