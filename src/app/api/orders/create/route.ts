@@ -1,35 +1,5 @@
 // // src/app/api/orders/create/route.ts
-// import { NextResponse } from 'next/server';
-// import { OrderRepository } from '@/infrastructure/repositories/OrderRepository';
-// import { ProductRepository } from '@/infrastructure/repositories/ProductRepository';
-// import { Order } from '@/domain/entities/Order';
 
-// const orderRepository = new OrderRepository();
-// const productRepository = new ProductRepository();
-
-// export async function POST(req: Request) {
-//   try {
-//     const body = await req.json();
-//     if (!body) {
-//       return new Response('No body received', { status: 400 });
-//     }
-
-//     const success = await orderRepository.create(Order.fromJson(body));
-    
-//     return NextResponse.json(
-//       { message: success ? 'Order created successfully' : 'Failed to create order' },
-//       { status: success ? 201 : 400 }
-//     );
-//   } catch (error: any) {
-//     return NextResponse.json(
-//       { message: error.message || 'Failed to create order' },
-//       { status: 400 }
-//     );
-//   }
-// }
-
-
-// src/app/api/orders/create/route.ts
 import { NextResponse } from 'next/server';
 import { OrderRepository } from '@/infrastructure/repositories/OrderRepository';
 import { OrderDetailsRepository } from '@/infrastructure/repositories/OrderDetailsRepository';
@@ -78,10 +48,10 @@ export async function POST(req: Request) {
     );
 
     // Use the repository method
-    const { order: createdOrder, orderDetails: createdOrderDetails } = await orderRepository.createOrderWithDetails(order, orderDetails);
+    // const { order: createdOrder, orderDetails: createdOrderDetails } = await orderRepository.createOrderWithDetails(order, orderDetails);
 
-    await walletRepository.decrementWalletBalance(body.user_id, body.total_amount);
-
+    const { order: createdOrder, orderDetails: createdOrderDetails } = await orderRepository.createOrderWithDetailsAndUpdateInventory(order, orderDetails);
+    
     return NextResponse.json(
       {
         message: 'Order created successfully',
