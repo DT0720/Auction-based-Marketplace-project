@@ -34,5 +34,19 @@ export class SellerRepository implements ISellerRepository {
             return null;
         }
     }
+
+    async findUserIdBySellerId(seller_id: number): Promise<number | null> {
+        try{
+            const seller = await prisma.seller.findFirst({
+                where: {
+                    id: seller_id
+                }
+            });
+            return seller?.user_id ?? null;
+        }catch(e){
+            console.log(e);
+            return null;
+        }
+    }
     
 }

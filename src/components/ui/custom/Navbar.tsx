@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"; // shadcn button
-import { Bell, ShoppingCart, CreditCard, Settings, Menu, User, Home, List, LogOut } from "lucide-react"; // lucide icons
+import { ShoppingCart, CreditCard, Settings, Menu, User, Home, List, LogOut } from "lucide-react"; // lucide icons
 import useAuth from "@/hooks/use-auth";
 import { ROUTES } from "@/application/routing/routes";
 import {

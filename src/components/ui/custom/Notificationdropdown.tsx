@@ -56,7 +56,7 @@ export function NotificationDropdown() {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
+    const interval = setInterval(fetchNotifications, 5000);
     return () => clearInterval(interval);
   }, [user?.user_id]);
 
@@ -65,10 +65,8 @@ export function NotificationDropdown() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative">
           <Bell className="h-5 w-5" />
-          {!isLoading && unreadCount > 0 && (
-            <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5">
-              {unreadCount}
-            </Badge>
+          {unreadCount > 0 && (
+            <span className="mb-1 bg-red-500 text-white rounded-full px-1 text-xs">{unreadCount}</span>
           )}
         </Button>
       </DropdownMenuTrigger>

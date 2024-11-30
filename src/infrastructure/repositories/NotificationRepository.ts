@@ -1,17 +1,25 @@
 // src/infrastructure/repositories/NotificationRepository.ts
 
+import { ISellerRepository } from "@/application/repositories/ISellerRepository";
 import { prisma } from "../database/prisma";
+import { SellerRepository } from "./SellerRepository";
 
 
 export class NotificationRepository {
+
+  private sellerRepository : ISellerRepository = new SellerRepository();
+
   async createNotification(receiverId: number, senderId: number, content: string): Promise<boolean> {
     try {
+
+      const seller_user_id = await this.sellerRepository.findUserIdBySellerId(receiverId);
+
       await prisma.notifications.create({
         data: {
-          reciever_id: receiverId,
+          reciever_id: seller_user_id ?? 0,
           sender_id: senderId,
           content: content,
-          recieved_at: new Date(),
+          recieved_at: new Date().toISOString(),
         },
       });
       return true;
