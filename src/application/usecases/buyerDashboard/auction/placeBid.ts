@@ -35,7 +35,9 @@ export async function placeBid(buyer_id: number, auction_id: number, user_id: nu
   if (response?.data) {
     // Notify the last bidder
     const lastBidderId = await getLastBidderId(auction_id);
+    console.log(`Last bidder ID: ${lastBidderId}`);
     if (lastBidderId && lastBidderId !== buyer_id) {
+      console.log(`Sending outbid notification to bidder ${lastBidderId}`);
       await sendOutbidNotification(lastBidderId, auction_id, bidAmount);
     }
   }
@@ -47,6 +49,7 @@ const bidRepository = new BidRepository();
 
 async function getLastBidderId(auctionId: number): Promise<number | null> {
   const bidHistory = await bidRepository.getBidsByAuctionId(auctionId);
+  console.log(`Bid history: ${JSON.stringify(bidHistory)}`);
   const lastBid = bidHistory.length > 0 ? bidHistory[bidHistory.length - 1] : null;
   return lastBid ? lastBid.buyer_id : null;
 }

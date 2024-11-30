@@ -6,13 +6,16 @@ export class NotificationService {
       console.log(`Sending notification to user ${userId}: ${message}`);
     }
 }
+
 // src/services/notificationService.ts
 export async function sendOutbidNotification(bidderId: number, auctionId: number, newBidAmount: number) {
   // Implement the logic to send a notification to the bidder
-  // This could be an email, SMS, push notification, etc.
+  const message = `You have been outbid on auction ${auctionId}. The new bid amount is ${newBidAmount}.`;
+  await sendNotification(bidderId, message);
   console.log(`Sending outbid notification to bidder ${bidderId} for auction ${auctionId} with new bid amount ${newBidAmount}`);
   // Example: await emailService.sendOutbidEmail(bidderId, auctionId, newBidAmount);
 }
+
 
 export async function sendNotification(userId: number, message: string): Promise<void> {
   const notificationService = new NotificationService();

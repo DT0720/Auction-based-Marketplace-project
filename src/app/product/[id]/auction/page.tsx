@@ -142,15 +142,14 @@ const handleBidSubmit = async (e: React.FormEvent) => {
         fetchAndUpdateBalance();
         successMessage(toast, "Bid placed successfully");
       } else {
-        errorMessage(toast, "Failed to place bid. Please try again.");
+        errorMessage(toast, "Failed to place bid");
       }
     } catch (error: any) {
-      errorMessage(toast, error.message || "Unexpected error occurred");
+      errorMessage(toast, error.message, "Invalid input!");
+      console.error("Error placing bid: ", error);
     } finally {
       hideLoader();
     }
-  } else {
-    errorMessage(toast, "Invalid auction data");
   }
 };
 
