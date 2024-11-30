@@ -99,7 +99,6 @@ export default function CheckoutPage() {
       const order = await prisma.orders.create({
         data: {
           buyer_id: 1, // Assuming a hardcoded buyer ID (you should use the authenticated user's ID)
-          seller_id: 1, // Assuming a hardcoded seller ID
           offer_id: discountApplied ? 1 : null, // Apply the discount offer if discount is applied
           status: "pending",
           order_details: {
@@ -107,6 +106,7 @@ export default function CheckoutPage() {
               {
                 product_id: 1, // Assuming a hardcoded product ID
                 quantity: 1, // Assuming quantity of 1 for the product
+                seller_id: 1, // Assuming a hardcoded seller ID
               },
             ],
           },
