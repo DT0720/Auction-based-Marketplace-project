@@ -5,6 +5,12 @@ import { Order } from '../../domain/entities/Order';
 
 // Define the OrderRepository class responsible for interacting with the orders table in the database
 export class OrderRepository {
+  static updateOrderStatus(orderId: any, arg1: string) {
+      throw new Error('Method not implemented.');
+  }
+  static createOrder(orderData: any) {
+      throw new Error('Method not implemented.');
+  }
   // Method to create a new order in the database
   async createOrder(orderData: any): Promise<Order> {
     // Use Prisma to create a new order record

@@ -1,7 +1,7 @@
 // src/infrastructure/repositories/NotificationRepository.ts
 
 import { prisma } from "../database/prisma";
-import { Prisma } from "@prisma/client";
+
 
 export class NotificationRepository {
   async createNotification(receiverId: number, senderId: number, content: string): Promise<boolean> {
