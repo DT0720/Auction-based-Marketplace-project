@@ -31,7 +31,7 @@ export async function notifySellerOfPurchase(order: Order): Promise<void> {
   const message = `You have a new order for product ${order.product_id} from buyer ${order.buyer_id}.`;
 
   // Send the notification to the seller
-  await notificationService.sendNotification(seller.user_id, message);
+  await notificationService.sendNotification(seller.user_id, order.buyer_id, message);
 }
 
 // Function to notify the buyer when their order has been shipped
@@ -49,5 +49,5 @@ export async function notifyBuyerOfShipment(order: Order): Promise<void> {
   const message = `Your order for product ${order.product_id} has been shipped.`;
 
   // Send the notification to the buyer
-  await notificationService.sendNotification(buyer.user_id, message);
+  await notificationService.sendNotification(buyer.user_id, order.seller_id, message);
 }
