@@ -122,10 +122,10 @@ const handleBidSubmit = async (e: React.FormEvent) => {
         throw new Error("Price must be greater than 0");
       }
 
-      if(!currentBalance || currentBalance < price){
-        errorMessage(toast, "Insufficient balance. Please add funds to your account.");
-        return;
-      }
+      // if(!currentBalance || currentBalance < price){
+      //   errorMessage(toast, "Insufficient balance. Please add funds to your account.");
+      //   return;
+      // }
 
       const lastBidder = await placeBid(buyerId, auctionId, user?.user_id ?? 0,price);
 

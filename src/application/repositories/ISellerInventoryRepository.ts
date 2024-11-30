@@ -14,4 +14,5 @@ export interface ISellerInvertoryRepository {
     findByProductName(productName: string): Promise<Product[]>;
     findByProductId(productId: number): Promise<SellerInventory | null>;
     findByCategory(product_type : typeof ProductTypeEnum): Promise<Product[]>;
+    getSellerIdsByProductIds(productIds: number[]): Promise<{ seller_id: number; product_id: number }[]>
 }
