@@ -31,7 +31,7 @@ export default function ProductAuctionPage() {
   const [productAuction, setProductAuction] = useState<{ product: Product; auction: Auction; } | null>(null);
   const [reviewAndBidderData, setReviewAndBidderData] = useState<{ reviews: Review[]; bids: Bid[] } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [bidAmount, setBidAmount] = useState(0);
+  const [bidAmount, setBidAmount] = useState<string>("");
   const [timeLeft, setTimeLeft] = useState<string | null>(null);
   const [auctionActive, setAuctionActive] = useState(true);
   const { showLoader, hideLoader } = useLoader();
@@ -78,10 +78,11 @@ export default function ProductAuctionPage() {
     const difference = end - now;
 
     if (difference > 0) {
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-      setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+      setTimeLeft(`${days > 0 ? `${days}d ` : ''}${hours}h ${minutes}m ${seconds}s`);
     } else {
       setTimeLeft("Auction ended");
       setAuctionActive(false);
@@ -89,19 +90,15 @@ export default function ProductAuctionPage() {
   };
 
   const handleBidAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    if (!isNaN(value)) {
-      setBidAmount(value);
-    } else {
-      setBidAmount(0);
-    }
+    setBidAmount(e.target.value);
   };
 
 
 const handleBidSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
-  if (bidAmount <= (reviewAndBidderData?.bids.reduce((max, bid) => Math.max(max, bid.price), 0) || 0)) {
+  const bidValue = parseFloat(bidAmount);
+  if (isNaN(bidValue) || bidValue <= (reviewAndBidderData?.bids.reduce((max, bidder) => Math.max(max, bidder.price), 0) || 0)) {
     errorMessage(toast, "Bid amount must be higher than the current highest bid");
     return;
   }
@@ -112,7 +109,7 @@ const handleBidSubmit = async (e: React.FormEvent) => {
       
       const buyerId = buyer_seller_id; // Replace this with the actual user id from context or state.
       const auctionId = productAuction.auction.id;
-      const price = bidAmount;
+      const price = bidValue;
 
       console.log("Buyer ID: " + buyerId);
 
@@ -209,7 +206,6 @@ const handleBidSubmit = async (e: React.FormEvent) => {
                   ) :
                   null
                 }
-
               </CardContent>
             </Card>
           )
@@ -226,26 +222,28 @@ const handleBidSubmit = async (e: React.FormEvent) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 h-full">
-              {reviewAndBidderData && reviewAndBidderData.bids.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Bid Amount</TableHead>
-                      <TableHead>Bid Time</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {reviewAndBidderData.bids.map((bid, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{formatCurrency(bid.price)}</TableCell>
-                        <TableCell>{bid.created_at.toString()}</TableCell>
+              <ScrollArea>
+                {reviewAndBidderData && reviewAndBidderData.bids.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Bid Amount</TableHead>
+                        <TableHead>Bid Time</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="text-gray-600">No bidders yet</p>
-              )}
+                    </TableHeader>
+                    <TableBody>
+                      {reviewAndBidderData.bids.map((bid, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{formatCurrency(bid.price)}</TableCell>
+                          <TableCell>{bid.created_at.toString()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <p className="text-gray-600">No bidders yet</p>
+                )}
+              </ScrollArea>
             </CardContent>
           </Card>
         )}
