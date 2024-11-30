@@ -1,144 +1,234 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AddressRepository } from "@/infrastructure/repositories/AddressRepository";
+import { getAddressesByUserId, createAddress, updateAddress, deleteAddress } from "@/application/usecases/profileManagement/addressManagement";
 import { OrderRepository } from "@/infrastructure/repositories/OrderRepository";
-import { getAddressesByUserId } from "@/application/usecases/profileManagement/addressManagement";
+import { findByBuyerId } from "@/application/usecases/profileManagement/orderManagement";
 import { Card } from "@/components/ui/card";
 import useAuth from "@/hooks/use-auth";
-import { getCanceledOrders, getReturnedOrders } from "@/application/usecases/profileManagement/orderManagement";
+import { Toast } from "@/components/ui/toast";
+import { UserRepository } from "@/infrastructure/repositories/UserRepository";
+import { Address } from "@/domain/entities/Address";
+import { Orders } from "@/domain/entities/Order";
+import { user } from "@prisma/client";
 
-const UserProfile = () => {
-    const [userProfile, setUserProfile] = useState<any>(null); 
-    const [addressBook, setAddressBook] = useState<any[]>([]); 
-    const [returnedOrders, setReturnedOrders] = useState<any[]>([]); 
-    const [cancelledOrders, setCancelledOrders] = useState<any[]>([]); 
-    const [reviews, setReviews] = useState<any[]>([]); 
-    const {user} = useAuth();
+const userProfile: React.FC = () => {
+  const [user, setUser] = useState<user | null>(null);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [newAddress, setNewAddress] = useState<Partial<Address>>({});
+  const [orders, setOrders] = useState<Orders[]>([]); 
+  const [canceledOrders, setCanceledOrders] = useState<Orders[]>([]);
+  const [returnedOrders, setReturnedOrders] = useState<Orders[]>([]);
+  const [userId, setUserId] = useState<number>(1); // Replace with dynamic user ID
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        // Fetch user profile and address book
-        const fetchUserProfile = async () => {
-            // Implement your logic to fetch user profile here
-            // Example: setUserProfile(await UserRepository.getUserProfile());
-        };
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const fetchedAddresses = await getAddressesByUserId(userId);
+        setAddresses(fetchedAddresses);
 
-        const fetchAddressBook = async () => {
-            const addresses = await getAddressesByUserId(user?.user_id ??0);
-            setAddressBook(addresses);
-        };
+        // const fetchedCanceledOrders = await findCanceledOrders(userId);
+        // const fetchedReturnedOrders = await findReturnedOrders(userId);
+        // setCanceledOrders(fetchedCanceledOrders);
+        // setReturnedOrders(fetchedReturnedOrders);
+        // Fetch all orders
+        const fetchedOrders = await findByBuyerId(6);
+        setOrders(fetchedOrders);
 
-        const fetchReturnedOrders = async () => {
-            const returned = await getReturnedOrders();
-            setReturnedOrders(returned);
-        };
+        // Filter orders by status on the frontend
+        setCanceledOrders(fetchedOrders.filter((order) => order.status === "cancelled"));
+        setReturnedOrders(fetchedOrders.filter((order) => order.status === "returned"));
+      } catch (error: any) {
+        setError(error.message || "Failed to fetch addresses");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-        const fetchCanceledOrders = async () => {
-            const cancelled = await getCanceledOrders();
-            setCancelledOrders(cancelled);
-        };
+    fetchAddresses();
+  }, [userId]);
 
-        const fetchReviews = async () => {
-            // Implement your logic to fetch reviews here
-            // Example: setReviews(await ReviewRepository.getUserReviews());
-        };
+  const handleCreateAddress = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (newAddress) {
+        const createdAddress = await createAddress(newAddress as Address);
+        if (createdAddress) {
+          setAddresses((prev) => [...prev, createdAddress]);
+        }
+      }
+    } catch (error: any) {
+      setError(error.message || "Failed to create address");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        fetchUserProfile();
-        fetchAddressBook();
-        fetchReturnedOrders();
-        fetchCanceledOrders();
-        fetchReviews();
-    }, []);
+  const handleUpdateAddress = async (updatedAddress: Address) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const success = await updateAddress(updatedAddress);
+      if (success) {
+        setAddresses((prev) =>
+          prev.map((addr) =>
+            addr.id === updatedAddress.id ? updatedAddress : addr
+          )
+        );
+      }
+    } catch (error: any) {
+      setError(error.message || "Failed to update address");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return (
-        <div className="flex">
-            <nav className="w-1/4 bg-gray-100 p-4">
-                <h2 className="font-bold text-lg">Navigation</h2>
-                <ul>
-                    <li><Button variant="link">My Profile</Button></li>
-                    <li><Button variant="link">Address Book</Button></li>
-                    <li><Button variant="link">My Orders</Button></li>
-                    <ul>
-                        <li><Button variant="link">My Returns</Button></li>
-                        <li><Button variant="link">My Cancellations</Button></li>
-                    </ul>
-                    <li><Button variant="link">My Reviews</Button></li>
-                </ul>
-            </nav>
+  const handleDeleteAddress = async (addressId: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const success = await deleteAddress(addressId);
+      if (success) {
+        setAddresses((prev) => prev.filter((addr) => addr.id !== addressId));
+      }
+    } catch (error: any) {
+      setError(error.message || "Failed to delete address");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            <main className="w-3/4 p-4">
-                {userProfile && (
-                    <Card className="mb-4">
-                        <h2 className="text-xl font-bold">User Profile</h2>
-                        {/* Display user profile details */}
-                        <p>Name: {userProfile.name}</p>
-                        <p>Email: {userProfile.email}</p>
-                        {/* Add more fields as necessary */}
-                    </Card>
-                )}
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <main className="p-6 w-full max-w-4xl bg-white rounded-lg shadow-md">
+        {/* User Profile Section */}
+        {user && (
+          <Card className="mb-6 p-4 border border-gray-300 rounded">
+            <h2 className="text-2xl font-bold mb-2">User Profile</h2>
+            <p><strong>Name:</strong> {user.name}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Age:</strong> {user.age}</p>
+            <p><strong>Gender:</strong> {user.gender === 1 ? "Male" : "Female"}</p>
+            <p><strong>Phone:</strong> {user.phone}</p>
+            <p><strong>Secondary Email:</strong> {user.secondary_email || "N/A"}</p>
+          </Card>
+        )}
 
-                <Card className="mb-4">
-                    <h2 className="text-xl font-bold">Address Book</h2>
-                    {addressBook.length > 0 ? (
-                        addressBook.map((address) => (
-                            <div key={address.id}>
-                                <p>{address.street}, {address.city}, {address.zip}</p>
-                                {/* Add more address details as necessary */}
-                            </div>
-                        ))
-                    ) : (
-                        <p>No addresses found.</p>
-                    )}
-                </Card>
+        {/* Address Book Section */}
+        <Card className="mb-6 p-4 border border-gray-300 rounded">
+          <h2 className="text-2xl font-bold mb-4">Address Book</h2>
+          {addresses.length > 0 ? (
+            addresses.map((address) => (
+              <div key={address.id} className="mb-2">
+                <p>
+                  {address.flat_no}, {address.house_no}, {address.house_name}, {address.road_no}, {address.sector}, {address.area}, {address.city}
+                </p>
+                <button onClick={() => handleUpdateAddress(address)} className="mr-2 text-blue-500 hover:underline">Edit</button>
+                <button onClick={() => handleDeleteAddress(address.id)} className="text-red-500 hover:underline">Delete</button>
+              </div>
+            ))
+          ) : (
+            <p>No addresses found.</p>
+          )}
 
-                <Card className="mb-4">
-                    <h2 className="text-xl font-bold">My Orders</h2>
+          <h3 className="font-semibold mt-6 mb-2">Add New Address</h3>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleCreateAddress();
+            }}
+            className="space-y-4"
+          >
+            <input
+              type="text"
+              placeholder="Flat No"
+              value={newAddress.flat_no || ""}
+              onChange={(e) => setNewAddress({ ...newAddress, flat_no: e.target.value })}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <input
+              type="text"
+              placeholder="House No"
+              value={newAddress.house_no || ""}
+              onChange={(e) => setNewAddress({ ...newAddress, house_no: e.target.value })}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <input
+              type="text"
+              placeholder="House Name"
+              value={newAddress.house_name || ""}
+              onChange={(e) => setNewAddress({ ...newAddress, house_name: e.target.value })}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <input
+              type="text"
+              placeholder="Road"
+              value={newAddress.road_no || ""}
+              onChange={(e) => setNewAddress({ ...newAddress, road_no: e.target.value })}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <input
+            type="number" // Change the input type to number for integer input
+            placeholder="Sector"
+            value={newAddress.sector || ""} // Default to an empty string if undefined
+            onChange={(e) =>
+            setNewAddress({ ...newAddress, sector: parseInt(e.target.value) || 0 })
+            } // Parse the input as an integer
+            className="w-full p-2 border border-gray-300 rounded"
+            />
+            <input
+              type="text"
+              placeholder="Area"
+              value={newAddress.area || ""}
+              onChange={(e) => setNewAddress({ ...newAddress, area: e.target.value })}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <input
+              type="text"
+              placeholder="City"
+              value={newAddress.city || ""}
+              onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <Button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Add Address</Button>
+          </form>
+        </Card>
 
-                    {/* My Returns Section */}
-                    <h3 className="font-semibold mt-4">My Returns</h3>
-                    {returnedOrders.length > 0 ? (
-                        returnedOrders.map((order) => (
-                            <div key={order.id}>
-                                <p>Order ID: {order.id} - Status: Returned</p>
-                                {/* Add more order details as necessary */}
-                            </div>
-                        ))
-                    ) : (
-                        <p>No returned orders found.</p>
-                    )}
+        {/* My Returns Section */}
+        <Card className="mb-6 p-4 border border-gray-300 rounded">
+          <h2 className="text-2xl font-bold mb-2">My Returns</h2>
+          {returnedOrders.length > 0 ? (
+            returnedOrders.map((order) => (
+              <div key={order.id} className="mb-2">
+                <p><strong>Order ID:</strong> {order.id} - <strong>Status:</strong> {order.status}</p>
+              </div>
+            ))
+          ) : (
+            <p>No returned orders found.</p>
+          )}
+        </Card>
 
-                    {/* My Cancellations Section */}
-                    <h3 className="font-semibold mt-4">My Cancellations</h3>
-                    {cancelledOrders.length > 0 ? (
-                        cancelledOrders.map((order) => (
-                            <div key={order.id}>
-                                <p>Order ID: {order.id} - Status: Cancelled</p>
-                                {/* Add more order details as necessary */}
-                            </div>
-                        ))
-                    ) : (
-                        <p>No cancelled orders found.</p>
-                    )}
-                </Card>
-
-                {/* My Reviews Section */}
-                <Card className="mb-4">
-                    <h2 className="text-xl font-bold">My Reviews</h2>
-                    {reviews.length > 0 ? (
-                        reviews.map((review) => (
-                            <div key={review.id}>
-                                <p>Product: {review.productName} - Rating: {review.rating}</p>
-                                {/* Add more review details as necessary */}
-                            </div>
-                        ))
-                    ) : (
-                        <p>No reviews found.</p>
-                    )}
-                </Card>
-            </main>
-        </div>
-    );
+        {/* My Cancellations Section */}
+        <Card className="p-4 border border-gray-300 rounded">
+          <h2 className="text-2xl font-bold mb-2">My Cancellations</h2>
+          {canceledOrders.length > 0 ? (
+            canceledOrders.map((order) => (
+              <div key={order.id} className="mb-2">
+                <p><strong>Order ID:</strong> {order.id} - <strong>Status:</strong> {order.status}</p>
+              </div>
+            ))
+          ) : (
+            <p>No canceled orders found.</p>
+          )}
+        </Card>
+      </main>
+    </div>
+  );
 };
-
-export default UserProfile;
+export default userProfile;

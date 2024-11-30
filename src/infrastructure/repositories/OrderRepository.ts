@@ -13,8 +13,23 @@ export class OrderRepository implements IOrderRepository {
     findById(id: number): Promise<Orders | null> {
         throw new Error("Method not implemented.");
     }
-    findByBuyerId(buyerId: number): Promise<Orders[]> {
-        throw new Error("Method not implemented.");
+    async findByBuyerId(buyerId: number): Promise<Orders[]> {
+        try {
+          if (!buyerId) {
+            throw new Error('Buyer ID is required');
+          }
+          console.log(" Buyer Id " + buyerId)
+          // Fetch orders for the given buyer ID
+          const orders = await prisma.orders.findMany({
+            where: {
+              buyer_id: buyerId,
+            },
+          });
+          return orders.map((item) => Orders.fromJson(item));
+        } catch (error: any) {
+          console.error('Error fetching orders by buyer ID:', error);
+          throw new Error('Failed to fetch orders for the specified buyer.');
+        }
     }
     findBySellerId(sellerId: number): Promise<Orders[]> {
         throw new Error("Method not implemented.");
@@ -36,38 +51,6 @@ export class OrderRepository implements IOrderRepository {
         } catch (e: any) {
             console.error("Error creating order:", e);
             return null;
-        }
-    }
-
-    async markAsReturned(orderId: number, reason?: string): Promise<boolean> {
-        try {
-            await prisma.orders.update({
-                where: { id: orderId },
-                data: {
-                    status: OrderStatusEnum.Returned, // Set status to Returned using enum
-                    // Optionally, you can add a reason field if needed in the future.
-                },
-            });
-            return true;
-        } catch (e) {
-            console.error("Error marking order as returned:", e);
-            return false;
-        }
-    }
-
-    async markAsCanceled(orderId: number, reason?: string): Promise<boolean> {
-        try {
-            await prisma.orders.update({
-                where: { id: orderId },
-                data: {
-                    status: OrderStatusEnum.Cancelled, // Set status to Cancelled using enum
-                    // Optionally, you can add a reason field if needed in the future.
-                },
-            });
-            return true;
-        } catch (e) {
-            console.error("Error marking order as canceled:", e);
-            return false;
         }
     }
 
