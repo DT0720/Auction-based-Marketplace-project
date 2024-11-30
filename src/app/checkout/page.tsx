@@ -11,12 +11,15 @@ import { useToast } from "@/hooks/use-toast";
 import { OrderStatusEnum } from "@/domain/enums/OrderStatusEnum";
 import createOrder from "@/application/usecases/orderManagement/createOrder";
 import useAuth from "@/hooks/use-auth";
+import { useCart } from "@/hooks/use-cart";
+import { ROUTES } from "@/application/routing/routes";
 
 
 export default function CheckoutPage() {
   const router = useRouter();
   const {toast} = useToast();
-  const {buyer_seller_id} = useAuth();
+  const {buyer_seller_id, user, fetchAndUpdateBalance} = useAuth();
+  const {clearCart} = useCart();
 
   // Billing Information State
   const [billingInfo, setBillingInfo] = useState({
@@ -149,6 +152,7 @@ useEffect(() => {
     try {
         // Prepare order data for submission
         const orderData = {
+            user_id: user?.user_id,
             buyer_id: buyer_seller_id,
             status: OrderStatusEnum.Pending,
             total_amount: finalTotal,
@@ -159,16 +163,21 @@ useEffect(() => {
         const success = await createOrder(orderData);
 
         if (success) {
-            successMessage(toast, "Order placed successfully!", "Order Created!");
-            router.push("/order-confirmation");
-        } else {
+          fetchAndUpdateBalance();
+          // Clear the cart from sessionStorage once the order is placed
+          clearCart();
+          successMessage(toast, "Order placed successfully!", "Order Created!");
+      
+          // Use router.replace() to replace the current page with the buyer dashboard
+          router.replace(ROUTES.BUYER_DASHBOARD);
+      } else {
             errorMessage(toast, "There was an error processing your order.");
         }
     } catch (error) {
         console.error("Error creating order:", error);
         errorMessage(toast, "Failed to create order. Please try again.");
     }
-};
+  };
   
 
   return (

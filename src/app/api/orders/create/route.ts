@@ -36,10 +36,12 @@ import { OrderDetailsRepository } from '@/infrastructure/repositories/OrderDetai
 import { Order } from '@/domain/entities/Order';
 import { OrderDetails } from '@/domain/entities/OrderDetails';
 import { SellerInventoryRepository } from '@/infrastructure/repositories/SellerInventoryRepository';
+import { WalletRepository } from '@/infrastructure/repositories/WalletRepository';
 
 const orderRepository = new OrderRepository();
 const orderDetailsRepository = new OrderDetailsRepository();
 const sellerInventoryRepository = new SellerInventoryRepository();
+const walletRepository = new WalletRepository();
 
 export async function POST(req: Request) {
   try {
@@ -77,6 +79,8 @@ export async function POST(req: Request) {
 
     // Use the repository method
     const { order: createdOrder, orderDetails: createdOrderDetails } = await orderRepository.createOrderWithDetails(order, orderDetails);
+
+    await walletRepository.decrementWalletBalance(body.user_id, body.total_amount);
 
     return NextResponse.json(
       {

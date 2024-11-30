@@ -3,12 +3,8 @@ import { Order } from "@/domain/entities/Order";
 import { prisma } from "../database/prisma";
 import { OrderDetails } from "@/domain/entities/OrderDetails";
 
-
 export class OrderRepository implements IOrderRepository {
-
-  constructor() {
-
-  }
+  constructor() {}
 
   // Create a new order
   async create(order: Order): Promise<Order> {
@@ -78,8 +74,8 @@ export class OrderRepository implements IOrderRepository {
     try {
       // Perform the transaction
       const result = await prisma.$transaction(async (prismaTransaction) => {
-        // Create the order
-        const createdOrder = await prisma.orders.create({
+        // Create the order within the transaction
+        const createdOrder = await prismaTransaction.orders.create({
           data: {
             buyer_id: order.buyerId,
             offer_id: order.offerId,
@@ -88,7 +84,7 @@ export class OrderRepository implements IOrderRepository {
           },
         });
 
-        // Create associated order details
+        // Create associated order details within the transaction
         const createdOrderDetails = await prismaTransaction.order_details.createMany({
           data: orderDetails.map((detail) => ({
             order_id: createdOrder.id,
@@ -110,7 +106,7 @@ export class OrderRepository implements IOrderRepository {
           result.createdOrder.status,
           result.createdOrder.total_amount ? result.createdOrder.total_amount.toNumber() : null // Convert Decimal to number
         ),
-        orderDetails: orderDetails.map((detail, index) => {
+        orderDetails: orderDetails.map((detail) => {
           return new OrderDetails(
             detail.id,
             result.createdOrder.id, // Associate with the created order ID
@@ -121,8 +117,8 @@ export class OrderRepository implements IOrderRepository {
         }),
       };
     } catch (error) {
-      console.error('Error during order transaction:', error);
-      throw new Error('Failed to create order with details.');
+      console.error("Error during order transaction:", error);
+      throw new Error("Failed to create order with details.");
     }
   }
 }

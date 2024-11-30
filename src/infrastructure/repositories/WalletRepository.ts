@@ -59,6 +59,46 @@ export class WalletRepository implements IWalletRepository {
         }
     }
 
+    async decrementWalletBalance(_id: number, decrement: number): Promise<boolean> {
+        try {
+            // Get the current wallet balance
+            const wallet = await prisma.wallet.findUnique({
+                where: { user_id: _id },
+            });
+    
+            // If the wallet doesn't exist, return false
+            if (!wallet) {
+                console.error("Wallet not found for user ID:", _id);
+                return false;
+            }
+    
+            // Convert the Decimal current_balance to a number for comparison
+            const currentBalance = wallet.current_balance.toNumber();
+    
+            // Check if the decrement is greater than the current balance
+            if (decrement > currentBalance) {
+                console.error("Decrement value exceeds current balance.");
+                return false; // Return false if decrement is greater than current balance
+            }
+    
+            // Proceed to update the wallet balance
+            const updatedWallet = await prisma.wallet.update({
+                where: { user_id: _id },
+                data: {
+                    current_balance: (currentBalance - decrement), // Subtract the decrement
+                },
+            });
+    
+            // If the update is successful, return true
+            return updatedWallet !== null;
+        } catch (error) {
+            console.error("Error decrementing wallet balance:", error);
+            return false; // Return false if an error occurs
+        }
+    }
+    
+
+
     async updateWallet(wallet: Wallet): Promise<Wallet> {
         throw new Error("Method not implemented.");
     }
