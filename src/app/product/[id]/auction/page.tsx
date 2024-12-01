@@ -21,6 +21,7 @@ import { formatCurrency } from "@/lib/stringUtils";
 import { Input } from "@/components/ui/input";
 import { placeBid } from "@/application/usecases/buyerDashboard/auction/placeBid";
 import useAuth from "@/hooks/use-auth";
+import { notifyBuyerOfOutBid } from "@/application/usecases/NotificationServiceSystem/Notification";
 
 
 export default function ProductAuctionPage() {
@@ -136,6 +137,7 @@ const handleBidSubmit = async (e: React.FormEvent) => {
         if (updatedReviewAndBidderData) {
           setReviewAndBidderData(updatedReviewAndBidderData);
         }
+       await notifyBuyerOfOutBid(auctionId, user?.user_id ?? 0, lastBidder);
         fetchAndUpdateBalance();
         successMessage(toast, "Bid placed successfully");
       } else {

@@ -23,6 +23,21 @@ export async function notifySellerOfPurchase(orderDetails: OrderDetails, sender_
 
   return response.data;
 }
+export async function notifyBuyerOfOutBid(auction_id: number, sender_id: number,receiver_id:number): Promise<boolean> {
+  const body = {   
+    sender_id: sender_id,
+    receiver_id: receiver_id,
+    message: `You have been outbid on auction ${auction_id}.`
+  };
+
+  const response = await NetworkUtils.postRequest<ApiResponse<boolean>>(endpoint+"outbid", body);
+
+  if (!response) {
+    throw new Error('Failed to send notification');
+  }
+
+  return response.data;
+}
 
 // Function to notify the buyer when their order has been shipped
 // export async function notifyBuyerOfShipment(order: Order): Promise<void> {

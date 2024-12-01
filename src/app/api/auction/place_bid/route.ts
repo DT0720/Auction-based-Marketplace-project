@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { IBidRepository } from '@/application/repositories/IBidRepository';
 import { BidRepository } from '@/infrastructure/repositories/BidRepository';
 
+
 const bidRepository : IBidRepository = new BidRepository();
 
 // Handle POST requests for signup
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
     console.log("Before creating bid" + JSON.stringify(body));
 
     const success = await bidRepository.placeBidAndUpdateWallet(body.user_id, body.buyer_id, body.auction_id,body.price, increment); // Create the product using the use case
-
+   
     console.log("After creating bid");
 
     return NextResponse.json(

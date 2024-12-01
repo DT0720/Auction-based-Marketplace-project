@@ -12,11 +12,11 @@ export class NotificationRepository {
   async createNotification(receiverId: number, senderId: number, content: string): Promise<boolean> {
     try {
 
-      const seller_user_id = await this.sellerRepository.findUserIdBySellerId(receiverId);
+      
 
       await prisma.notifications.create({
         data: {
-          reciever_id: seller_user_id ?? 0,
+          reciever_id: receiverId ?? 0,
           sender_id: senderId,
           content: content,
           recieved_at: new Date().toISOString(),
