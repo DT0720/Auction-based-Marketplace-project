@@ -7,29 +7,29 @@ const notificationService = new NotificationService();
 
 // Create a new order (Buyer purchases a product)
 export async function POST(req: Request) {
-  try {
-    const body = await req.json();
+    try {
+        const body = await req.json();
 
-    if (!body) {
-      throw new Error('No body received');
+        if (!body) {
+            throw new Error('No body received');
+        }
+
+        console.log('Notification body: ', body);
+
+        // Notify the seller about the new order
+        await notificationService.sendNotificationToSeller(
+            body.sender_id,
+            body.receiver_id,
+            body.message
+        );
+
+        return NextResponse.json(
+            { message: 'Notification sent successfully', data: true },
+            { status: 201 }
+        );
+    } catch (error: any) {
+        return NextResponse.json({ message: error.message, data: false }, { status: 400 });
     }
-
-    console.log('Notification body: ', body);
-
-    // Notify the seller about the new order
-    await notificationService.sendNotificationToSeller(
-      body.sender_id,
-      body.receiver_id,
-      body.message
-    );
-
-    return NextResponse.json(
-      { message: 'Notification sent successfully', data: true },
-      { status: 201 }
-    );
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message, data: false }, { status: 400 });
-  }
 }
 
 // // Update order status to shipped (Seller ships the product)
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 //       order.seller_id,
 //       `Your order ${orderId} has been shipped.`
 //     );
-    
+
 
 //     return NextResponse.json(
 //       { message: 'Order status updated to shipped', data: order },
@@ -57,27 +57,34 @@ export async function POST(req: Request) {
 // }
 
 
-export async function GET(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get('userId');
+/**
+ * Handles GET requests to retrieve user notifications
+ * @async
+ * @function GET
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing notifications or an error message
+ */
+export async function GET(req: Request): Promise<Response> {
+    try {
+        const { searchParams } = new URL(req.url);
+        const userId = searchParams.get('userId');
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: 'User ID is required' },
-        { status: 400 }
-      );
+        if (!userId) {
+            return NextResponse.json(
+                { message: 'User ID is required' },
+                { status: 400 }
+            );
+        }
+        const notifications = await notificationService.getUserNotifications(Number(userId));
+        return NextResponse.json(
+            { data: notifications },
+            { status: 200 }
+        );
+    } catch (error: any) {
+        console.error('API error:', error);
+        return NextResponse.json(
+            { message: error.message || 'Internal server error' },
+            { status: 500 }
+        );
     }
-    const notifications = await notificationService.getUserNotifications(Number(userId));
-    return NextResponse.json(
-      { data: notifications },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    console.error('API error:', error);
-    return NextResponse.json(
-      { message: error.message || 'Internal server error' },
-      { status: 500 }
-    );
-  }
 }
