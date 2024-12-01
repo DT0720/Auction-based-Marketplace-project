@@ -1,4 +1,17 @@
+/**
+ * @class OrderDetails
+ * @classdesc Represents the details of an order
+ */
+
 export class OrderDetails {
+  /**
+     * @constructor
+     * @param {number} id - The unique identifier of the order detail
+     * @param {number} orderId - The ID of the order
+     * @param {number} productId - The ID of the product
+     * @param {number} quantity - The quantity of the product ordered
+     * @param {number} sellerId - The ID of the seller
+     */
     constructor(
       public id: number,
       public orderId: number,

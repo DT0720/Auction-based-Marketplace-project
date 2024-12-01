@@ -51,6 +51,14 @@ export class NotificationService {
 
         console.log(`Notification stored: receiver=${receiverId}, sender=${senderId}, message=${message}`);
     }
+     /**
+     * Notifies a buyer of being outbid
+     * @param {number} sender_id - ID of the sender
+     * @param {number} receiver_id - ID of the receiver (buyer)
+     * @param {string} message - Notification message
+     * @returns {Promise<void>}
+     * @throws Will throw an error if the notification fails to send
+     */
 
     async notifyBuyerOfOutBid(sender_id: number, receiver_id: number, message: string): Promise<void> {
         const buyer_id = await this.buyerRepository.findUserIdBybuyerId(receiver_id);
@@ -67,6 +75,12 @@ export class NotificationService {
 
 
     }
+     /**
+     * Retrieves notifications for a user
+     * @param {number} userId - ID of the user
+     * @returns {Promise<any[]>} - Array of notifications
+     * @throws Will throw an error if the user ID is not provided or if there is an error retrieving notifications
+     */
     async getUserNotifications(userId: number) {
         try {
             if (!userId) throw new Error('User ID is required');
