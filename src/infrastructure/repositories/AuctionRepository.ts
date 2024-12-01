@@ -61,27 +61,33 @@ export class AuctionRepository implements IAuctionRepository{
      */
     async findActiveAuctionsById(id: number): Promise<{ product: Product; auction: Auction } | null> {
         try{
-            const productsOnSale = await prisma.product.findFirst({
+            const productsOnSale = await prisma.product.findMany({
                 where: {
-                    auction: {
-                        some: {
-                            product_id: id,
-                            status: true
-                        }
-                    }
+                  auction: {
+                    is: {
+                      status: true,
+                    },
+                  },
                 },
                 include: {
-                    auction: true
-                }
+                  auction: true,
+                },
             });
+              
     
             if(!productsOnSale){
                 throw new Error("Error fetching products on sale by id");
             }
     
+            const firstProduct = productsOnSale[0]; // Get the first product from the array
+
+            if(!firstProduct.auction){
+                throw new Error("Error fetching first product on sale");
+            }
+
             return {
-                product: Product.fromJson(productsOnSale),
-                auction: Auction.fromJson(productsOnSale.auction[0])
+                product: Product.fromJson(firstProduct),
+                auction: Auction.fromJson(firstProduct.auction),
             };
         }catch(error){
             console.log(error);
@@ -90,26 +96,32 @@ export class AuctionRepository implements IAuctionRepository{
     }
     async findById(id: number): Promise<{ product: Product; auction: Auction } | null> {
         try{
-            const productsOnSale = await prisma.product.findFirst({
+            const productsOnSale = await prisma.product.findMany({
                 where: {
-                    auction: {
-                        some: {
-                            product_id: id,
-                        }
-                    }
+                  auction: {
+                    is: {
+                      status: true,
+                    },
+                  },
                 },
                 include: {
-                    auction: true
-                }
-            });
+                  auction: true,
+                },
+              });
     
             if(!productsOnSale){
                 throw new Error("Error fetching products on sale by id");
             }
     
+            const firstProduct = productsOnSale[0]; // Get the first product from the array
+
+            if(!firstProduct.auction){
+                throw new Error("Error fetching first product on sale");
+            }
+
             return {
-                product: Product.fromJson(productsOnSale),
-                auction: Auction.fromJson(productsOnSale.auction[0])
+                product: Product.fromJson(firstProduct),
+                auction: Auction.fromJson(firstProduct.auction),
             };
         }catch(error){
             console.log(error);
@@ -133,27 +145,28 @@ export class AuctionRepository implements IAuctionRepository{
         try{
             const productsOnSale = await prisma.product.findMany({
                 where: {
-                    auction: {
-                        some: {
-                            status: true
-                        }
-                    }
+                  auction: {
+                    is: {
+                      status: true,
+                    },
+                  },
                 },
                 include: {
-                    auction: true
-                }
-            });
+                  auction: true,
+                },
+              });
     
             if(!productsOnSale){
                 throw new Error("Error fetching products on sale");
             }
     
-            return productsOnSale.flatMap(product => 
-                product.auction.map(auction => ({
+            return productsOnSale
+                .filter(product => product.auction !== null)
+                .map(product => ({
                     product: Product.fromJson(product),
-                    auction: Auction.fromJson(auction)
-                }))
-            );
+                    auction: Auction.fromJson(product.auction!)
+                }));
+            
         }catch(error){
             console.log(error);
             return [];
