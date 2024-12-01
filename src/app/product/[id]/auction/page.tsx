@@ -128,6 +128,10 @@ export default function ProductAuctionPage() {
                 //   return;
                 // }
 
+                if( currentBalance < price){
+                    throw new Error("Insufficient balance. Please add funds to your account.");
+                }
+
                 const lastBidder = await placeBid(buyerId, auctionId, user?.user_id ?? 0, price);
 
                 console.log("Last bidder: " + JSON.stringify(lastBidder));
