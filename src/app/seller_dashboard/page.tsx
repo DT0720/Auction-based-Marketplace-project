@@ -16,16 +16,71 @@ import { formatCurrency } from "@/lib/stringUtils";
 import { useFilters } from "@/hooks/use-filter";
 import { ProductTypeEnum } from "@/domain/enums/ProductTypeEnum";
 
-// Main sellerDashboard component
+/**
+ * Seller Dashboard Component
+ *
+ * Displays a list of products for a seller, with filtering and navigation options.
+ *
+ * @component
+ */
+
 export default function sellerDashboard()
  {
+    /**
+     * State for storing all products fetched from the server.
+     * @type {Array<Product>}
+     */
+
     const [products, setProducts] = useState<Product[]>([]);
+
+    /**
+     * State for storing filtered products based on search query and category.
+     * @type {Array<Product>}
+     */
+
     const { showLoader, hideLoader } = useLoader();
+
+    /**
+     * Custom hook for getting authentication-related information.
+     * @typedef {Object} AuthHook
+     * @property {string} buyer_seller_id - Unique ID for the seller or buyer.
+     */
+
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+
+    /**
+     * Custom hook for showing and hiding a loader.
+     * @typedef {Object} LoaderHook
+     * @property {Function} showLoader - Function to display the loader.
+     * @property {Function} hideLoader - Function to hide the loader.
+     */
+
     const { searchQuery, category } = useFilters();
+
+    /**
+     * Router instance for navigation.
+     * @typedef {Object} Router
+     * @property {Function} push - Function to navigate to a specific route.
+     */
+
     const { buyer_seller_id } = useAuth();
+
+     /**
+     * Custom hook for getting filter information.
+     * @typedef {Object} FiltersHook
+     * @property {string} searchQuery - The current search query.
+     * @property {string} category - The selected category filter.
+     */
+
     const router = useRouter();
-    // Fetch products from API
+
+    /**
+     * Fetches products from the server based on the seller ID.
+     * Updates both the 'products' and 'filteredProducts' state variables.
+     * Runs on component mount.
+     */
+
+    
     useEffect(() => {
         const fetchProducts = async () => 
             {
@@ -42,6 +97,11 @@ export default function sellerDashboard()
         };
         fetchProducts();
     }, []);
+
+    /**
+     * Filters products based on the search query and selected category.
+     * Runs whenever 'searchQuery', 'category', or 'products' changes.
+     */
 
     useEffect(() => {
         const filtered = products.filter((product) => {

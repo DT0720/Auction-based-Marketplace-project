@@ -2,17 +2,42 @@ import { prisma } from "../database/prisma";
 import { IOffersRepository } from "@/application/repositories/IOfferRepository";
 import { Offers } from "@/domain/entities/Offers";
 
-export class OffersRepository implements IOffersRepository {
-  constructor(
+/**
+ * Repository for managing offers in the database.
+ * Implements the IOffersRepository interface.
+ */
+
+export class OffersRepository implements IOffersRepository 
+
+{
+  constructor
+  (
 
   ) {}
 
-  async findByType(type: string): Promise<Offers | null> {
+  /**
+   * Finds an offer by its type.
+   * @param {string} type - The type of the offer to search for.
+   * @returns {Promise<Offers | null>} - The offer if found, otherwise null.
+ */
+
+  async findByType(type: string): Promise<Offers | null> 
+     // Implementation
+  {
+
     const offerData = await prisma.offers.findFirst({ where: { type } });
     return offerData ? Offers.fromJson(offerData) : null;
   }
 
-  async create(offer: Partial<Offers>): Promise<boolean> {
+   /**
+   * Creates a new offer in the database.
+   * @param {Partial<Offers>} offer - The offer data to create.
+   * @returns {Promise<boolean>} - True if creation succeeds, false otherwise.
+   */
+
+  async create(offer: Partial<Offers>): Promise<boolean> 
+  {
+    // Implementation
     try {
       await prisma.offers.create({
         data: {
@@ -27,7 +52,16 @@ export class OffersRepository implements IOffersRepository {
     }
   }
 
-  async update(id: number, data: Partial<Offers>): Promise<boolean> {
+  /**
+   * Updates an existing offer in the database.
+   * @param {number} id - The ID of the offer to update.
+   * @param {Partial<Offers>} data - The data to update the offer with.
+   * @returns {Promise<boolean>} - True if the update succeeds, false otherwise.
+   */
+
+  async update(id: number, data: Partial<Offers>): Promise<boolean>
+   {
+     // Implementation
     try {
       await prisma.offers.update({
         where: { id },
@@ -43,6 +77,13 @@ export class OffersRepository implements IOffersRepository {
     }
   }
 
+  /**
+   * Delete an existing offer in the database.
+   * @param {number} id - The ID of the offer to delete.
+   * @param {Partial<Offers>} data - The data to delete the offer with.
+   * @returns {Promise<boolean>} - True if the delete succeeds, false otherwise.
+   */
+
   async delete(id: number): Promise<boolean> {
     try {
       await prisma.offers.delete({ where: { id } });
@@ -53,12 +94,17 @@ export class OffersRepository implements IOffersRepository {
     }
   }
 
+  /**
+ * Fetches all offers from the database and returns them as an array of `Offers` objects.
+ * @returns {Promise<Offers[]>} A promise resolving to an array of `Offers`.
+ * @throws {Error} Throws an error if fetching offers fails.
+ */
+
   async getAllOffers(): Promise<Offers[]> {
     try {
-        // Fetch all offers from the database
+      
         const offersData = await prisma.offers.findMany();
     
-        // Map the result to `Offers` objects
         return offersData.map((offer) =>
           Offers.fromJson({
             id: offer.id,
