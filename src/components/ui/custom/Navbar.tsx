@@ -16,6 +16,9 @@ import {
 import SearchBar from "./SearchBar";
 import { useCart } from "@/hooks/use-cart";
 import { NotificationDropdown } from "./Notificationdropdown";
+import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
+import { warningMessage } from "./Toast";
 
 
 const Navbar = () => {
@@ -23,6 +26,11 @@ const Navbar = () => {
   const router = useRouter(); // Next.js router
   const pathname = usePathname(); // To determine the active page
   const { cartCount } = useCart(); // Hook for cart state
+  const { toast } = useToast(); // Hook for notifications
+
+  const showMethodNotImplemented = () => {
+      warningMessage(toast, "Method not implemented yet");
+  }
 
   const isBuyer = user?.type.toLocaleLowerCase() === "b"; 
   const isSeller = user?.type.toLocaleLowerCase() === "s";
@@ -41,11 +49,12 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="w-full flex h-14 items-center justify-between px-4">
         {/* Left: Logo */}
-        <div className="flex items-center">
-          <Home className="mr-2 text-blue-500" />
-          <span className="font-bold text-lg">MyApp</span>
-        </div>
-
+        <Link href={ROUTES.HOME}>
+          <div className="flex items-center">
+            <Home className="mr-2 text-blue-500" />
+            <span className="font-bold text-lg">Sundarban Marketplace</span>
+          </div>
+        </Link>
         {/* Center: Search Bar for Logged-in Users */}
         {isAuthenticated && (
           <div className="flex-grow flex justify-center">
@@ -76,10 +85,6 @@ const Navbar = () => {
           ) : isBuyer ? (
             <>
               {/* Buyer View */}
-              {/* <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
-                <Bell />
-              </Button> */}
-
               <NotificationDropdown />
               <Button variant="ghost" className="mr-4" onClick={() => router.push(ROUTES.SHOPPING_CART)}>
                 <ShoppingCart />
@@ -104,24 +109,20 @@ const Navbar = () => {
                     {user?.name || "User"}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => console.log("Navigate to My Profile")}>
+                  <DropdownMenuItem onClick={() => router.push(ROUTES.USER_PROFILE)}>
                   <User className="mr-2 h-4 w-4" />
                   My Profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => console.log("Navigate to Billing")}>
+                  <DropdownMenuItem onClick={() => showMethodNotImplemented()}>
                   <CreditCard className="mr-2 h-4 w-4" />
                   Billing
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => console.log("Navigate to Settings")}>
+                  <DropdownMenuItem onClick={() => showMethodNotImplemented()}>
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => console.log("Navigate to My Cart")}>
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  My Cart
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => console.log("Navigate to Ongoing Bids")}>
+                  <DropdownMenuItem onClick={() => showMethodNotImplemented()}>
                   <List className="mr-2 h-4 w-4" />
                   Ongoing Bids
                   </DropdownMenuItem>
@@ -157,20 +158,20 @@ const Navbar = () => {
                     {user?.name || "User"}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => console.log("Navigate to My Profile")}>
+                  <DropdownMenuItem onClick={() => router.push(ROUTES.USER_PROFILE)}>
                   <User className="mr-2 h-4 w-4" />
                   My Profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => console.log("Navigate to Billing")}>
+                  <DropdownMenuItem onClick={() => showMethodNotImplemented()}>
                   <CreditCard className="mr-2 h-4 w-4" />
                   Billing
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => console.log("Navigate to Settings")}>
+                  <DropdownMenuItem onClick={() => showMethodNotImplemented()}>
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => console.log("Navigate to Ongoing Bids")}>
+                  <DropdownMenuItem onClick={() => showMethodNotImplemented()}>
                   <List className="mr-2 h-4 w-4" />
                   Your Auctions
                   </DropdownMenuItem>

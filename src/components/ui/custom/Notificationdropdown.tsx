@@ -9,7 +9,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import useAuth from "@/hooks/use-auth";
-
+import { Badge } from "@/components/ui/badge";
 import NetworkUtils from "@/lib/networkUtils";
 /**
  * @typedef {Object} Notification
