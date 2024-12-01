@@ -10,9 +10,8 @@ import { SellerRepository } from "./SellerRepository";
  */
 
 export class NotificationRepository {
-
     private sellerRepository: ISellerRepository = new SellerRepository();
-     /**
+    /**
      * Creates a new notification
      * @param {number} receiverId - The ID of the user receiving the notification
      * @param {number} senderId - The ID of the user sending the notification
@@ -20,11 +19,12 @@ export class NotificationRepository {
      * @returns {Promise<boolean>} - Returns true if the notification was created successfully, otherwise false
      */
 
-    async createNotification(receiverId: number, senderId: number, content: string): Promise<boolean> {
+    async createNotification(
+        receiverId: number,
+        senderId: number,
+        content: string
+    ): Promise<boolean> {
         try {
-
-
-
             await prisma.notifications.create({
                 data: {
                     reciever_id: receiverId ?? 0,
@@ -56,13 +56,13 @@ export class NotificationRepository {
                     user_notifications_sender_idTouser: {
                         select: {
                             name: true,
-                        }
-                    }
+                        },
+                    },
                 },
                 orderBy: {
-                    recieved_at: 'desc'
+                    recieved_at: "desc",
                 },
-                take: 10
+                take: 10,
             });
             return notifications;
         } catch (error) {

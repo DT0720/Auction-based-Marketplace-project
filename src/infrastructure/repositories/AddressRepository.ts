@@ -9,7 +9,7 @@ import { prisma } from "../database/prisma";
 export class AddressRepository implements IAddressRepository {
     /**
      * Creates a new Address entity in the database.
-     * 
+     *
      * @param address - The Address entity to create.
      * @returns A Promise that resolves to the created `Address` entity if successful, otherwise `null`.
      */
@@ -36,7 +36,7 @@ export class AddressRepository implements IAddressRepository {
 
     /**
      * Updates an existing Address entity in the database.
-     * 
+     *
      * @param address - The Address entity with updated information.
      * @returns A Promise that resolves to `true` if the update is successful, otherwise `false`.
      */
@@ -63,7 +63,7 @@ export class AddressRepository implements IAddressRepository {
 
     /**
      * Deletes an Address entity from the database by its ID.
-     * 
+     *
      * @param id - The unique identifier of the Address to delete.
      * @returns A Promise that resolves to `true` if the deletion is successful, otherwise `false`.
      */
@@ -81,7 +81,7 @@ export class AddressRepository implements IAddressRepository {
 
     /**
      * Finds an Address entity in the database by its ID.
-     * 
+     *
      * @param id - The unique identifier of the Address to find.
      * @returns A Promise that resolves to the `Address` entity if found, otherwise `null`.
      */
@@ -100,7 +100,7 @@ export class AddressRepository implements IAddressRepository {
 
     /**
      * Finds all Address entities in the database associated with a specific user ID.
-     * 
+     *
      * @param userId - The unique identifier of the user whose addresses are to be retrieved.
      * @returns A Promise that resolves to an array of `Address` entities associated with the user.
      */

@@ -31,13 +31,22 @@ export class NotificationService {
      * @returns {Promise<void>}
      * @throws Will throw an error if the notification fails to send
      */
-    async sendNotificationToSeller(senderId: number, receiverId: number, message: string): Promise<void> {
+    async sendNotificationToSeller(
+        senderId: number,
+        receiverId: number,
+        message: string
+    ): Promise<void> {
+        console.log(
+            `sendNotificationToSellerBefore: receiver=${receiverId}, sender=${senderId}, message=${message}`
+        );
 
-        console.log(`sendNotificationToSellerBefore: receiver=${receiverId}, sender=${senderId}, message=${message}`);
+        const seller_user_id = await this.sellerRepository.findUserIdBySellerId(
+            receiverId
+        );
 
-        const seller_user_id = await this.sellerRepository.findUserIdBySellerId(receiverId);
-
-        console.log(`sendNotificationToSeller: receiver=${seller_user_id}, sender=${senderId}, message=${message}`);
+        console.log(
+            `sendNotificationToSeller: receiver=${seller_user_id}, sender=${senderId}, message=${message}`
+        );
 
         const success = await this.notificationRepository.createNotification(
             seller_user_id ?? 0,
@@ -49,9 +58,11 @@ export class NotificationService {
             throw new Error("Failed to send notification");
         }
 
-        console.log(`Notification stored: receiver=${receiverId}, sender=${senderId}, message=${message}`);
+        console.log(
+            `Notification stored: receiver=${receiverId}, sender=${senderId}, message=${message}`
+        );
     }
-     /**
+    /**
      * Notifies a buyer of being outbid
      * @param {number} sender_id - ID of the sender
      * @param {number} receiver_id - ID of the receiver (buyer)
@@ -60,8 +71,14 @@ export class NotificationService {
      * @throws Will throw an error if the notification fails to send
      */
 
-    async notifyBuyerOfOutBid(sender_id: number, receiver_id: number, message: string): Promise<void> {
-        const buyer_id = await this.buyerRepository.findUserIdBybuyerId(receiver_id);
+    async notifyBuyerOfOutBid(
+        sender_id: number,
+        receiver_id: number,
+        message: string
+    ): Promise<void> {
+        const buyer_id = await this.buyerRepository.findUserIdBybuyerId(
+            receiver_id
+        );
 
         const success = await this.notificationRepository.createNotification(
             buyer_id ?? 0,
@@ -72,10 +89,8 @@ export class NotificationService {
         if (!success) {
             throw new Error("Failed to send notification");
         }
-
-
     }
-     /**
+    /**
      * Retrieves notifications for a user
      * @param {number} userId - ID of the user
      * @returns {Promise<any[]>} - Array of notifications
@@ -83,14 +98,13 @@ export class NotificationService {
      */
     async getUserNotifications(userId: number) {
         try {
-            if (!userId) throw new Error('User ID is required');
-            const notifications = await this.notificationRepository.getNotificationsByUserId(userId);
+            if (!userId) throw new Error("User ID is required");
+            const notifications =
+                await this.notificationRepository.getNotificationsByUserId(userId);
             return notifications;
         } catch (error) {
-            console.error('NotificationService error:', error);
+            console.error("NotificationService error:", error);
             throw error;
         }
     }
 }
-
-

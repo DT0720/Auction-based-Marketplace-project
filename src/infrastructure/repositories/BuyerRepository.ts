@@ -10,7 +10,7 @@ import { prisma } from "../database/prisma";
 export class BuyerRepository implements IBuyerRepository {
     /**
      * Creates a new Buyer entity in the database.
-     * 
+     *
      * @param user_id - The ID of the user to associate with the Buyer.
      * @returns A Promise that resolves to `true` if the creation is successful, otherwise `false`.
      */
@@ -30,7 +30,7 @@ export class BuyerRepository implements IBuyerRepository {
 
     /**
      * Deletes a Buyer entity by its ID.
-     * 
+     *
      * @param id - The unique identifier of the Buyer to delete.
      * @returns A Promise that resolves to `true` if the deletion is successful.
      * Note: This method currently returns `true` without performing any operation.
@@ -41,7 +41,7 @@ export class BuyerRepository implements IBuyerRepository {
 
     /**
      * Finds the user ID associated with a specific Buyer ID.
-     * 
+     *
      * @param buyer_id - The unique identifier of the Buyer.
      * @returns A Promise that resolves to the user ID if found, otherwise `null`.
      */
@@ -61,7 +61,7 @@ export class BuyerRepository implements IBuyerRepository {
 
     /**
      * Finds a Buyer entity in the database by its ID.
-     * 
+     *
      * @param id - The unique identifier of the Buyer to find.
      * @returns A Promise that resolves to the `Buyer` entity if found, otherwise `null`.
      * Assumes the existence of a static `fromJson` method in the `Buyer` entity class.

@@ -11,15 +11,15 @@ import { Bid } from "@/domain/entities/Bid";
  * Auction Repository class.
  * Implements methods to interact with the auction database.
  */
-export class AuctionRepository implements IAuctionRepository{
+export class AuctionRepository implements IAuctionRepository {
     /**
      * Creates a new auction.
-     * 
+     *
      * @param {Auction} auction - The auction data to create.
      * @returns {Promise<boolean>} - True if the auction is successfully created, otherwise false.
      */
     async create(auction: Auction): Promise<boolean> {
-        try{
+        try {
             const nowAuction = await prisma.auction.create({
                 data: {
                     product_id: auction.productId,
@@ -29,15 +29,15 @@ export class AuctionRepository implements IAuctionRepository{
                     status: auction.status,
                     start_time: auction.startTime,
                     end_time: auction.endTime,
-                }
+                },
             });
 
-            if(!nowAuction){
+            if (!nowAuction) {
                 throw new Error("Error creating auction");
             }
 
             return true;
-        }catch(error){
+        } catch (error) {
             console.log(auction);
             return false;
         }
@@ -45,7 +45,7 @@ export class AuctionRepository implements IAuctionRepository{
 
     /**
      * Deletes an auction.
-     * 
+     *
      * @param {number} id - The ID of the auction to delete.
      * @returns {Promise<boolean>} - True if the auction is successfully deleted, otherwise false.
      */
@@ -55,33 +55,34 @@ export class AuctionRepository implements IAuctionRepository{
 
     /**
      * Finds an auction by ID.
-     * 
+     *
      * @param {number} id - The ID of the auction to find.
      * @returns {Promise<Auction | null>} - The auction object if found, otherwise null.
      */
-    async findActiveAuctionsById(id: number): Promise<{ product: Product; auction: Auction } | null> {
-        try{
+    async findActiveAuctionsById(
+        id: number
+    ): Promise<{ product: Product; auction: Auction } | null> {
+        try {
             const productsOnSale = await prisma.product.findMany({
                 where: {
-                  auction: {
-                    is: {
-                      status: true,
+                    auction: {
+                        is: {
+                            status: true,
+                        },
                     },
-                  },
                 },
                 include: {
-                  auction: true,
+                    auction: true,
                 },
             });
-              
-    
-            if(!productsOnSale){
+
+            if (!productsOnSale) {
                 throw new Error("Error fetching products on sale by id");
             }
-    
+
             const firstProduct = productsOnSale[0]; // Get the first product from the array
 
-            if(!firstProduct.auction){
+            if (!firstProduct.auction) {
                 throw new Error("Error fetching first product on sale");
             }
 
@@ -89,33 +90,43 @@ export class AuctionRepository implements IAuctionRepository{
                 product: Product.fromJson(firstProduct),
                 auction: Auction.fromJson(firstProduct.auction),
             };
-        }catch(error){
+        } catch (error) {
             console.log(error);
             return null;
         }
     }
-    async findById(id: number): Promise<{ product: Product; auction: Auction } | null> {
-        try{
+
+    /**
+     * Finds an auction by its ID.
+     *
+     * @param {number} id - The ID of the auction to find.
+     * @returns {Promise<{ product: Product; auction: Auction } | null>} - Resolves with the product and auction details if found, otherwise `null`.
+     */
+
+    async findById(
+        id: number
+    ): Promise<{ product: Product; auction: Auction } | null> {
+        try {
             const productsOnSale = await prisma.product.findMany({
                 where: {
-                  auction: {
-                    is: {
-                      status: true,
+                    auction: {
+                        is: {
+                            status: true,
+                        },
                     },
-                  },
                 },
                 include: {
-                  auction: true,
+                    auction: true,
                 },
-              });
-    
-            if(!productsOnSale){
+            });
+
+            if (!productsOnSale) {
                 throw new Error("Error fetching products on sale by id");
             }
-    
+
             const firstProduct = productsOnSale[0]; // Get the first product from the array
 
-            if(!firstProduct.auction){
+            if (!firstProduct.auction) {
                 throw new Error("Error fetching first product on sale");
             }
 
@@ -123,14 +134,14 @@ export class AuctionRepository implements IAuctionRepository{
                 product: Product.fromJson(firstProduct),
                 auction: Auction.fromJson(firstProduct.auction),
             };
-        }catch(error){
+        } catch (error) {
             console.log(error);
             return null;
         }
     }
     /**
      * Finds all auctions.
-     * 
+     *
      * @returns {Promise<Auction[]>} - The list of all auctions.
      */
     async findAll(): Promise<Auction[]> {
@@ -138,36 +149,37 @@ export class AuctionRepository implements IAuctionRepository{
     }
     /**
      * Finds all products on auction.
-     * 
+     *
      * @returns {Promise<{Product, Auction}>} - The list of all products on auction.
      */
-    async findAllProductsOnAuction(): Promise<{ product: Product; auction: Auction }[]> {
-        try{
+    async findAllProductsOnAuction(): Promise<
+        { product: Product; auction: Auction }[]
+    > {
+        try {
             const productsOnSale = await prisma.product.findMany({
                 where: {
-                  auction: {
-                    is: {
-                      status: true,
+                    auction: {
+                        is: {
+                            status: true,
+                        },
                     },
-                  },
                 },
                 include: {
-                  auction: true,
+                    auction: true,
                 },
-              });
-    
-            if(!productsOnSale){
+            });
+
+            if (!productsOnSale) {
                 throw new Error("Error fetching products on sale");
             }
-    
+
             return productsOnSale
-                .filter(product => product.auction !== null)
-                .map(product => ({
+                .filter((product) => product.auction !== null)
+                .map((product) => ({
                     product: Product.fromJson(product),
-                    auction: Auction.fromJson(product.auction!)
+                    auction: Auction.fromJson(product.auction!),
                 }));
-            
-        }catch(error){
+        } catch (error) {
             console.log(error);
             return [];
         }
@@ -175,39 +187,41 @@ export class AuctionRepository implements IAuctionRepository{
 
     /**
      * Finds product by id on auction with reviews and bidders.
-     * 
+     *
      * @returns {Promise<{Review[], Bid[]}>} - The bidders, and reviews if found, otherwise empty list.
      */
-    async findProductByIdWithDetails(productId: number): Promise<{ reviews: Review[]; bids: Bid[] } | null> {
-        try{
+    async findProductByIdWithDetails(
+        productId: number
+    ): Promise<{ reviews: Review[]; bids: Bid[] } | null> {
+        try {
             const auctionWithDetails = await prisma.auction.findFirst({
                 where: {
                     product_id: productId,
-                    status: true
+                    status: true,
                 },
                 include: {
                     bid: true,
                     product: {
                         include: {
-                            review: true
-                        }
-                    }
-                }
+                            review: true,
+                        },
+                    },
+                },
             });
-      
-            if(!auctionWithDetails){
+
+            if (!auctionWithDetails) {
                 throw new Error("Error fetching auction details");
             }
-      
-            const reviews = auctionWithDetails.product.review.map((review) => Review.fromJson(review));
+
+            const reviews = auctionWithDetails.product.review.map((review) =>
+                Review.fromJson(review)
+            );
             const bids = auctionWithDetails.bid.map((bid) => Bid.fromJson(bid));
-      
+
             return { reviews, bids };
-        }catch(error){
+        } catch (error) {
             console.log(error);
             return null;
         }
-      }
-      
-      
+    }
 }
