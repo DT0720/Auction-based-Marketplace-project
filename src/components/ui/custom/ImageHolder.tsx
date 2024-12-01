@@ -31,5 +31,7 @@ const ImageHolder = React.memo(({ image, handleImageUpdate }: { image: File | nu
     );
   });
 
+  ImageHolder.displayName = "ImageHolder";
+
 // Exporting the memoized component
 export default ImageHolder;

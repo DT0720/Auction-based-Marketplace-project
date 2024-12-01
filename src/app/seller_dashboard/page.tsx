@@ -16,15 +16,8 @@ import { formatCurrency } from "@/lib/stringUtils";
 import { useFilters } from "@/hooks/use-filter";
 import { ProductTypeEnum } from "@/domain/enums/ProductTypeEnum";
 
-/**
- * Seller Dashboard Component
- *
- * Displays a list of products for a seller, with filtering and navigation options.
- *
- * @component
- */
-
-export default function sellerDashboard()
+// Main sellerDashboard component
+export default function SellerDashboard()
  {
     /**
      * State for storing all products fetched from the server.
