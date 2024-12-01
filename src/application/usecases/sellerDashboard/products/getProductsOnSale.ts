@@ -3,11 +3,19 @@ import NetworkUtils, { ApiResponse } from "@/lib/networkUtils";
 
 const endpoint = "/api/products/getAll/on_sale/";
 
-async function getProductsOnSale(): Promise<Product[]> {
+/**
+ * Fetches all products currently on sale.
+ *
+ * @returns {Promise<Product[]>} - A promise that resolves to an array of products currently on sale.
+ * @throws {Error} - Throws an error if the network request fails.
+ */
 
-   const response = await NetworkUtils.getRequest<ApiResponse<Product[]>>(endpoint);
-   
-   return response?.data ?? [];
+async function getProductsOnSale(): Promise<Product[]> {
+    const response = await NetworkUtils.getRequest<ApiResponse<Product[]>>(
+        endpoint
+    );
+
+    return response?.data ?? [];
 }
 
 export default getProductsOnSale;
