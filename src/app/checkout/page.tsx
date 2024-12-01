@@ -14,6 +14,7 @@ import useAuth from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { ROUTES } from "@/application/routing/routes";
 import { useLoader } from "@/hooks/use-loader";
+import { notifySellerOfPurchase } from "@/application/usecases/NotificationServiceSystem/Notification";
 
 
 export default function CheckoutPage() {
@@ -163,11 +164,16 @@ useEffect(() => {
         };
 
         // Make API request to create order
-        const success = await createOrder(orderData);
+        const response = await createOrder(orderData);
 
-        if (success) {
+        if (response) {
           fetchAndUpdateBalance();
           // Clear the cart from sessionStorage once the order is placed
+          await Promise.all(
+            response.orderDetails.map((orderDetail) => 
+              notifySellerOfPurchase(orderDetail, user?.user_id ?? 0)
+            )
+          );
           clearCart();
           successMessage(toast, "Order placed successfully!", "Order Created!");
       

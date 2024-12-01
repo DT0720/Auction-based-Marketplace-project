@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"; // shadcn button
-import { Bell, ShoppingCart, CreditCard, Settings, Menu, User, Home, List, LogOut } from "lucide-react"; // lucide icons
+import { ShoppingCart, CreditCard, Settings, Menu, User, Home, List, LogOut } from "lucide-react"; // lucide icons
 import useAuth from "@/hooks/use-auth";
 import { ROUTES } from "@/application/routing/routes";
 import {
@@ -15,6 +15,7 @@ import {
   } from "@/components/ui/dropdown-menu";
 import SearchBar from "./SearchBar";
 import { useCart } from "@/hooks/use-cart";
+import { NotificationDropdown } from "./Notificationdropdown";
 
 
 const Navbar = () => {
@@ -37,148 +38,154 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white shadow-md flex items-center justify-between px-4 py-2 z-10">
-      {/* Left: Logo */}
-      <div className="flex items-center">
-        <Home className="mr-2 text-blue-500" />
-        <span className="font-bold text-lg">MyApp</span>
-      </div>
-
-      {/* Center: Search Bar for Logged-in Users */}
-      {isAuthenticated && (
-        <div className="flex-grow flex justify-center">
-          <SearchBar /> {/* Render the custom SearchBar component */}
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="w-full flex h-14 items-center justify-between px-4">
+        {/* Left: Logo */}
+        <div className="flex items-center">
+          <Home className="mr-2 text-blue-500" />
+          <span className="font-bold text-lg">MyApp</span>
         </div>
-      )}
 
-      {/* Right: Conditional buttons */}
-      <div className="flex items-center">
-        {!isAuthenticated ? (
-          <>
-            {/* Guest View: Login & Signup */}
-            <Button
-              variant={pathname === ROUTES.LOGIN ? "default" : "ghost"}
-              className="mr-4"
-              onClick={() => router.push(ROUTES.LOGIN)}
-            >
-              Login
-            </Button>
-            <Button
-              variant={pathname === ROUTES.SIGNUP ? "default" : "ghost"}
-              onClick={() => router.push(ROUTES.SIGNUP)}
-            >
-              Sign Up
-            </Button>
-          </>
-        ) : isBuyer ? (
-          <>
-            {/* Buyer View */}
-            <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
-              <Bell />
-            </Button>
-            <Button variant="ghost" className="mr-4" onClick={() => router.push(ROUTES.SHOPPING_CART)}>
-              <ShoppingCart />
-              {cartCount > 0 && (
-                <span className="mb-1 bg-red-500 text-white rounded-full px-1 text-xs">{cartCount}</span>
-              )}
-            </Button>
-            <Button variant="ghost" className="mr-4">
-              <CreditCard />
-              <span className="ml-2">{formattedCurrency}</span>
-            </Button>
+        {/* Center: Search Bar for Logged-in Users */}
+        {isAuthenticated && (
+          <div className="flex-grow flex justify-center">
+            <SearchBar /> {/* Render the custom SearchBar component */}
+          </div>
+        )}
 
-            {/* Dropdown Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost">
-                  <Menu />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel className="font-bold">
-                  {user?.name || "User"}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push(ROUTES.USER_PROFILE)}>
-                <User className="mr-2 h-4 w-4" />
-                My Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Navigate to Billing")}>
-                <CreditCard className="mr-2 h-4 w-4" />
-                Billing
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Navigate to Settings")}>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => console.log("Navigate to My Cart")}>
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                My Cart
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Navigate to Ongoing Bids")}>
-                <List className="mr-2 h-4 w-4" />
-                Ongoing Bids
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logoutHandler}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </>
-        ) : isSeller ? (
-          <>
-            {/* Seller View */}
-            <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
-              <Bell />
-            </Button>
-            <Button variant="ghost" className="mr-4">
-              <CreditCard />
-              <span className="ml-2">{formattedCurrency}</span>
-            </Button>
+        {/* Right: Conditional buttons */}
+        <div className="flex items-center gap-4">
+          {!isAuthenticated ? (
+            <>
+              {/* Guest View: Login & Signup */}
+              <Button
+                variant={pathname === ROUTES.LOGIN ? "default" : "ghost"}
+                className="mr-4"
+                onClick={() => router.push(ROUTES.LOGIN)}
+              >
+                Login
+              </Button>
+              <Button
+                variant={pathname === ROUTES.SIGNUP ? "default" : "ghost"}
+                onClick={() => router.push(ROUTES.SIGNUP)}
+              >
+                Sign Up
+              </Button>
 
-            {/* Dropdown Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost">
-                  <Menu />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel className="font-bold">
-                  {user?.name || "User"}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push(ROUTES.USER_PROFILE)}>
-                <User className="mr-2 h-4 w-4" />
-                My Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Navigate to Billing")}>
-                <CreditCard className="mr-2 h-4 w-4" />
-                Billing
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Navigate to Settings")}>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => console.log("Navigate to Ongoing Bids")}>
-                <List className="mr-2 h-4 w-4" />
-                Your Auctions
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logoutHandler}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </>
-        ) : null}
+            </>
+          ) : isBuyer ? (
+            <>
+              {/* Buyer View */}
+              {/* <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
+                <Bell />
+              </Button> */}
+
+              <NotificationDropdown />
+              <Button variant="ghost" className="mr-4" onClick={() => router.push(ROUTES.SHOPPING_CART)}>
+                <ShoppingCart />
+                {cartCount > 0 && (
+                  <span className="mb-1 bg-red-500 text-white rounded-full px-1 text-xs">{cartCount}</span>
+                )}
+              </Button>
+              <Button variant="ghost" className="mr-4">
+                <CreditCard />
+                <span className="ml-2">{formattedCurrency}</span>
+              </Button>
+
+              {/* Dropdown Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost">
+                    <Menu />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel className="font-bold">
+                    {user?.name || "User"}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push(ROUTES.USER_PROFILE)}>
+                  <User className="mr-2 h-4 w-4" />
+                  My Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => console.log("Navigate to Billing")}>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Billing
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => console.log("Navigate to Settings")}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => console.log("Navigate to My Cart")}>
+                  <ShoppingCart className="mr-2 h-4 w-4" />
+                  My Cart
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => console.log("Navigate to Ongoing Bids")}>
+                  <List className="mr-2 h-4 w-4" />
+                  Ongoing Bids
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logoutHandler}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : isSeller ? (
+            <>
+              {/* Seller View */}
+              {/* <Button variant="ghost" className="mr-4" onClick={() => console.log("Notifications")}>
+                <Bell />
+              </Button> */}
+              <NotificationDropdown />
+              <Button variant="ghost" className="mr-4">
+                <CreditCard />
+                <span className="ml-2">{formattedCurrency}</span>
+              </Button>
+
+              {/* Dropdown Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost">
+                    <Menu />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel className="font-bold">
+                    {user?.name || "User"}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push(ROUTES.USER_PROFILE)}>
+                  <User className="mr-2 h-4 w-4" />
+                  My Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => console.log("Navigate to Billing")}>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Billing
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => console.log("Navigate to Settings")}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => console.log("Navigate to Ongoing Bids")}>
+                  <List className="mr-2 h-4 w-4" />
+                  Your Auctions
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logoutHandler}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : null}
+        </div>
       </div>
-    </nav>
+    </header>
   );
 };
 

@@ -38,7 +38,7 @@ export async function placeBid(buyer_id: number, auction_id: number, user_id: nu
     console.log(`Last bidder ID: ${lastBidderId}`);
     if (lastBidderId && lastBidderId !== buyer_id) {
       console.log(`Sending outbid notification to bidder ${lastBidderId}`);
-      await sendOutbidNotification(lastBidderId, auction_id, bidAmount);
+      await sendOutbidNotification(lastBidderId, buyer_id, auction_id, bidAmount);
     }
   }
 

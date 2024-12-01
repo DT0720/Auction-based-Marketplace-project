@@ -1,23 +1,42 @@
 // src/infrastructure/services/NotificationService.ts
 
+import { NotificationRepository } from "../repositories/NotificationRepository";
+
 export class NotificationService {
-    async sendNotification(userId: number, message: string): Promise<void> {
-      // Logic to send a notification (email, SMS, in-app, etc.)
-      console.log(`Sending notification to user ${userId}: ${message}`);
+  private notificationRepository: NotificationRepository;
+
+  constructor() {
+    this.notificationRepository = new NotificationRepository();
+  }
+
+  async sendNotification(receiverId: number, senderId: number, message: string): Promise<void> {
+    const success = await this.notificationRepository.createNotification(
+      receiverId,
+      senderId,
+      message
+    );
+    
+    if (!success) {
+      throw new Error("Failed to send notification");
     }
+    
+    console.log(`Notification stored: receiver=${receiverId}, sender=${senderId}, message=${message}`);
+  }
+
+  async getUserNotifications(userId: number) {
+    try {
+      if (!userId) throw new Error('User ID is required');
+      const notifications = await this.notificationRepository.getNotificationsByUserId(userId);
+      return notifications;
+    } catch (error) {
+      console.error('NotificationService error:', error);
+      throw error;
+    }
+  }
 }
 
-// src/services/notificationService.ts
-export async function sendOutbidNotification(bidderId: number, auctionId: number, newBidAmount: number) {
-  // Implement the logic to send a notification to the bidder
-  const message = `You have been outbid on auction ${auctionId}. The new bid amount is ${newBidAmount}.`;
-  await sendNotification(bidderId, message);
-  console.log(`Sending outbid notification to bidder ${bidderId} for auction ${auctionId} with new bid amount ${newBidAmount}`);
-  // Example: await emailService.sendOutbidEmail(bidderId, auctionId, newBidAmount);
-}
-
-
-export async function sendNotification(userId: number, message: string): Promise<void> {
-  const notificationService = new NotificationService();
-  await notificationService.sendNotification(userId, message);
+export async function sendOutbidNotification(bidderId: number, senderId: number, auctionId: number, newBidAmount: number) {
+    const notificationService = new NotificationService();
+    const message = `You have been outbid on auction ${auctionId}. The new bid amount is ${newBidAmount}.`;
+    await notificationService.sendNotification(bidderId, senderId, message);
 }

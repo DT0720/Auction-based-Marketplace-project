@@ -1,54 +1,82 @@
 // src/app/api/orders/route.ts
 
 import { NextResponse } from 'next/server';
-import { OrderRepository } from '../../../../infrastructure/repositories/OrderRepository';
-import { NotificationService } from '../../../../infrastructure/services/NotificationService';
+import { NotificationService } from '@/infrastructure/services/NotificationService';
 
-const orderRepository = new OrderRepository();
 const notificationService = new NotificationService();
+
 
 // Create a new order (Buyer purchases a product)
 export async function POST(req: Request) {
   try {
-    const orderData = await req.json();
+    const body = await req.json();
 
-    // Create the order in the database
-    const order = await orderRepository.createOrder(orderData);
+    if (!body) {
+      throw new Error('No body received');
+    }
 
     // Notify the seller about the new order
     await notificationService.sendNotification(
-      order.seller_id,
-      `You have a new order from buyer ${order.buyer_id} for product ${order.product_id}.`
+      body.receiver_id,
+      body.sender_id,
+      body.message
     );
 
     return NextResponse.json(
-      { message: 'Order created successfully', data: order },
+      { message: 'Notification sent successfully', data: true },
       { status: 201 }
     );
   } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 400 });
+    return NextResponse.json({ message: error.message, data: false }, { status: 400 });
   }
 }
 
-// Update order status to shipped (Seller ships the product)
-export async function PUT(req: Request) {
+// // Update order status to shipped (Seller ships the product)
+// export async function PUT(req: Request) {
+//   try {
+//     const { orderId } = await req.json();
+
+//     // Update the order status in the database
+//     const order = await orderRepository.updateOrderStatus(orderId, 'shipped');
+
+//     await notificationService.sendNotification(
+//       order.buyer_id,
+//       order.seller_id,
+//       `Your order ${orderId} has been shipped.`
+//     );
+    
+
+//     return NextResponse.json(
+//       { message: 'Order status updated to shipped', data: order },
+//       { status: 200 }
+//     );
+//   } catch (error: any) {
+//     return NextResponse.json({ message: error.message }, { status: 400 });
+//   }
+// }
+
+
+export async function GET(req: Request) {
   try {
-    const { orderId } = await req.json();
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get('userId');
 
-    // Update the order status in the database
-    const order = await orderRepository.updateOrderStatus(orderId, 'shipped');
-
-    // Notify the buyer that the product has been shipped
-    await notificationService.sendNotification(
-      order.buyer_id,
-      `Your order ${orderId} has been shipped.`
-    );
-
+    if (!userId) {
+      return NextResponse.json(
+        { message: 'User ID is required' },
+        { status: 400 }
+      );
+    }
+    const notifications = await notificationService.getUserNotifications(Number(userId));
     return NextResponse.json(
-      { message: 'Order status updated to shipped', data: order },
+      { data: notifications },
       { status: 200 }
     );
   } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 400 });
+    console.error('API error:', error);
+    return NextResponse.json(
+      { message: error.message || 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
