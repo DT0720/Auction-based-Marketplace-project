@@ -1,18 +1,3 @@
-// src/application/usecases/orderManagement/createOrder.ts
-
-// import { Order } from "@/domain/entities/Order";
-// import NetworkUtils from "@/lib/networkUtils";
-
-// const endpoint = "/api/orders/create/";
-
-// async function createOrder(body: any): Promise<Order | null> {
-//   const response = await NetworkUtils.postRequest<{ message: string; data: Order }>(endpoint, body);
-
-//   return response?.data ?? null;
-// }
-
-// export default createOrder;
-
 import { Order } from "@/domain/entities/Order";
 import { OrderDetails } from "@/domain/entities/OrderDetails";
 import NetworkUtils from "@/lib/networkUtils";
@@ -30,6 +15,22 @@ interface CreateOrderPayload {
   }[];
 }
 
+/**
+ * Creates an order by sending a POST request to the API.
+ * 
+ * @param payload - The data required to create an order.
+ * @param payload.buyer_id - The ID of the buyer placing the order.
+ * @param payload.status - The status of the order (e.g., "pending", "completed").
+ * @param payload.total_amount - The total amount of the order.
+ * @param payload.orderDetails - An array of order details containing product and quantity for each item.
+ * @param payload.orderDetails.product_id - The ID of the product being ordered.
+ * @param payload.orderDetails.quantity - The quantity of the product being ordered.
+ * @param payload.orderDetails.seller_id - The ID of the seller of the product.
+ * 
+ * @returns A promise that resolves to an object containing the created order and its details, or `null` if the creation fails.
+ * 
+ * @throws {Error} Throws an error if the API request fails or returns an invalid response.
+ */
 async function createOrder(payload: CreateOrderPayload): Promise<{ order: Order; orderDetails: OrderDetails[] } | null> {
   try {
     // Sending the request to create the order
