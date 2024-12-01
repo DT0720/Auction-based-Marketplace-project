@@ -6,10 +6,18 @@ import { SellerInventory } from "@/domain/entities/SellerInventory";
 import { IProductRepository } from "@/application/repositories/IProductRepository";
 import { ProductRepository } from "./ProductRepository";
 
+/**
+ * Repository for handling Seller Inventory data.
+ */
 export class SellerInventoryRepository implements ISellerInvertoryRepository {
   private productRepository: IProductRepository = new ProductRepository();
 
-  // Create a new seller inventory
+  /**
+   * Creates a new seller inventory entry.
+   * 
+   * @param sellerInventory - The `SellerInventory` entity to be created.
+   * @returns A promise that resolves to the created `SellerInventory` entity or `null` if an error occurs.
+   */
   async create(sellerInventory: SellerInventory): Promise<SellerInventory | null> {
     try {
       const inventory = await prisma.seller_inventory.create({
@@ -22,7 +30,12 @@ export class SellerInventoryRepository implements ISellerInvertoryRepository {
     }
   }
 
-  // Update an existing seller inventory
+  /**
+   * Updates an existing seller inventory entry.
+   * 
+   * @param sellerInventory - The `SellerInventory` entity to be updated.
+   * @returns A promise that resolves to `true` if the update was successful, or `false` if an error occurs.
+   */
   async update(sellerInventory: SellerInventory): Promise<boolean> {
     try {
       await prisma.seller_inventory.update({
@@ -36,7 +49,12 @@ export class SellerInventoryRepository implements ISellerInvertoryRepository {
     }
   }
 
-  // Delete a seller inventory entry by its ID
+  /**
+   * Deletes a seller inventory entry by its ID.
+   * 
+   * @param id - The ID of the seller inventory to be deleted.
+   * @returns A promise that resolves to `true` if the deletion was successful, or `false` if an error occurs.
+   */
   async delete(id: number): Promise<boolean> {
     try {
       await prisma.seller_inventory.delete({
@@ -49,7 +67,12 @@ export class SellerInventoryRepository implements ISellerInvertoryRepository {
     }
   }
 
-  // Find a seller inventory by ID
+  /**
+   * Finds a seller inventory entry by its ID.
+   * 
+   * @param id - The ID of the seller inventory.
+   * @returns A promise that resolves to the `SellerInventory` entity, or `null` if not found or an error occurs.
+   */
   async findById(id: number): Promise<SellerInventory | null> {
     try {
       const inventory = await prisma.seller_inventory.findUnique({
@@ -62,7 +85,12 @@ export class SellerInventoryRepository implements ISellerInvertoryRepository {
     }
   }
 
-  // Find seller inventory by product ID
+  /**
+   * Finds seller inventory by product ID.
+   * 
+   * @param productId - The ID of the product.
+   * @returns A promise that resolves to the `SellerInventory` entity or `null` if not found or an error occurs.
+   */
   async findByProductId(productId: number): Promise<SellerInventory | null> {
     try {
       const inventory = await prisma.seller_inventory.findFirst({
@@ -75,18 +103,22 @@ export class SellerInventoryRepository implements ISellerInvertoryRepository {
     }
   }
 
-  // Find all seller inventory records
+  /**
+   * Finds all seller inventory records.
+   * 
+   * @returns A promise that resolves to an array of `Product` entities.
+   */
   async findAll(): Promise<Product[]> {
     try {
       const result = await prisma.seller_inventory.findMany();
-            // Use Promise.all to await all async calls and filter out null results
+      // Use Promise.all to await all async calls and filter out null results
       const products = await Promise.all(
         result.map(async (seller_inventory) => {
           const product = await this.productRepository.findById(seller_inventory.product_id);
           return product ? product : null;
         })
       );
-            // Filter out null values from the products array
+      // Filter out null values from the products array
       return products.filter((product): product is Product => product !== null);
     } catch (e) {
       console.error("Error fetching all seller inventory:", e);
@@ -94,7 +126,11 @@ export class SellerInventoryRepository implements ISellerInvertoryRepository {
     }
   }
 
-  // Find all seller inventory records that are for sale
+  /**
+   * Finds all seller inventory records that are available for sale (quantity > 0).
+   * 
+   * @returns A promise that resolves to an array of `Product` entities.
+   */
   async findAllForSale(): Promise<Product[]> {
     try {
       const result = await prisma.seller_inventory.findMany({
@@ -115,7 +151,12 @@ export class SellerInventoryRepository implements ISellerInvertoryRepository {
     }
   }
 
-  // Find seller inventory by seller ID
+  /**
+   * Finds seller inventory by seller ID.
+   * 
+   * @param sellerId - The ID of the seller.
+   * @returns A promise that resolves to an array of `Product` entities.
+   */
   async findBySellerId(sellerId: number): Promise<Product[]> {
     try {
       const result = await prisma.seller_inventory.findMany({
@@ -137,22 +178,45 @@ export class SellerInventoryRepository implements ISellerInvertoryRepository {
     }
   }
 
-  // Find seller inventory by price (This is a placeholder for future implementation)
+  /**
+   * Finds seller inventory by price.
+   * 
+   * @param price - The price of the product.
+   * @returns A promise that resolves to an array of `Product` entities.
+   * @throws Will throw an error since this method is not yet implemented.
+   */
   async findByPrice(price: number): Promise<Product[]> {
     throw new Error("Method not implemented.");
   }
 
-  // Find seller inventory by product name (This is a placeholder for future implementation)
+  /**
+   * Finds seller inventory by product name.
+   * 
+   * @param productName - The name of the product.
+   * @returns A promise that resolves to an array of `Product` entities.
+   * @throws Will throw an error since this method is not yet implemented.
+   */
   async findByProductName(productName: string): Promise<Product[]> {
     throw new Error("Method not implemented.");
   }
 
-  // Find seller inventory by category (This is a placeholder for future implementation)
+  /**
+   * Finds seller inventory by category.
+   * 
+   * @param product_type - The type/category of the product.
+   * @returns A promise that resolves to an array of `Product` entities.
+   * @throws Will throw an error since this method is not yet implemented.
+   */
   async findByCategory(product_type: typeof ProductTypeEnum): Promise<Product[]> {
     throw new Error("Method not implemented.");
   }
 
-  // Get seller IDs by product IDs (This method fetches all sellers for given products)
+  /**
+   * Retrieves seller IDs associated with a list of product IDs.
+   * 
+   * @param productIds - An array of product IDs.
+   * @returns A promise that resolves to an array of objects containing `seller_id` and `product_id`.
+   */
   async getSellerIdsByProductIds(productIds: number[]): Promise<{ seller_id: number; product_id: number }[]> {
     try {
       const sellers = await prisma.seller_inventory.findMany({
