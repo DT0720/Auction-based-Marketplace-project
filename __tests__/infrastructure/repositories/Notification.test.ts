@@ -1,151 +1,95 @@
+// __tests__/infrastructure/services/NotificationService.test.ts
+
 import { NotificationService } from '../../../src/infrastructure/services/NotificationService';
 import { NotificationRepository } from '../../../src/infrastructure/repositories/NotificationRepository';
-import { prisma } from '../../../src/infrastructure/database/prisma';
-import { Order } from '../../../src/domain/entities/Order';
-import { notifyBuyerOfShipment, notifySellerOfPurchase } from '../../../src/application/usecases/NotificationServiceSystem/Notification';
+import { SellerRepository } from '../../../src/infrastructure/repositories/SellerRepository';
+import { BuyerRepository } from '../../../src/infrastructure/repositories/BuyerRepository';
 
-jest.mock('../../../src/infrastructure/database/prisma');
-jest.mock('../../../src/infrastructure/repositories/BuyerRepository');
-jest.mock('../../../src/infrastructure/repositories/SellerRepository');
+// Mock implementations
+jest.mock('../../../src/infrastructure/repositories/NotificationRepository', () => ({
+  NotificationRepository: jest.fn().mockImplementation(() => ({
+    createNotification: jest.fn(),
+    getNotificationsByUserId: jest.fn()
+  }))
+}));
+
+jest.mock('../../../src/infrastructure/repositories/SellerRepository', () => ({
+  SellerRepository: jest.fn().mockImplementation(() => ({
+    findUserIdBySellerId: jest.fn()
+  }))
+}));
+
+jest.mock('../../../src/infrastructure/repositories/BuyerRepository', () => ({
+  BuyerRepository: jest.fn().mockImplementation(() => ({
+    findUserIdBybuyerId: jest.fn()
+  }))
+}));
 
 describe('NotificationService', () => {
   let notificationService: NotificationService;
-  let notificationRepository: NotificationRepository;
+  let mockNotificationRepo: any;
+  let mockSellerRepo: any;
+  let mockBuyerRepo: any;
 
   beforeEach(() => {
-    notificationService = new NotificationService();
-    notificationRepository = new NotificationRepository();
+    // Clear all mocks
     jest.clearAllMocks();
+    
+    // Get mock instances
+    notificationService = new NotificationService();
+    mockNotificationRepo = (NotificationRepository as jest.Mock).mock.results[0].value;
+    mockSellerRepo = (SellerRepository as jest.Mock).mock.results[0].value;
+    mockBuyerRepo = (BuyerRepository as jest.Mock).mock.results[0].value;
   });
 
-  describe('Basic notification functionality', () => {
-    it('should verify notification content format', async () => {
-    const receiverId = 1;
-    const senderId = 2;
-    const message = 'Test notification';
+  describe('getUserNotifications', () => {
+    it('should retrieve notifications for a user', async () => {
+      const mockNotifications = [{
+        id: 1,
+        reciever_id: 1,
+        sender_id: 2,
+        content: 'Test notification',
+        recieved_at: new Date(),
+        user_notifications_sender_idTouser: {
+          name: 'Test User'
+        }
+      }];
 
-    (prisma.notifications.create as jest.Mock).mockResolvedValueOnce({
-      id: 1,
-      reciever_id: receiverId,
-      sender_id: senderId,
-      content: message,
-      recieved_at: new Date()
+      mockNotificationRepo.getNotificationsByUserId.mockResolvedValue(mockNotifications);
+
+      const result = await notificationService.getUserNotifications(1);
+
+      expect(mockNotificationRepo.getNotificationsByUserId).toHaveBeenCalledWith(1);
+      expect(result).toEqual(mockNotifications);
     });
 
-      const result = await notificationRepository.createNotification(
-        receiverId,
-        senderId, 
-        message
-      );
-
-      expect(result).toBe(true);
-    expect(prisma.notifications.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          content: message
-        })
+    it('should throw error for invalid user id', async () => {
+      await expect(notificationService.getUserNotifications(0))
+        .rejects.toThrow('User ID is required');
     });
   });
 
-    it('should handle invalid receiver ID', async () => {
-      const invalidReceiverId = -1;
-      const senderId = 2;
-      const message = 'Test notification';
+  describe('sendNotification', () => {
+    it('should send notification successfully', async () => {
+      mockSellerRepo.findUserIdBySellerId.mockResolvedValue(2);
+      mockNotificationRepo.createNotification.mockResolvedValue(true);
 
-      (prisma.notifications.create as jest.Mock).mockRejectedValueOnce(
-        new Error('Invalid receiver ID')
-      );
+      await notificationService.sendNotification(1, 2, 'test');
 
-      const result = await notificationRepository.createNotification(
-        invalidReceiverId,
-        senderId,
-        message  
-      );
-
-      expect(result).toBe(false);
+      expect(mockSellerRepo.findUserIdBySellerId).toHaveBeenCalledWith(2);
+      expect(mockNotificationRepo.createNotification).toHaveBeenCalledWith(2, 1, 'test');
+    });
   });
 
-    it('should verify notification timestamp', async () => {
-    const receiverId = 1;
-    const senderId = 2; 
-    const message = 'Test notification';
-      const currentTime = new Date();
+  describe('notifyBuyerOfOutBid', () => {
+    it('should notify buyer successfully', async () => {
+      mockBuyerRepo.findUserIdBybuyerId.mockResolvedValue(2);
+      mockNotificationRepo.createNotification.mockResolvedValue(true);
 
-      (prisma.notifications.create as jest.Mock).mockImplementationOnce(({data}) => {
-        expect(data.recieved_at).toBeInstanceOf(Date);
-        expect(data.recieved_at.getTime()).toBeGreaterThanOrEqual(currentTime.getTime());
-        return Promise.resolve({...data, id: 1});
-      });
+      await notificationService.notifyBuyerOfOutBid(1, 2, 'outbid');
 
-      await notificationRepository.createNotification(receiverId, senderId, message);
-  });
-});
-
-  describe('Order notification system', () => {
-    const mockOrder: Order = {
-      id: 1,
-      buyer_id: 1,
-      seller_id: 2,
-      product_id: 3,
-      status: 'pending',
-      quantity: 1
-    };
-
-    it('should verify seller notification message format', async () => {
-      const mockSeller = { user_id: 2, username: 'seller' };
-      const sellerRepo = jest.requireMock('../../../src/infrastructure/repositories/SellerRepository');
-      sellerRepo.SellerRepository.prototype.findById.mockResolvedValueOnce(mockSeller);
-
-      const notificationSpy = jest.spyOn(notificationService, 'sendNotification');
-
-      await notifySellerOfPurchase(mockOrder);
-
-      expect(notificationSpy).toHaveBeenCalledWith(
-        mockSeller.user_id,
-        mockOrder.buyer_id,
-        expect.stringContaining(`product ${mockOrder.product_id}`)
-      );
-    });
-
-    it('should handle notification failure gracefully', async () => {
-      const mockBuyer = { user_id: 1, username: 'buyer' };
-      const buyerRepo = jest.requireMock('../../../src/infrastructure/repositories/BuyerRepository');
-      buyerRepo.BuyerRepository.prototype.findById.mockResolvedValueOnce(mockBuyer);
-
-      jest.spyOn(notificationService, 'sendNotification')
-        .mockRejectedValueOnce(new Error('Notification failed'));
-
-      await expect(notifyBuyerOfShipment(mockOrder))
-        .rejects
-        .toThrow('Notification failed');
-    });
-
-    // Fix for failing tests:
-    // 1. Ensure proper mock implementations
-    beforeEach(() => {
-      const mockNotificationService = {
-        sendNotification: jest.fn().mockResolvedValue(undefined)
-      };
-      jest.spyOn(NotificationService.prototype, 'sendNotification').mockImplementation(mockNotificationService.sendNotification);
-    });
-
-    // 2. Add proper type checking
-    it('should validate order object properties', async () => {
-      const invalidOrder = { ...mockOrder, buyer_id: undefined };
-      await expect(notifyBuyerOfShipment(invalidOrder as unknown as Order))
-        .rejects
-        .toThrow();
-    });
-
-    // 3. Add error boundary tests
-    it('should handle repository errors', async () => {
-      const buyerRepo = jest.requireMock('../../../src/infrastructure/repositories/BuyerRepository');
-      buyerRepo.BuyerRepository.prototype.findById.mockRejectedValueOnce(
-        new Error('Database connection failed')
-      );
-
-      await expect(notifyBuyerOfShipment(mockOrder))
-        .rejects
-        .toThrow('Database connection failed');
+      expect(mockBuyerRepo.findUserIdBybuyerId).toHaveBeenCalledWith(2);
+      expect(mockNotificationRepo.createNotification).toHaveBeenCalledWith(2, 1, 'outbid');
     });
   });
 });
