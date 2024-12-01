@@ -9,7 +9,7 @@ import { Address } from "@/domain/entities/Address";
 import { Order } from "@/domain/entities/Order";
 import { OrderStatusEnum } from "@/domain/enums/OrderStatusEnum";
 
-const userProfile: React.FC = () => {
+const UserProfile: React.FC = () => {
   const {user} = useAuth();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [newAddress, setNewAddress] = useState<Partial<Address>>({});
@@ -222,4 +222,4 @@ const userProfile: React.FC = () => {
     </div>
   );
 };
-export default userProfile;
+export default UserProfile;
