@@ -5,7 +5,6 @@ import { NotificationService } from '@/infrastructure/services/NotificationServi
 
 const notificationService = new NotificationService();
 
-
 // Create a new order (Buyer purchases a product)
 export async function POST(req: Request) {
   try {
@@ -15,10 +14,12 @@ export async function POST(req: Request) {
       throw new Error('No body received');
     }
 
+    console.log('Notification body: ', body);
+
     // Notify the seller about the new order
-    await notificationService.sendNotification(
-      body.receiver_id,
+    await notificationService.sendNotificationToSeller(
       body.sender_id,
+      body.receiver_id,
       body.message
     );
 

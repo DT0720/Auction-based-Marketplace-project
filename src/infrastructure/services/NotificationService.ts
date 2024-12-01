@@ -1,6 +1,5 @@
 // src/infrastructure/services/NotificationService.ts
 
-import { buyer, seller } from "@prisma/client";
 import { NotificationRepository } from "../repositories/NotificationRepository";
 import { SellerRepository } from "../repositories/SellerRepository";
 import { BuyerRepository } from "../repositories/BuyerRepository";
@@ -16,8 +15,14 @@ export class NotificationService {
     this.buyerRepository = new BuyerRepository();
   }
 
-  async sendNotification(senderId: number, receiverId: number, message: string): Promise<void> {
+  async sendNotificationToSeller(senderId: number, receiverId: number, message: string): Promise<void> {
+
+    console.log(`sendNotificationToSellerBefore: receiver=${receiverId}, sender=${senderId}, message=${message}`);
+
     const seller_user_id = await this.sellerRepository.findUserIdBySellerId(receiverId);
+
+    console.log(`sendNotificationToSeller: receiver=${seller_user_id}, sender=${senderId}, message=${message}`);
+
     const success = await this.notificationRepository.createNotification(
       seller_user_id ?? 0,
       senderId,
@@ -30,6 +35,7 @@ export class NotificationService {
     
     console.log(`Notification stored: receiver=${receiverId}, sender=${senderId}, message=${message}`);
   }
+
   async notifyBuyerOfOutBid(sender_id: number,receiver_id:number,message:string ): Promise<void> {
     const buyer_id = await this.buyerRepository.findUserIdBybuyerId(receiver_id);
     

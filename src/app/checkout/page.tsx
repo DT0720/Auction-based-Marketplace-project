@@ -166,12 +166,16 @@ useEffect(() => {
         // Make API request to create order
         const response = await createOrder(orderData);
 
+        console.log("Order response: ", JSON.stringify(response?.orderDetails));
+
         if (response) {
+
+          console.log("Order response received: ", JSON.stringify(response?.orderDetails));  
           fetchAndUpdateBalance();
           // Clear the cart from sessionStorage once the order is placed
           await Promise.all(
             response.orderDetails.map((orderDetail) => 
-              notifySellerOfPurchase(orderDetail, user?.user_id ?? 0)
+              notifySellerOfPurchase(orderDetail.sellerId, user?.user_id ?? 0)
             )
           );
           clearCart();

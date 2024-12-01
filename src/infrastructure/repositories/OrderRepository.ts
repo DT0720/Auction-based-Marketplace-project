@@ -156,6 +156,17 @@ async createOrderWithDetailsAndUpdateInventory(
           seller_id: detail.sellerId,
         })),
       });
+      
+      // Map to OrderDetails instances
+      const createdOrderDetails = orderDetails.map((detail) => {
+        return new OrderDetails(
+          0, // You may need to adjust this if your OrderDetails class requires an ID
+          createdOrder.id,
+          detail.productId,
+          detail.quantity,
+          detail.sellerId
+        );
+      });
 
       // Deduct the total amount from the buyer's wallet
       await prismaTransaction.wallet.update({
@@ -165,7 +176,7 @@ async createOrderWithDetailsAndUpdateInventory(
         },
       });
 
-      return { createdOrder, createdOrderDetails: orderDetails };
+      return { createdOrder, createdOrderDetails };
     });
 
     // // Step 2: Perform inventory updates in a separate transaction
@@ -190,7 +201,7 @@ async createOrderWithDetailsAndUpdateInventory(
     //   }
     // });
 
-    return { order: Order.fromJson(createdOrder), orderDetails: createdOrderDetails.map((detail) => OrderDetails.fromJson(detail)) };
+    return { order: Order.fromJson(createdOrder), orderDetails: createdOrderDetails };
   } catch (error: any) {
       console.error("Error during order transaction:", error.message);
       throw new Error("Failed to create order with details.");
