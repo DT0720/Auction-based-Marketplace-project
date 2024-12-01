@@ -44,7 +44,7 @@ async function createOrder(payload: CreateOrderPayload): Promise<{ order: Order;
   
       // Return the created order and its associated order details
       return {
-        order: Order.fromJson(order), // Mapping order data to Order entity
+        order: order, // Mapping order data to Order entity
         orderDetails: orderDetails, // Returning mapped order details
       };
     }

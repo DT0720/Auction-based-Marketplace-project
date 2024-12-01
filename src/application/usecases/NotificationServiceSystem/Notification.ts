@@ -1,18 +1,21 @@
 // NotificationService.ts
 
-import { OrderDetails } from '@/domain/entities/OrderDetails';
 import NetworkUtils, { ApiResponse } from '@/lib/networkUtils';
 
 const endpoint = '/api/notifications/send_notification/';
 
 // Function to notify the seller of a new purchase
-export async function notifySellerOfPurchase(orderDetails: OrderDetails, sender_id: number): Promise<boolean> {
+export async function notifySellerOfPurchase(reciever_id: number, sender_id: number): Promise<boolean> {
+
+  console.log("Notify Seller of Purchase reciver id: " + reciever_id + " " + sender_id);
 
   const body = { 
-    receiver_id: orderDetails.sellerId, 
+    receiver_id: reciever_id, 
     sender_id: sender_id, 
-    message: `You have received a new order for product ${orderDetails.productId} from buyer ${sender_id}.`
+    message: `You have received a new order for product ${reciever_id} from buyer ${sender_id}.`
   }
+
+  console.log("Send Notification: " + JSON.stringify(body));
 
   // Fetch the seller details using the seller ID from the order
   const response = await NetworkUtils.postRequest<ApiResponse<boolean>>(endpoint, body);
