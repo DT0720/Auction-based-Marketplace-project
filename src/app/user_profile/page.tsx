@@ -15,7 +15,7 @@ import { user } from "@prisma/client";
 import { OrderStatusEnum } from "@/domain/enums/OrderStatusEnum";
 
 const userProfile: React.FC = () => {
-  const [user, setUser] = useState<user | null>(null);
+  const {user} = useAuth();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [newAddress, setNewAddress] = useState<Partial<Address>>({});
   const [orders, setOrders] = useState<Order[]>([]); 

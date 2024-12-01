@@ -99,7 +99,7 @@ const Navbar = () => {
                   {user?.name || "User"}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => console.log("Navigate to My Profile")}>
+                <DropdownMenuItem onClick={() => router.push(ROUTES.USER_PROFILE)}>
                 <User className="mr-2 h-4 w-4" />
                 My Profile
                 </DropdownMenuItem>
@@ -151,7 +151,7 @@ const Navbar = () => {
                   {user?.name || "User"}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => console.log("Navigate to My Profile")}>
+                <DropdownMenuItem onClick={() => router.push(ROUTES.USER_PROFILE)}>
                 <User className="mr-2 h-4 w-4" />
                 My Profile
                 </DropdownMenuItem>
