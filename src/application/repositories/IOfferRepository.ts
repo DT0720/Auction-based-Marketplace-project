@@ -30,6 +30,12 @@ export interface IOffersRepository {
    */
   delete(id: number): Promise<boolean>;
 
+  /**
+ * Retrieves all offers from the database as an array of 'Offers' objects.
+ * @returns {Promise<Offers[]>} A promise that resolves to an array of 'Offers'.
+ * @throws {Error} Throws an error if the fetch operation fails.
+ */
+
   getAllOffers(): Promise<Offers[]>;
 
 }
