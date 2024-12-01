@@ -8,21 +8,39 @@ import NetworkUtils, { ApiResponse } from "@/lib/networkUtils";
 const endpoint = "api/discount/getDiscount/";
 
 /**
- * Fetches review data for a given user ID.
- * @param userId - The ID of the user whose reviews are to be fetched.
- * @returns A promise that resolves to an array of Review objects.
+ * Fetches a specific discount based on the provided discount type.
+ *
+ * @param {string} type - The type of discount to fetch.
+ * @returns {Promise<Offers | null>} - A promise that resolves to the discount data for the given type, or `null` if no data is found.
  */
 
-export async function getDiscount(type: string): Promise<Offers|null> {
-  // Make a GET request to the endpoint with the user ID
-  const response = await NetworkUtils.getRequest<{ message: string; data: Offers }>(endpoint + type);
-   // Return the fetched review data or an empty array if no data is found
-  return response?.data ?? null;
+export async function getDiscount(type: string): Promise<Offers | null> {
+    // Make a GET request to the endpoint with the type parameter
+
+    const response = await NetworkUtils.getRequest<{
+        message: string;
+        data: Offers;
+    }>(endpoint + type);
+
+    // Return the fetched discount data or null if no data is found
+
+    return response?.data ?? null;
 }
 
-export async function getAllDiscounts(): Promise<Offers[]>{
-  // Make a GET request to the endpoint with the user ID
-  const response = await NetworkUtils.getRequest<ApiResponse<Offers[]>>(endpoint + "getAll");
-  // Return the fetched review data or an empty array if no data is found
- return response?.data ?? [];
+/**
+ * Fetches all available discounts.
+ *
+ * @returns {Promise<Offers[]>} - A promise that resolves to an array of all available discount objects, or an empty array if no data is found.
+ */
+
+export async function getAllDiscounts(): Promise<Offers[]> {
+    // Make a GET request to the endpoint to fetch all discounts
+
+    const response = await NetworkUtils.getRequest<ApiResponse<Offers[]>>(
+        endpoint + "getAll"
+    );
+
+    // Return the fetched discount data or an empty array if no data is found
+
+    return response?.data ?? [];
 }
