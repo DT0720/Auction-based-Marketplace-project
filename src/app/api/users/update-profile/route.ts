@@ -31,3 +31,20 @@ export async function POST(req: Request) {
       );
   }
 }
+
+// Handler for getting user profile by ID
+export async function GET(req: Request, { params }: any) {
+    const userId = params.id;
+
+    try {
+        const userProfile = await userRepository.findById(userId);
+        
+        if (!userProfile) {
+            return NextResponse.json({ message: 'User not found' }, { status: 404 });
+        }
+
+        return NextResponse.json(userProfile);
+    } catch (error: any) {
+        return NextResponse.json({ message: error.message }, { status: 400 });
+    }
+}
