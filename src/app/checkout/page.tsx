@@ -15,12 +15,13 @@ import { useCart } from "@/hooks/use-cart";
 import { ROUTES } from "@/application/routing/routes";
 import { useLoader } from "@/hooks/use-loader";
 import { notifySellerOfPurchase } from "@/application/usecases/NotificationServiceSystem/Notification";
+import { error } from "console";
 
 
 export default function CheckoutPage() {
   const router = useRouter();
   const {toast} = useToast();
-  const {buyer_seller_id, user, fetchAndUpdateBalance} = useAuth();
+  const {buyer_seller_id, user, fetchAndUpdateBalance, currentBalance} = useAuth();
   const {clearCart} = useCart();
 
   // Billing Information State
@@ -82,6 +83,10 @@ export default function CheckoutPage() {
       // Check if the entered coupon code matches any discount code
       const discount = discounts.find(d => d.type === couponCode);
       if (discount) {
+
+        if (discount.discountAmount > total) {
+          throw new Error("Discount amount cannot exceed the total amount.");
+        }
         // Apply the discount
         setDiscountAmount(discount.discountAmount);
         setDiscountApplied(true);
@@ -90,9 +95,9 @@ export default function CheckoutPage() {
         alert("Invalid coupon code.");
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error applying discount:", error);
-      errorMessage(toast, "Failed to apply discount. Please try again.");
+      errorMessage(toast, error.message);
     }
   };
 
@@ -109,41 +114,6 @@ useEffect(() => {
 
 
   // // Create order and order details
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   // Validate billing information
-  //   if (!billingInfo.name || !billingInfo.address || !billingInfo.city || !billingInfo.zip) {
-  //     alert("Please fill out all required fields.");
-  //     return;
-  //   }
-
-  //   try {
-  //     // Prepare order data for submission
-  //     const orderData = {
-  //       buyer_id: buyer_seller_id,
-  //       status: OrderStatusEnum.Pending,
-  //       total_amount: finalTotal
-  //     };
-  
-  //     // Make API request to create order
-  //     const success = await createOrder(orderData);
-  
-  //     if (success) {
-  //       successMessage(toast, "Order placed successfully!", "Order Created!");
-  //       router.push("/order-confirmation");
-  //     } else {
-  //       errorMessage(toast, "There was an error processing your order.");
-  //     }
-  
-  //   } catch (error) {
-  //     console.error("Error creating order:", error);
-  //     errorMessage(toast, "Failed to create order. Please try again.");
-  //   }
-  
-  // };
-  
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Validate billing information
@@ -162,6 +132,10 @@ useEffect(() => {
             total_amount: finalTotal,
             orderDetails: productDetails, // Include product details here
         };
+
+        if(finalTotal>currentBalance){
+          throw new Error("Insufficient Balance.")
+        }
 
         // Make API request to create order
         const response = await createOrder(orderData);
@@ -186,9 +160,9 @@ useEffect(() => {
       } else {
             errorMessage(toast, "There was an error processing your order.");
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating order:", error);
-        errorMessage(toast, "Failed to create order. Please try again.");
+        errorMessage(toast, error.message);
     }finally{
         hideLoader();
     }
