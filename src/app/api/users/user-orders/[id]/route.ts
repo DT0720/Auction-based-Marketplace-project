@@ -14,7 +14,7 @@ export async function GET(req: Request, context: { params:Promise<{ id: string }
         }
 
         // Fetch all orders for the given user ID
-        const orders = await orderRepository.findByBuyerId(userId);
+        const orders = await orderRepository.getByBuyerId(userId);
 
         // if (!orders || orders.length === 0) {
         //     return NextResponse.json(

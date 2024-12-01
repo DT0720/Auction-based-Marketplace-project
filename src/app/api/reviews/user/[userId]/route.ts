@@ -13,12 +13,9 @@ const reviewRepository = new ReviewRepository();
  * @returns A JSON response with the reviews or an error message.
  */
 
-export async function GET(
-  req: Request,
-  { params }: { params: { userId: string } }
-) {
+export async function GET( req: Request, context: { params: Promise<{ userId: string }> } ) {
   try {
-    const { userId } = params;
+    const { userId } = await context.params;
 
     // Validate the user ID
     if (!userId || isNaN(Number(userId))) {
