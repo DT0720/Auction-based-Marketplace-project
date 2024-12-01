@@ -17,7 +17,7 @@ import { useFilters } from "@/hooks/use-filter";
 import { ProductTypeEnum } from "@/domain/enums/ProductTypeEnum";
 
 // Main sellerDashboard component
-export default function sellerDashboard()
+export default function SellerDashboard()
  {
     const [products, setProducts] = useState<Product[]>([]);
     const { showLoader, hideLoader } = useLoader();

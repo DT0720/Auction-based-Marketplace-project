@@ -38,5 +38,7 @@ const ImageHolderSquare = React.memo(({ image, handleImageUpdate }: { image: Fil
   );
 });
 
+ImageHolderSquare.displayName = "ImageHolderSquare";
+
 // Exporting the memoized component
 export default ImageHolderSquare;

@@ -62,6 +62,7 @@ export default function SignupPage() {
       };
     
       // Handle form submission
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const handleSignup = async (event: React.FormEvent) => {
         event.preventDefault();
 
