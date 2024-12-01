@@ -1,8 +1,17 @@
-"use client"
+"use client";
 
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"; // shadcn button
-import { ShoppingCart, CreditCard, Settings, Menu, User, Home, List, LogOut } from "lucide-react"; // lucide icons
+import {
+    ShoppingCart,
+    CreditCard,
+    Settings,
+    Menu,
+    User,
+    Home,
+    List,
+    LogOut,
+} from "lucide-react"; // lucide icons
 import useAuth from "@/hooks/use-auth";
 import { ROUTES } from "@/application/routing/routes";
 import {
@@ -20,6 +29,20 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { warningMessage } from "./Toast";
 
+/**
+ * Navbar Component.
+ * A responsive navigation bar that adapts based on the user's authentication status and role (Buyer/Seller).
+ *
+ * Displays:
+ * - The application logo and home link.
+ * - A search bar for authenticated users.
+ * - Login/Signup buttons for unauthenticated users.
+ * - Cart and balance info for authenticated buyers.
+ * - Profile and settings options for both authenticated buyers and sellers.
+ * - A dropdown menu for user-specific actions (e.g., My Profile, Billing, Logout).
+ *
+ * @returns {JSX.Element} - A navigation bar with conditional rendering based on user authentication and role.
+ */
 
 const Navbar = () => {
     const { user, isAuthenticated, logout, currentBalance } = useAuth(); // Hook for authentication state
@@ -30,14 +53,14 @@ const Navbar = () => {
 
     const showMethodNotImplemented = () => {
         warningMessage(toast, "Method not implemented yet");
-    }
+    };
 
     const isBuyer = user?.type.toLocaleLowerCase() === "b";
     const isSeller = user?.type.toLocaleLowerCase() === "s";
 
-    const formattedCurrency = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
+    const formattedCurrency = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
     }).format(currentBalance);
 
     const logoutHandler = () => {
@@ -80,16 +103,21 @@ const Navbar = () => {
                             >
                                 Sign Up
                             </Button>
-
                         </>
                     ) : isBuyer ? (
                         <>
                             {/* Buyer View */}
                             <NotificationDropdown />
-                            <Button variant="ghost" className="mr-4" onClick={() => router.push(ROUTES.SHOPPING_CART)}>
+                            <Button
+                                variant="ghost"
+                                className="mr-4"
+                                onClick={() => router.push(ROUTES.SHOPPING_CART)}
+                            >
                                 <ShoppingCart />
                                 {cartCount > 0 && (
-                                    <span className="mb-1 bg-red-500 text-white rounded-full px-1 text-xs">{cartCount}</span>
+                                    <span className="mb-1 bg-red-500 text-white rounded-full px-1 text-xs">
+                                        {cartCount}
+                                    </span>
                                 )}
                             </Button>
                             <Button variant="ghost" className="mr-4">
@@ -109,7 +137,9 @@ const Navbar = () => {
                                         {user?.name || "User"}
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => router.push(ROUTES.USER_PROFILE)}>
+                                    <DropdownMenuItem
+                                        onClick={() => router.push(ROUTES.USER_PROFILE)}
+                                    >
                                         <User className="mr-2 h-4 w-4" />
                                         My Profile
                                     </DropdownMenuItem>
@@ -158,7 +188,9 @@ const Navbar = () => {
                                         {user?.name || "User"}
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => router.push(ROUTES.USER_PROFILE)}>
+                                    <DropdownMenuItem
+                                        onClick={() => router.push(ROUTES.USER_PROFILE)}
+                                    >
                                         <User className="mr-2 h-4 w-4" />
                                         My Profile
                                     </DropdownMenuItem>
@@ -191,4 +223,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
