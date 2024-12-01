@@ -2,19 +2,27 @@
 "use client"
 
 import { ROUTES } from "@/application/routing/routes";
-import { Button } from "@/components/ui/button";
-import { errorMessage, successMessage, warningMessage } from "@/components/ui/custom/Toast";
-import { ToastAction } from "@/components/ui/toast";
-import { useLoader } from "@/hooks/use-loader";
-import { useToast } from "@/hooks/use-toast";
+import useAuth from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
 
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <button onClick={() => router.push(ROUTES.USER_PROFILE)}>Click me</button>
-    </div>
-  );
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // If the user is not authenticated, redirect to login page
+      router.push(ROUTES.LOGIN);
+    } else {
+      // If the user is authenticated, redirect based on user type
+      if (user?.type.toLowerCase() === "b") {
+        router.push(ROUTES.BUYER_DASHBOARD);
+      } else if (user?.type.toLowerCase() === "s") {
+        router.push(ROUTES.SELLER_DASHBOARD);
+      }
+    }
+  }, [isAuthenticated, user, router]);
+
+  return null; // No UI to render since the component handles only redirection
 }

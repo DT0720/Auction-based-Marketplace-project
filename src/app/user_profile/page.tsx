@@ -1,17 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { AddressRepository } from "@/infrastructure/repositories/AddressRepository";
 import { getAddressesByUserId, createAddress, updateAddress, deleteAddress } from "@/application/usecases/profileManagement/addressManagement";
-import { OrderRepository } from "@/infrastructure/repositories/OrderRepository";
 import { findByBuyerId } from "@/application/usecases/profileManagement/orderManagement";
 import { Card } from "@/components/ui/card";
 import useAuth from "@/hooks/use-auth";
-import { Toast } from "@/components/ui/toast";
-import { UserRepository } from "@/infrastructure/repositories/UserRepository";
 import { Address } from "@/domain/entities/Address";
 import { Order } from "@/domain/entities/Order";
-import { user } from "@prisma/client";
 import { OrderStatusEnum } from "@/domain/enums/OrderStatusEnum";
 
 const userProfile: React.FC = () => {
@@ -110,9 +105,9 @@ const userProfile: React.FC = () => {
             <p><strong>Name:</strong> {user.name}</p>
             <p><strong>Email:</strong> {user.email}</p>
             <p><strong>Age:</strong> {user.age}</p>
-            <p><strong>Gender:</strong> {user.gender === 1 ? "Male" : "Female"}</p>
+            <p><strong>Gender:</strong> {user.gender === 0 ? "Male" : "Female"}</p>
             <p><strong>Phone:</strong> {user.phone}</p>
-            <p><strong>Secondary Email:</strong> {user.secondary_email || "N/A"}</p>
+            <p><strong>Secondary Email:</strong> {user.secondaryEmail || "N/A"}</p>
           </Card>
         )}
 
@@ -192,7 +187,7 @@ const userProfile: React.FC = () => {
               onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
               className="w-full p-2 border border-gray-300 rounded"
             />
-            <Button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Add Address</Button>
+            <Button type="submit" className="w-full p-2 rounded" variant="outline">Add Address</Button>
           </form>
         </Card>
 
