@@ -4,10 +4,21 @@ import { ISellerRepository } from "@/application/repositories/ISellerRepository"
 import { prisma } from "../database/prisma";
 import { SellerRepository } from "./SellerRepository";
 
+/**
+ * @class NotificationRepository
+ * @classdesc Repository class for handling notification-related database operations
+ */
 
 export class NotificationRepository {
 
     private sellerRepository: ISellerRepository = new SellerRepository();
+     /**
+     * Creates a new notification
+     * @param {number} receiverId - The ID of the user receiving the notification
+     * @param {number} senderId - The ID of the user sending the notification
+     * @param {string} content - The content of the notification
+     * @returns {Promise<boolean>} - Returns true if the notification was created successfully, otherwise false
+     */
 
     async createNotification(receiverId: number, senderId: number, content: string): Promise<boolean> {
         try {
@@ -28,6 +39,12 @@ export class NotificationRepository {
             return false;
         }
     }
+    /**
+     * Retrieves notifications for a user by their user ID
+     * @param {number} userId - The ID of the user
+     * @returns {Promise<any[]>} - An array of notifications
+     * @throws Will throw an error if there is an issue retrieving notifications
+     */
 
     async getNotificationsByUserId(userId: number) {
         try {
