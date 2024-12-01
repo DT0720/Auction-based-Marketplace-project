@@ -10,49 +10,53 @@ import { Review } from "@/domain/entities/Review";
 export interface IAuctionRepository {
     /**
      * Creates a new auction.
-     * 
+     *
      * @param {Auction} auction - The auction to be created.
      * @returns {Promise<boolean>} - True if the auction is created successfully, otherwise false.
      */
     create(auction: Auction): Promise<boolean>;
     /**
      * Deletes an auction by its ID.
-     * 
+     *
      * @param {number} id - The ID of the auction to be deleted.
      * @returns {Promise<boolean>} - True if the auction is deleted successfully, otherwise false.
      */
     delete(id: number): Promise<boolean>;
     /**
      * Finds an auction by its ID.
-     * 
+     *
      * @param {number} id - The ID of the auction to find.
      * @returns {Promise<{Product, Auction} | null>} - The auction and product of active auctions if found, otherwise null.
      */
-    findActiveAuctionsById(id: number): Promise<{ product: Product; auction: Auction } | null>;
+    findActiveAuctionsById(
+        id: number
+    ): Promise<{ product: Product; auction: Auction } | null>;
     /**
      * Finds an auction by its ID.
-     * 
+     *
      * @param {number} id - The ID of the auction to find.
      * @returns {Promise<{Product, Auction} | null>} - The auction and product if found, otherwise null.
      */
     findById(id: number): Promise<{ product: Product; auction: Auction } | null>;
     /**
      * Finds all auctions.
-     * 
+     *
      * @returns {Promise<Auction[]>} - The list of all auctions.
      */
     findAll(): Promise<Auction[]>;
     /**
      * Finds all active auctions.
-     * 
+     *
      * @returns {Promise<{ Product; Auction }[]>} - The list of active auctions and products.
      */
     findAllProductsOnAuction(): Promise<{ product: Product; auction: Auction }[]>;
 
     /**
      * Finds all products on auction with reviews and bidders.
-     * 
+     *
      * @returns {Promise<{Product, Auction, User[], Review[]}[]>} - The auction, products, bidders, and reviews if found, otherwise empty list.
      */
-    findProductByIdWithDetails(productId: Number): Promise<{ reviews: Review[]; bids: Bid[] } | null>;
+    findProductByIdWithDetails(
+        productId: Number
+    ): Promise<{ reviews: Review[]; bids: Bid[] } | null>;
 }
