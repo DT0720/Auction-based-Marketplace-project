@@ -7,6 +7,20 @@ import { ProductTypeEnum } from "@/domain/enums/ProductTypeEnum";
 
 export class ProductRepository implements IProductRepository{
 
+
+/**
+ * Creates a new product in the database.
+ * 
+ * This method attempts to insert a new product into the database using Prisma. If successful,
+ * it returns the created `Product` object. In case of an error, it logs the error and returns `null`.
+ *
+ * @param {Product} product - The product instance to be created. The product's data is extracted
+ *                              using the `toJson()` method for database insertion.
+ * @returns {Promise<Product | null>} A promise that resolves to the created `Product` object
+ *                                     if the creation is successful, or `null` if there is an error.
+ *
+ * @throws {Error} If there is an issue with the database query, an error is caught and logged.
+ */    
     async create(product: Product): Promise<Product | null> {
         try {
             const newProduct = await prisma.product.create({
