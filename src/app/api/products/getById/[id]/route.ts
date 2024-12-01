@@ -6,6 +6,16 @@ import { ProductRepository } from '@/infrastructure/repositories/ProductReposito
 import { ImageStorageService } from '@/infrastructure/services/ImageStorageService';
 import { NextRequest, NextResponse } from 'next/server';
 
+
+/**
+ * Handles GET requests to retrieve a product by its ID
+ * @async
+ * @function GET
+ * @param {NextRequest} req - The request object
+ * @param {Object} context - The context object containing route parameters
+ * @param {Promise<{ id: string }>} context.params - The route parameters containing the product ID
+ * @returns {Promise<NextResponse>} - The response object containing the product details or an error message
+ */
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
 
     const imageStorageService: IFileStorageService = new ImageStorageService();

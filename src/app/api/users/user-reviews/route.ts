@@ -3,6 +3,14 @@ import { ReviewRepository } from '@/infrastructure/repositories/ReviewRepository
 
 const reviewRepository = new ReviewRepository();
 
+/**
+ * Handles GET requests for fetching user reviews
+ * @async
+ * @function GET
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the user reviews or an error message
+ */
+
 // Handle GET requests for fetching user reviews
 export async function GET(req: Request) {
     try {

@@ -9,6 +9,14 @@ import { SellerInventoryRepository } from '@/infrastructure/repositories/SellerI
 const orderRepository = new OrderRepository();
 const sellerInventoryRepository = new SellerInventoryRepository();
 
+/**
+ * Handles POST requests to create a new order
+ * @async
+ * @function POST
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the result of the operation
+ */
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();

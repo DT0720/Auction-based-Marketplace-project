@@ -6,6 +6,14 @@ import { PhotoTypeEnum } from '@/domain/enums/PhotoTypeEnum';
 const productRepository = new ProductRepository();
 const imageStorageService = new ImageStorageService();
 
+
+/**
+ * Handles GET requests to retrieve all products
+ * @async
+ * @function GET
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the list of products or an error message
+ */
 export async function GET(req: Request) {
   try {
 

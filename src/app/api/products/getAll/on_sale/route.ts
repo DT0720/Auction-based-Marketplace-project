@@ -8,6 +8,13 @@ import { IFileStorageService } from '@/application/services/IFileStorageService'
 const sellerInventoryRepository: ISellerInvertoryRepository = new SellerInventoryRepository();
 const imageStorageService: IFileStorageService = new ImageStorageService();
 
+/**
+ * Handles GET requests to retrieve all products for sale
+ * @async
+ * @function GET
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the list of products for sale or an error message
+ */
 export async function GET(req: Request) {
   try {
     const productList = await sellerInventoryRepository.findAllForSale();

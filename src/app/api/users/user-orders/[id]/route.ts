@@ -3,6 +3,16 @@ import { OrderRepository } from '@/infrastructure/repositories/OrderRepository';
 
 const orderRepository = new OrderRepository();
 
+/**
+ * Handles GET requests to retrieve orders by user ID
+ * @async
+ * @function GET
+ * @param {Request} req - The request object
+ * @param {Object} context - The context object containing route parameters
+ * @param {Promise<{ id: string }>} context.params - The route parameters containing the user ID
+ * @returns {Promise<Response>} - The response object containing the orders or an error message
+ */
+
 export async function GET(req: Request, context: { params:Promise<{ id: string }> }) {
     try {
         const { id } = await context.params;

@@ -6,6 +6,14 @@ import { User } from '@/domain/entities/User';
 const userRepository = new UserRepository();
 const hashingService = new HashingService();
 
+/**
+ * Handles POST requests for user signup
+ * @async
+ * @function POST
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the result of the operation
+ */
+
 // Handle POST requests for signupa
 export async function POST(req: Request) {
   try {

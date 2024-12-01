@@ -5,7 +5,15 @@ import { SellerInventory } from '@/domain/entities/SellerInventory';
 
 const sellerInventoryRepository : ISellerInvertoryRepository = new SellerInventoryRepository();
 
-// Handle POST requests for signup
+/**
+ * Handles POST requests for signup
+ * @async
+ * @function POST
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the result of the operation
+ */
+
+
 export async function POST(req: Request) {
   try {
     const body = await req.json(); // Parse JSON request body

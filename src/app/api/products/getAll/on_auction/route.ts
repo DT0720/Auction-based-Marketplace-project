@@ -7,6 +7,14 @@ import { AuctionRepository } from '@/infrastructure/repositories/AuctionReposito
 const auctionRepository: IAuctionRepository = new AuctionRepository();
 const imageStorageService: IFileStorageService = new ImageStorageService();
 
+
+/**
+ * Handles GET requests to retrieve all products on auction
+ * @async
+ * @function GET
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the list of products on auction or an error message
+ */
 export async function GET(req: Request) {
   try {
     const productList = await auctionRepository.findAllProductsOnAuction();

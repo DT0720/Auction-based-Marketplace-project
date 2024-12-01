@@ -73,6 +73,14 @@ import { UserRepository } from '@/infrastructure/repositories/UserRepository';
 
 const userRepository = new UserRepository();
 
+/**
+ * Handles GET requests for fetching user profile
+ * @async
+ * @function GET
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the user profile or an error message
+ */
+
 // Handle GET requests for fetching user profile
 export async function GET(req: Request) {
     try {

@@ -5,6 +5,13 @@ import { Product } from '@/domain/entities/Product';
 
 const productRepository : IProductRepository = new ProductRepository();
 
+/**
+ * Handles POST requests for creating a product
+ * @async
+ * @function POST
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the result of the operation
+ */
 // Handle POST requests for signup
 export async function POST(req: Request) {
   try {

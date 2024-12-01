@@ -4,6 +4,16 @@ import { IOrderRepository } from '@/application/repositories/IOrderRepository';
 import { OrderRepository } from '@/infrastructure/repositories/OrderRepository';
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * Handles GET requests to retrieve an order by buyer ID
+ * @async
+ * @function GET
+ * @param {NextRequest} req - The request object
+ * @param {Object} context - The context object containing route parameters
+ * @param {Promise<{ id: string }>} context.params - The route parameters containing the buyer ID
+ * @returns {Promise<NextResponse>} - The response object containing the order details or an error message
+ */
+
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
 
     const orderRespository : IOrderRepository = new OrderRepository();

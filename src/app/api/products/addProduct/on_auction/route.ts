@@ -8,6 +8,14 @@ import { AuctionRepository } from '@/infrastructure/repositories/AuctionReposito
 const sellerInventoryRepository : ISellerInvertoryRepository = new SellerInventoryRepository();
 const auctionRepository : IAuctionRepository = new AuctionRepository();
 
+
+/**
+ * Handles POST requests to create a new auction
+ * @async
+ * @function POST
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the result of the operation
+ */
 // Handle POST requests for signup
 export async function POST(req: Request) {
   try {

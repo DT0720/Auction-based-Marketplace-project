@@ -4,6 +4,17 @@ import { AddressRepository } from '@/infrastructure/repositories/AddressReposito
 import { Address } from '@/domain/entities/Address';
 
 const addressRepository = new AddressRepository();
+
+/**
+ * Handles GET requests to find addresses by user ID
+ * @async
+ * @function GET
+ * @param {Request} req - The request object
+ * @param {Object} context - The context object containing route parameters
+ * @param {Promise<{ id: string }>} context.params - The route parameters containing the user ID
+ * @returns {Promise<Response>} - The response object containing the addresses or an error message
+ */
+
 //Find addresses by user ID
 export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
     try {

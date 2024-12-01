@@ -3,6 +3,16 @@ import { IWalletRepository } from '@/application/repositories/IWalletRepository'
 import { WalletRepository } from '@/infrastructure/repositories/WalletRepository';
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * Handles GET requests to retrieve a user's wallet by user ID
+ * @async
+ * @function GET
+ * @param {NextRequest} req - The request object
+ * @param {Object} context - The context object containing route parameters
+ * @param {Promise<{ id: string }>} context.params - The route parameters containing the user ID
+ * @returns {Promise<NextResponse>} - The response object containing the wallet details or an error message
+ */
+
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
 
     const walletRepository : IWalletRepository = new WalletRepository();

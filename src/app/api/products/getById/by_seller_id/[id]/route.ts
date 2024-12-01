@@ -5,6 +5,17 @@ import { SellerInventoryRepository } from '@/infrastructure/repositories/SellerI
 import { ImageStorageService } from '@/infrastructure/services/ImageStorageService';
 import { NextRequest, NextResponse } from 'next/server';
 
+
+/**
+ * Handles GET requests to retrieve products by seller ID
+ * @async
+ * @function GET
+ * @param {NextRequest} req - The request object
+ * @param {Object} context - The context object containing route parameters
+ * @param {Promise<{ id: string }>} context.params - The route parameters containing the seller ID
+ * @returns {Promise<NextResponse>} - The response object containing the product details or an error message
+ */
+
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
 
     const imageStorageService: IFileStorageService = new ImageStorageService();

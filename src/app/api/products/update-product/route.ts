@@ -5,6 +5,15 @@ import { ProductRepository } from '@/infrastructure/repositories/ProductReposito
 const productRepository = new ProductRepository();
 const updateProductUseCase = new UpdateProduct(productRepository);
 
+
+/**
+ * Handles POST requests to update a product
+ * @async
+ * @function POST
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the result of the operation
+ */
+
 // Handle POST requests for signup
 export async function POST(req: Request) {
   try {

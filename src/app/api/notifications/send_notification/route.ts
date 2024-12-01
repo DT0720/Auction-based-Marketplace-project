@@ -5,6 +5,14 @@ import { NotificationService } from '@/infrastructure/services/NotificationServi
 
 const notificationService = new NotificationService();
 
+/**
+ * Handles POST requests to create a new order and notify the seller
+ * @async
+ * @function POST
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the result of the operation
+ */
+
 // Create a new order (Buyer purchases a product)
 export async function POST(req: Request) {
     try {

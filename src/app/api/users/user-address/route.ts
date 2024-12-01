@@ -40,6 +40,13 @@ export async function PUT(req: Request) {
         );
     }
 }
+/**
+ * Handles DELETE requests to delete an address
+ * @async
+ * @function DELETE
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the result of the operation
+ */
 
 // Delete an address
 export async function DELETE(req: Request) {

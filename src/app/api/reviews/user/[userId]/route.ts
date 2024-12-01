@@ -7,10 +7,13 @@ import { ReviewRepository } from '@/infrastructure/repositories/ReviewRepository
 const reviewRepository = new ReviewRepository();
 
 /**
- * GET handler for fetching reviews by user ID.
- * @param req - The request object.
- * @param params - The route parameters containing the user ID.
- * @returns A JSON response with the reviews or an error message.
+ * Handles GET requests to fetch reviews by user ID
+ * @async
+ * @function GET
+ * @param {Request} req - The request object
+ * @param {Object} context - The context object containing route parameters
+ * @param {Promise<{ userId: string }>} context.params - The route parameters containing the user ID
+ * @returns {Promise<NextResponse>} - The response object containing the reviews or an error message
  */
 
 export async function GET( req: Request, context: { params: Promise<{ userId: string }> } ) {

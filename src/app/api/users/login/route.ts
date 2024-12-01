@@ -10,6 +10,15 @@ const walletRepository = new WalletRepository();
 const sellerRepository = new SellerRepository();
 const buyerRepository = new BuyerRepository();
 
+
+/**
+ * Handles POST requests for user login
+ * @async
+ * @function POST
+ * @param {Request} req - The request object
+ * @returns {Promise<Response>} - The response object containing the result of the operation
+ */
+
 export async function POST(req: Request) {
   try {
     const body = await req.json(); // Parse JSON request body
