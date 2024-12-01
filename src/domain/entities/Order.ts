@@ -1,4 +1,17 @@
+/**
+ * @class Order
+ * @classdesc Represents an order placed by a buyer
+ */
+
 export class Order {
+  /**
+   * @constructor
+   * @param {number} id - The unique identifier of the order
+   * @param {number} buyerId - The ID of the buyer who placed the order
+   * @param {number | null} offerId - The ID of the offer applied to the order, if any
+   * @param {string | null} status - The status of the order
+   * @param {number | null} totalAmount - The total amount of the order
+   */
   constructor(
     public id: number,
     public buyerId: number,

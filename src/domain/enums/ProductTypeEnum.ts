@@ -1,3 +1,7 @@
+/**
+ * @enum {string}
+ * @description Enum for product types used in the application
+ */
 export const ProductTypeEnum = {
     ALL: "All",
     LADY_FASHION: "Women's and Girl's Fashion",
@@ -14,5 +18,8 @@ export const ProductTypeEnum = {
     WATCHES_BAGS_JEWELLERY: "Watches, Bags & Jewellery",
     NO_CATEGORY: "No Category",
 } as const;
-
+/**
+ * @typedef {keyof typeof ProductTypeEnum} ProductTypeEnumKey
+ * @description Type representing the keys of the ProductTypeEnum
+ */
 export type ProductTypeEnumKey = keyof typeof ProductTypeEnum;

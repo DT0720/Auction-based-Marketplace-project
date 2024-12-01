@@ -1,4 +1,19 @@
+/**
+ * @class Auction
+ * @classdesc Represents an auction for a product
+ */
 export class Auction{
+    /**
+     * @constructor
+     * @param {number} id - The unique identifier of the auction
+     * @param {number} productId - The ID of the product being auctioned
+     * @param {number} sellerId - The ID of the seller
+     * @param {number} buyItNowPrice - The "Buy It Now" price of the auction
+     * @param {number} minimumPrice - The minimum price of the auction
+     * @param {boolean} status - The status of the auction (active or inactive)
+     * @param {Date} startTime - The start time of the auction
+     * @param {Date} endTime - The end time of the auction
+     */
     constructor(
         public id: number,
         public productId: number,
@@ -9,6 +24,11 @@ export class Auction{
         public startTime: Date,
         public endTime: Date,
     ){}
+      /**
+     * Creates an Auction instance from a JSON object
+     * @param {any} data - The JSON object containing auction data
+     * @returns {Auction} - The Auction instance created from the JSON data
+     */
 
     static fromJson(data: any): Auction {
         return new Auction(

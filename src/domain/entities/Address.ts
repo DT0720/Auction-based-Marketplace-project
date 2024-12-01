@@ -1,6 +1,22 @@
 import { fromJSON } from "postcss";
 
+/**
+ * @class Address
+ * @classdesc Represents an address associated with a user
+ */
 export class Address{
+    /**
+     * @constructor
+     * @param {number} id - The unique identifier of the address
+     * @param {number} user_id - The ID of the user associated with the address
+     * @param {string} flat_no - The flat number of the address
+     * @param {string} house_no - The house number of the address
+     * @param {string} house_name - The house name of the address
+     * @param {string} road_no - The road number of the address
+     * @param {number} sector - The sector number of the address
+     * @param {string} area - The area of the address
+     * @param {string} city - The city of the address
+     */
     constructor(
         public id: number,
         public user_id: number,
@@ -12,6 +28,11 @@ export class Address{
         public area: string,
         public city: string,
     ){}
+    /**
+     * Creates an Address instance from a JSON object
+     * @param {any} data - The JSON object containing address data
+     * @returns {Address} - The Address instance created from the JSON data
+     */
 
     static fromJSON(data: any): Address {
         return new Address(
